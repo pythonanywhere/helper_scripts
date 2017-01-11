@@ -13,6 +13,7 @@ Options:
 
 from docopt import docopt
 import getpass
+import os
 import subprocess
 
 
@@ -26,8 +27,18 @@ def create_virtualenv(name, python_version, django_version):
     subprocess.check_call(['bash', '-c', 'source virtualenvwrapper.sh && {}'.format(command)])
 
 
+
 def start_django_project(domain, virtualenv_path):
-    pass
+    target_folder = os.path.expanduser('~/' + domain)
+    os.mkdir(target_folder)
+    subprocess.check_call([
+        os.path.join(virtualenv_path, 'bin/django-admin.py'),
+        'startproject',
+        'mysite',
+        target_folder
+    ])
+
+
 
 
 def create_webapp(domain, python_version, virtualenv_path, project_path):
