@@ -1,5 +1,8 @@
-import getpass
 from unittest.mock import patch, call
+import getpass
+import os
+import pytest
+import subprocess
 
 from new_django_project_in_virtualenv import (
     create_virtualenv,
@@ -53,4 +56,46 @@ class TestMain:
         assert mock_create_webapp.call_args == call(
             'domain', 'python.version', mock_create_virtualenv.return_value, mock_start_django_project.return_value
         )
+
+
+class TestCreateVirtualenv:
+
+    @patch('new_django_project_in_virtualenv.subprocess')
+    def test_uses_bash_and_sources_virtualenvwrapper(self, mock_subprocess):
+        create_virtualenv('domain.com', '2.7', 'latest')
+        args, kwargs = mock_subprocess.check_call.call_args
+        command_list = args[0]
+        assert command_list[:2] == ['bash', '-c']
+        assert command_list[2].startswith('source virtualenvwrapper.sh && mkvirtualenv')
+
+
+    @patch('new_django_project_in_virtualenv.subprocess')
+    def test_calls_mkvirtualenv_with_python_version_and_domain(self, mock_subprocess):
+        create_virtualenv('domain.com', '2.7', 'latest')
+        args, kwargs = mock_subprocess.check_call.call_args
+        command_list = args[0]
+        bash_command = command_list[2]
+        assert 'mkvirtualenv --python=/usr/bin/python2.7 domain.com' in bash_command
+
+
+    @patch('new_django_project_in_virtualenv.subprocess')
+    def test_django_version_for_latest(self, mock_subprocess):
+        create_virtualenv('domain.com', '2.7', 'latest')
+        args, kwargs = mock_subprocess.check_call.call_args
+        command_list = args[0]
+        assert command_list[2].endswith('pip install django')
+
+
+    @pytest.mark.slowtest
+    def test_actually_creates_a_virtualenv_with_right_django_version_in(self, virtualenvs_folder):
+        domain = 'mydomain.com'
+        create_virtualenv(domain, '2.7', '1.9')
+
+        assert domain in os.listdir(virtualenvs_folder)
+        django_version = subprocess.check_output([
+            os.path.join(virtualenvs_folder, domain, 'bin/python'),
+            '-c'
+            'import django; print(django.get_version())'
+        ]).decode().strip()
+        assert django_version == '1.9'
 

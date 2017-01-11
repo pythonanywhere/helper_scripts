@@ -13,10 +13,17 @@ Options:
 
 from docopt import docopt
 import getpass
+import subprocess
 
 
 def create_virtualenv(name, python_version, django_version):
-    pass
+    pip_install = 'pip install django'
+    if django_version != 'latest':
+        pip_install += '==' + django_version
+    command = 'mkvirtualenv --python=/usr/bin/python{python_version} {name} && {pip_install}'.format(
+        name=name, python_version=python_version, pip_install=pip_install
+    )
+    subprocess.check_call(['bash', '-c', 'source virtualenvwrapper.sh && {}'.format(command)])
 
 
 def start_django_project(domain, virtualenv_path):
