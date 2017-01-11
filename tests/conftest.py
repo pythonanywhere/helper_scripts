@@ -1,32 +1,47 @@
 import os
+import getpass
 import pytest
 import shutil
 import subprocess
 import tempfile
 
 @pytest.fixture
-def virtualenvs_folder():
-    virtualenvs_path = os.path.expanduser('~/.virtualenvs')
-    if not os.path.exists(virtualenvs_path):
-        raise Exception('assumes use of virtualenvwrapper')
-    old_virtualenvs = os.listdir(virtualenvs_path)
+def fake_home():
+    tempdir = tempfile.mkdtemp()
+    old_home = os.environ['HOME']
+    old_home_contents = os.listdir(old_home)
 
-    yield virtualenvs_path
+    os.environ['HOME'] = tempdir
+    yield tempdir
+    os.environ['HOME'] = old_home
+    shutil.rmtree(tempdir)
 
-    latest_virtualenvs = os.listdir(virtualenvs_path)
-    for new_venv in set(latest_virtualenvs) - set(old_virtualenvs):
-        shutil.rmtree(os.path.join(virtualenvs_path, new_venv))
+    new_home_contents = os.listdir(old_home)
+    new_stuff = set(new_home_contents) - set(old_home_contents)
+    if new_stuff:
+        raise Exception('home mocking failed somewehere: {}, {}'.format(
+            new_stuff, tempdir
+        ))
 
 
 @pytest.fixture
-def cleanup_home():
-    home = os.path.expanduser('~')
-    old_home_contents = os.listdir(home)
-    yield
-    new_home_contents = os.listdir(home)
-    for new_dir in set(new_home_contents) - set(old_home_contents):
-        if new_dir.endswith('.test.com'):
-            shutil.rmtree(os.path.join(home, new_dir))
+def virtualenvs_folder():
+    actual_virtualenvs = '/home/{}/.virtualenvs'.format(getpass.getuser())
+    old_virtualenvs = os.listdir(actual_virtualenvs)
+
+    tempdir = tempfile.mkdtemp()
+    old_workon = os.environ['WORKON_HOME']
+    os.environ['WORKON_HOME'] = tempdir
+    yield tempdir
+    os.environ['WORKON_HOME'] = old_workon
+    shutil.rmtree(tempdir)
+
+    latest_virtualenvs = os.listdir(actual_virtualenvs)
+    new_envs = set(latest_virtualenvs) - set(old_virtualenvs)
+    if new_envs:
+        raise Exception('virtualenvs path mocking failed somewehere: {}, {}'.format(
+            new_envs, tempdir
+        ))
 
 
 @pytest.fixture

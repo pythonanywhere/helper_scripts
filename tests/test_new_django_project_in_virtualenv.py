@@ -62,7 +62,7 @@ class TestCreateVirtualenv:
 
     @patch('new_django_project_in_virtualenv.subprocess')
     def test_uses_bash_and_sources_virtualenvwrapper(self, mock_subprocess):
-        create_virtualenv('domain.test.com', '2.7', 'latest')
+        create_virtualenv('domain.com', '2.7', 'latest')
         args, kwargs = mock_subprocess.check_call.call_args
         command_list = args[0]
         assert command_list[:2] == ['bash', '-c']
@@ -71,16 +71,16 @@ class TestCreateVirtualenv:
 
     @patch('new_django_project_in_virtualenv.subprocess')
     def test_calls_mkvirtualenv_with_python_version_and_domain(self, mock_subprocess):
-        create_virtualenv('domain.test.com', '2.7', 'latest')
+        create_virtualenv('domain.com', '2.7', 'latest')
         args, kwargs = mock_subprocess.check_call.call_args
         command_list = args[0]
         bash_command = command_list[2]
-        assert 'mkvirtualenv --python=/usr/bin/python2.7 domain.test.com' in bash_command
+        assert 'mkvirtualenv --python=/usr/bin/python2.7 domain.com' in bash_command
 
 
     @patch('new_django_project_in_virtualenv.subprocess')
     def test_django_version_for_latest(self, mock_subprocess):
-        create_virtualenv('domain.test.com', '2.7', 'latest')
+        create_virtualenv('domain.com', '2.7', 'latest')
         args, kwargs = mock_subprocess.check_call.call_args
         command_list = args[0]
         assert command_list[2].endswith('pip install django')
@@ -88,7 +88,7 @@ class TestCreateVirtualenv:
 
     @pytest.mark.slowtest
     def test_actually_creates_a_virtualenv_with_right_django_version_in(self, virtualenvs_folder):
-        domain = 'mydomain.test.com'
+        domain = 'mydomain.com'
         create_virtualenv(domain, '2.7', '1.9')
 
         assert domain in os.listdir(virtualenvs_folder)
@@ -103,9 +103,9 @@ class TestCreateVirtualenv:
 class TestStartDjangoProject:
 
     @pytest.mark.slowtest
-    def test_actually_creates_a_django_project(self, test_virtualenv, cleanup_home):
+    def test_actually_creates_a_django_project(self, test_virtualenv, fake_home):
         home = os.path.expanduser('~')
-        start_django_project('mydomain.test.com', test_virtualenv)
-        assert 'mydomain.test.com' in os.listdir(home)
-        assert 'settings.py' in os.listdir(os.path.join(home, 'mydomain.test.com', 'mysite'))
+        start_django_project('mydomain.com', test_virtualenv)
+        assert 'mydomain.com' in os.listdir(home)
+        assert 'settings.py' in os.listdir(os.path.join(home, 'mydomain.com', 'mysite'))
 
