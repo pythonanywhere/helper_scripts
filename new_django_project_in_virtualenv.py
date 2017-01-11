@@ -40,7 +40,6 @@ def start_django_project(domain, virtualenv_path):
 
 
 
-
 def create_webapp(domain, python_version, virtualenv_path, project_path):
     pass
 
