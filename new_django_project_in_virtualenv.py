@@ -23,7 +23,7 @@ def start_django_project(domain, virtualenv_path):
     pass
 
 
-def create_webapp(domain, project_path):
+def create_webapp(domain, python_version, virtualenv_path, project_path):
     pass
 
 
@@ -31,7 +31,9 @@ def main(domain, django_version, python_version):
     if domain == 'your-username.pythonanywhere.com':
         username = getpass.getuser()
         domain = '{}.pythonanywhere.com'.format(username)
-    create_virtualenv(domain, python_version, django_version)
+    virtualenv_path = create_virtualenv(domain, python_version, django_version)
+    project_path = start_django_project(domain, virtualenv_path)
+    create_webapp(domain, python_version, virtualenv_path, project_path)
 
 
 

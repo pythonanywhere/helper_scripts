@@ -34,3 +34,23 @@ class TestMain:
             username + '.pythonanywhere.com', 'python.version', 'django.version'
         )
 
+
+    def test_calls_start_django_project_with_virtualenv(
+        self, mock_create_webapp, mock_start_django_project,
+        mock_create_virtualenv
+    ):
+        main('domain', 'django.version', 'python.version')
+        assert mock_start_django_project.call_args == call(
+            'domain', mock_create_virtualenv.return_value
+        )
+
+
+    def test_calls_create_webapp_with_virtualenv_and_python_version(
+        self, mock_create_webapp, mock_start_django_project,
+        mock_create_virtualenv
+    ):
+        main('domain', 'django.version', 'python.version')
+        assert mock_create_webapp.call_args == call(
+            'domain', 'python.version', mock_create_virtualenv.return_value, mock_start_django_project.return_value
+        )
+
