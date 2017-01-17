@@ -73,8 +73,10 @@ def create_webapp(domain, python_version, virtualenv_path, project_path):
 
 
 
-def update_wsgi_file(domain, project_path):
-    pass
+def update_wsgi_file(wsgi_file_path, project_path):
+    template = open(os.path.join(os.path.dirname(__file__), 'wsgi_file_template.py')).read()
+    with open(wsgi_file_path, 'w') as f:
+        f.write(template.format(project_path=project_path))
 
 
 
@@ -90,7 +92,8 @@ def main(domain, django_version, python_version):
     virtualenv_path = create_virtualenv(domain, python_version, django_version)
     project_path = start_django_project(domain, virtualenv_path)
     create_webapp(domain, python_version, virtualenv_path, project_path)
-    update_wsgi_file(domain, project_path)
+    wsgi_file_path = '/var/www/' + domain.replace('.', '_') + '_wsgi.py'
+    update_wsgi_file(wsgi_file_path, project_path)
     reload_webapp(domain)
 
 

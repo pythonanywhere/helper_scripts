@@ -4,15 +4,17 @@ import os
 import pytest
 import responses
 import subprocess
+import tempfile
 from urllib.parse import urlencode
 
+import new_django_project_in_virtualenv
 from new_django_project_in_virtualenv import (
     API_ENDPOINT,
     create_virtualenv,
     create_webapp,
     main,
     start_django_project,
-    # update_wsgi_file,
+    update_wsgi_file,
     # reload_webapp,
 )
 
@@ -52,9 +54,9 @@ class TestMain:
 
 
     def test_calls_update_wsgi_file(self, mock_main_functions):
-        main('domain', 'django.version', 'python.version')
+        main('www.domain.com', 'django.version', 'python.version')
         assert mock_main_functions.update_wsgi_file.call_args == call(
-            'domain',
+            '/var/www/www_domain_com_wsgi.py',
             mock_main_functions.start_django_project.return_value
         )
 
@@ -200,4 +202,17 @@ class TestCreateWebapp:
 
         assert 'PATCH to set virtualenv path via API failed' in str(e.value)
         assert 'an error' in str(e.value)
+
+
+class TestUpdateWsgiFileTest:
+
+    def test_updates_wsgi_file_from_template(self):
+        wsgi_file = tempfile.NamedTemporaryFile().name
+        template = open(os.path.join(os.path.dirname(new_django_project_in_virtualenv.__file__), 'wsgi_file_template.py')).read()
+
+        update_wsgi_file(wsgi_file, '/project/path')
+
+        with open(wsgi_file) as f:
+            contents = f.read()
+        assert contents == template.format(project_path='/project/path')
 
