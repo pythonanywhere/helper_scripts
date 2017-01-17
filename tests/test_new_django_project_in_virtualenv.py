@@ -107,5 +107,26 @@ class TestStartDjangoProject:
         home = os.path.expanduser('~')
         start_django_project('mydomain.com', test_virtualenv)
         assert 'mydomain.com' in os.listdir(home)
-        assert 'settings.py' in os.listdir(os.path.join(home, 'mydomain.com', 'mysite'))
+        assert 'settings.py' in os.listdir(os.path.join(home, 'mydomain.com/mysite'))
+
+
+    @pytest.mark.slowtest
+    def test_adds_STATIC_and_MEDIA_config_to_settings(self, test_virtualenv, fake_home):
+        home = os.path.expanduser('~')
+        start_django_project('mydomain.com', test_virtualenv)
+        with open(os.path.join(home, 'mydomain.com/mysite/settings.py')) as f:
+            contents = f.read()
+
+        print(contents)
+        lines = contents.split('\n')
+        assert "STATIC_URL = '/static/'" in lines
+        assert "MEDIA_URL = '/media/'" in lines
+        assert "STATIC_ROOT = os.path.join(BASE_DIR, 'static')" in lines
+        assert "MEDIA_ROOT = os.path.join(BASE_DIR, 'media')" in lines
+
+    @pytest.mark.slowtest
+    def test_has_run_collectstatic(self, test_virtualenv, fake_home):
+        home = os.path.expanduser('~')
+        start_django_project('mydomain.com', test_virtualenv)
+        assert 'base.css' in os.listdir(os.path.join(home, 'mydomain.com/static/admin/css'))
 

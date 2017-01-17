@@ -15,6 +15,7 @@ from docopt import docopt
 import getpass
 import os
 import subprocess
+from textwrap import dedent
 
 
 def create_virtualenv(name, python_version, django_version):
@@ -36,6 +37,20 @@ def start_django_project(domain, virtualenv_path):
         'startproject',
         'mysite',
         target_folder
+    ])
+    with open(os.path.join(target_folder, 'mysite', 'settings.py'), 'a') as f:
+        f.write(dedent(
+            """
+            MEDIA_URL = '/media/'
+            STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+            MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+            """
+        ))
+    subprocess.check_call([
+        os.path.join(virtualenv_path, 'bin/python'),
+        os.path.join(target_folder, 'manage.py'),
+        'collectstatic',
+        '--noinput',
     ])
 
 
