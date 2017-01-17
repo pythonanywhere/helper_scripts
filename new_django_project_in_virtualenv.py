@@ -14,8 +14,11 @@ Options:
 from docopt import docopt
 import getpass
 import os
+import requests
 import subprocess
 from textwrap import dedent
+
+API_ENDPOINT = 'https://www.pythonanywhere.com/api/v0/user/{username}/webapps/'
 
 
 def create_virtualenv(name, python_version, django_version):
@@ -54,9 +57,19 @@ def start_django_project(domain, virtualenv_path):
     ])
 
 
-
 def create_webapp(domain, python_version, virtualenv_path, project_path):
-    pass
+    post_url = API_ENDPOINT.format(username=getpass.getuser())
+    patch_url = post_url + domain + '/'
+    response = requests.post(post_url, data={
+        'domain_name': domain, 'python_version': python_version
+    })
+    if not response.ok:
+        raise Exception('POST to create webapp via API failed, got {}'.format(response))
+    response = requests.patch(patch_url, data={
+        'virtualenv_path': virtualenv_path
+    })
+    if not response.ok:
+        raise Exception('PATCH to set virtualenv path via API failed, got {}'.format(response))
 
 
 def main(domain, django_version, python_version):

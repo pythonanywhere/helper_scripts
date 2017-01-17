@@ -2,9 +2,12 @@ from unittest.mock import patch, call
 import getpass
 import os
 import pytest
+import responses
 import subprocess
+from urllib.parse import urlencode
 
 from new_django_project_in_virtualenv import (
+    API_ENDPOINT,
     create_virtualenv,
     create_webapp,
     main,
@@ -127,5 +130,67 @@ class TestStartDjangoProject:
     def test_has_run_collectstatic(self, test_virtualenv, fake_home):
         start_django_project('mydomain.com', test_virtualenv)
         assert 'base.css' in os.listdir(os.path.join(fake_home, 'mydomain.com/static/admin/css'))
+
+
+
+class TestCreateWebapp:
+
+    @responses.activate
+    def test_does_post_to_create_webapp(self):
+        expected_post_url = API_ENDPOINT.format(username=getpass.getuser())
+        expected_patch_url = API_ENDPOINT.format(username=getpass.getuser()) + 'mydomain.com/'
+        responses.add(responses.POST, expected_post_url, status=201)
+        responses.add(responses.PATCH, expected_patch_url, status=200)
+
+        create_webapp('mydomain.com', '2.7', '/virtualenv/path', '/project/path')
+
+        post = responses.calls[0]
+        assert post.request.url == expected_post_url
+        assert post.request.body == urlencode({
+            'domain_name': 'mydomain.com',
+            'python_version': '2.7',
+        })
+
+
+    @responses.activate
+    def test_does_patch_to_update_virtualenv_path(self):
+        expected_post_url = API_ENDPOINT.format(username=getpass.getuser())
+        expected_patch_url = API_ENDPOINT.format(username=getpass.getuser()) + 'mydomain.com/'
+        responses.add(responses.POST, expected_post_url, status=201)
+        responses.add(responses.PATCH, expected_patch_url, status=200)
+
+        create_webapp('mydomain.com', '2.7', '/virtualenv/path', '/project/path')
+
+        patch = responses.calls[1]
+        assert patch.request.url == expected_patch_url
+        assert patch.request.body == urlencode({
+            'virtualenv_path': '/virtualenv/path'
+        })
+
+
+    @responses.activate
+    def test_raises_if_post_does_not_20x(self):
+        expected_post_url = API_ENDPOINT.format(username=getpass.getuser())
+        expected_patch_url = API_ENDPOINT.format(username=getpass.getuser()) + 'mydomain.com/'
+        responses.add(responses.POST, expected_post_url, status=500)
+        responses.add(responses.PATCH, expected_patch_url, status=200)
+
+        with pytest.raises(Exception) as e:
+            create_webapp('mydomain.com', '2.7', '/virtualenv/path', '/project/path')
+
+        assert 'POST to create webapp via API failed' in str(e.value)
+
+
+    @responses.activate
+    def test_raises_if_patch_does_not_20x(self):
+        expected_post_url = API_ENDPOINT.format(username=getpass.getuser())
+        expected_patch_url = API_ENDPOINT.format(username=getpass.getuser()) + 'mydomain.com/'
+        responses.add(responses.POST, expected_post_url, status=201)
+        responses.add(responses.PATCH, expected_patch_url, status=500)
+
+        with pytest.raises(Exception) as e:
+            create_webapp('mydomain.com', '2.7', '/virtualenv/path', '/project/path')
+
+        assert 'PATCH to set virtualenv path via API failed' in str(e.value)
 
 
