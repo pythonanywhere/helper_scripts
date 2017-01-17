@@ -72,6 +72,17 @@ def create_webapp(domain, python_version, virtualenv_path, project_path):
         raise Exception('PATCH to set virtualenv path via API failed, got {}:{}'.format(response, response.text))
 
 
+
+def update_wsgi_file(domain, project_path):
+    pass
+
+
+
+def reload_webapp(domain):
+    pass
+
+
+
 def main(domain, django_version, python_version):
     if domain == 'your-username.pythonanywhere.com':
         username = getpass.getuser()
@@ -79,6 +90,8 @@ def main(domain, django_version, python_version):
     virtualenv_path = create_virtualenv(domain, python_version, django_version)
     project_path = start_django_project(domain, virtualenv_path)
     create_webapp(domain, python_version, virtualenv_path, project_path)
+    update_wsgi_file(domain, project_path)
+    reload_webapp(domain)
 
 
 
