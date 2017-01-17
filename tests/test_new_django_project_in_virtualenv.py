@@ -1,4 +1,4 @@
-from unittest.mock import patch, call
+from unittest.mock import call
 import getpass
 import os
 import pytest
@@ -71,7 +71,6 @@ class TestMain:
 
 class TestCreateVirtualenv:
 
-    @patch('new_django_project_in_virtualenv.subprocess')
     def test_uses_bash_and_sources_virtualenvwrapper(self, mock_subprocess):
         create_virtualenv('domain.com', '2.7', 'latest')
         args, kwargs = mock_subprocess.check_call.call_args
@@ -80,7 +79,6 @@ class TestCreateVirtualenv:
         assert command_list[2].startswith('source virtualenvwrapper.sh && mkvirtualenv')
 
 
-    @patch('new_django_project_in_virtualenv.subprocess')
     def test_calls_mkvirtualenv_with_python_version_and_domain(self, mock_subprocess):
         create_virtualenv('domain.com', '2.7', 'latest')
         args, kwargs = mock_subprocess.check_call.call_args
@@ -89,7 +87,6 @@ class TestCreateVirtualenv:
         assert 'mkvirtualenv --python=/usr/bin/python2.7 domain.com' in bash_command
 
 
-    @patch('new_django_project_in_virtualenv.subprocess')
     def test_django_version_for_latest(self, mock_subprocess):
         create_virtualenv('domain.com', '2.7', 'latest')
         args, kwargs = mock_subprocess.check_call.call_args
@@ -109,6 +106,7 @@ class TestCreateVirtualenv:
             'import django; print(django.get_version())'
         ]).decode().strip()
         assert django_version == '1.9'
+
 
 
 class TestStartDjangoProject:

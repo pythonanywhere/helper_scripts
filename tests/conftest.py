@@ -82,3 +82,12 @@ def test_virtualenv(virtualenvs_folder):
     ])
     return os.path.join(virtualenvs_folder, virtualenv_name)
 
+
+
+
+@pytest.fixture
+def mock_subprocess():
+    with patch('new_django_project_in_virtualenv.subprocess') as mock:
+        yield mock
+
+
