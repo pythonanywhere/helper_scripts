@@ -81,7 +81,10 @@ def update_wsgi_file(wsgi_file_path, project_path):
 
 
 def reload_webapp(domain):
-    pass
+    url = API_ENDPOINT.format(username=getpass.getuser()) + domain + '/reload'
+    response = requests.post(url)
+    if not response.ok:
+        raise Exception('POST to reload webapp via API failed, got {}:{}'.format(response, response.text))
 
 
 

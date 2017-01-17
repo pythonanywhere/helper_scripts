@@ -15,7 +15,7 @@ from new_django_project_in_virtualenv import (
     main,
     start_django_project,
     update_wsgi_file,
-    # reload_webapp,
+    reload_webapp,
 )
 
 
@@ -213,4 +213,31 @@ class TestUpdateWsgiFileTest:
         with open(wsgi_file) as f:
             contents = f.read()
         assert contents == template.format(project_path='/project/path')
+
+
+class TestReloadWebapp:
+
+
+    @responses.activate
+    def test_does_post_to_reload_url(self):
+        expected_url = API_ENDPOINT.format(username=getpass.getuser()) + 'mydomain.com/reload'
+        responses.add(responses.POST, expected_url, status=200)
+
+        reload_webapp('mydomain.com')
+
+        post = responses.calls[0]
+        assert post.request.url == expected_url
+        assert post.request.body is None
+
+
+    @responses.activate
+    def test_raises_if_post_does_not_20x(self):
+        expected_url = API_ENDPOINT.format(username=getpass.getuser()) + 'mydomain.com/reload'
+        responses.add(responses.POST, expected_url, status=404, body='nope')
+
+        with pytest.raises(Exception) as e:
+            reload_webapp('mydomain.com')
+
+        assert 'POST to reload webapp via API failed' in str(e.value)
+        assert 'nope' in str(e.value)
 
