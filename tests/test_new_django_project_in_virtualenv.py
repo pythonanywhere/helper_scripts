@@ -172,13 +172,14 @@ class TestCreateWebapp:
     def test_raises_if_post_does_not_20x(self):
         expected_post_url = API_ENDPOINT.format(username=getpass.getuser())
         expected_patch_url = API_ENDPOINT.format(username=getpass.getuser()) + 'mydomain.com/'
-        responses.add(responses.POST, expected_post_url, status=500)
+        responses.add(responses.POST, expected_post_url, status=500, body='an error')
         responses.add(responses.PATCH, expected_patch_url, status=200)
 
         with pytest.raises(Exception) as e:
             create_webapp('mydomain.com', '2.7', '/virtualenv/path', '/project/path')
 
         assert 'POST to create webapp via API failed' in str(e.value)
+        assert 'an error' in str(e.value)
 
 
     @responses.activate
@@ -186,11 +187,11 @@ class TestCreateWebapp:
         expected_post_url = API_ENDPOINT.format(username=getpass.getuser())
         expected_patch_url = API_ENDPOINT.format(username=getpass.getuser()) + 'mydomain.com/'
         responses.add(responses.POST, expected_post_url, status=201)
-        responses.add(responses.PATCH, expected_patch_url, status=500)
+        responses.add(responses.PATCH, expected_patch_url, status=400, json={'message': 'an error'})
 
         with pytest.raises(Exception) as e:
             create_webapp('mydomain.com', '2.7', '/virtualenv/path', '/project/path')
 
         assert 'PATCH to set virtualenv path via API failed' in str(e.value)
-
+        assert 'an error' in str(e.value)
 

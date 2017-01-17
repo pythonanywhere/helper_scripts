@@ -64,12 +64,12 @@ def create_webapp(domain, python_version, virtualenv_path, project_path):
         'domain_name': domain, 'python_version': python_version
     })
     if not response.ok:
-        raise Exception('POST to create webapp via API failed, got {}'.format(response))
+        raise Exception('POST to create webapp via API failed, got {}:{}'.format(response, response.text))
     response = requests.patch(patch_url, data={
         'virtualenv_path': virtualenv_path
     })
     if not response.ok:
-        raise Exception('PATCH to set virtualenv path via API failed, got {}'.format(response))
+        raise Exception('PATCH to set virtualenv path via API failed, got {}:{}'.format(response, response.text))
 
 
 def main(domain, django_version, python_version):
