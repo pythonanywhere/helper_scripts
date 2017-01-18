@@ -1,4 +1,4 @@
-from unittest.mock import call
+from unittest.mock import call, patch
 import getpass
 import json
 import os
@@ -16,6 +16,7 @@ from new_django_project_in_virtualenv import (
     create_webapp,
     main,
     start_django_project,
+    update_settings_file,
     update_wsgi_file,
     reload_webapp,
 )
@@ -146,6 +147,27 @@ class TestStartDjangoProject:
         assert 'base.css' in os.listdir(os.path.join(fake_home, 'mydomain.com/static/admin/css'))
 
 
+    @pytest.mark.slowtest
+    def test_calls_update_settings_file(self, test_virtualenv, fake_home):
+        with patch('new_django_project_in_virtualenv.update_settings_file') as mock_update_settings_file:
+            start_django_project('mydomain.com', test_virtualenv)
+        expected_path = os.path.join(fake_home, 'mydomain.com')
+        assert mock_update_settings_file.call_args == call(
+            'mydomain.com', expected_path
+        )
+
+
+    @pytest.mark.slowtest
+    def test_returns_project_path(self, test_virtualenv, fake_home):
+        response = start_django_project('mydomain.com', test_virtualenv)
+        assert response == os.path.join(fake_home, 'mydomain.com')
+
+
+
+class TestUpdateSettingsFile:
+    pass
+
+
 
 class TestCreateWebapp:
 
@@ -226,6 +248,7 @@ class TestCreateWebapp:
 
         assert 'PATCH to set virtualenv path via API failed' in str(e.value)
         assert 'an error' in str(e.value)
+
 
 
 class TestUpdateWsgiFileTest:

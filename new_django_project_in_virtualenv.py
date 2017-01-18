@@ -61,12 +61,20 @@ def start_django_project(domain, virtualenv_path):
         settings = f.read()
     with open(os.path.join(target_folder, 'mysite', 'settings.py'), 'w') as f:
         f.write(settings.replace('ALLOWED_HOSTS = []', "ALLOWED_HOSTS = [{!r}]".format(domain)))
+    update_settings_file(domain, target_folder)
     subprocess.check_call([
         os.path.join(virtualenv_path, 'bin/python'),
         os.path.join(target_folder, 'manage.py'),
         'collectstatic',
         '--noinput',
     ])
+    return target_folder
+
+
+
+def update_settings_file(domain, project_path):
+    pass
+
 
 
 def create_webapp(domain, python_version, virtualenv_path, project_path):
