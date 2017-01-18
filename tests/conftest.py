@@ -91,3 +91,12 @@ def mock_subprocess():
         yield mock
 
 
+@pytest.fixture
+def api_token():
+    token = 'sekrit.token'
+    old_token = os.environ.get('API_TOKEN')
+    os.environ['API_TOKEN'] = token
+    yield token
+    if old_token is not None:
+        os.environ['API_TOKEN'] = old_token
+

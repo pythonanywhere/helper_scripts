@@ -61,14 +61,18 @@ def start_django_project(domain, virtualenv_path):
 def create_webapp(domain, python_version, virtualenv_path, project_path):
     post_url = API_ENDPOINT.format(username=getpass.getuser())
     patch_url = post_url + domain + '/'
-    response = requests.post(post_url, data={
-        'domain_name': domain, 'python_version': python_version
-    })
+    response = requests.post(
+        post_url,
+        data={'domain_name': domain, 'python_version': python_version},
+        headers={'Authorization': 'Token {}'.format(os.environ['API_TOKEN'])}
+    )
     if not response.ok:
         raise Exception('POST to create webapp via API failed, got {}:{}'.format(response, response.text))
-    response = requests.patch(patch_url, data={
-        'virtualenv_path': virtualenv_path
-    })
+    response = requests.patch(
+        patch_url,
+        data={'virtualenv_path': virtualenv_path},
+        headers={'Authorization': 'Token {}'.format(os.environ['API_TOKEN'])}
+    )
     if not response.ok:
         raise Exception('PATCH to set virtualenv path via API failed, got {}:{}'.format(response, response.text))
 

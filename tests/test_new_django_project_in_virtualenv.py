@@ -161,6 +161,7 @@ class TestCreateWebapp:
             'domain_name': 'mydomain.com',
             'python_version': '2.7',
         })
+        assert post.request.headers['Authorization'] == 'Token {}'.format(api_token)
 
 
     @responses.activate
@@ -177,6 +178,7 @@ class TestCreateWebapp:
         assert patch.request.body == urlencode({
             'virtualenv_path': '/virtualenv/path'
         })
+        assert patch.request.headers['Authorization'] == 'Token {}'.format(api_token)
 
 
     @responses.activate
