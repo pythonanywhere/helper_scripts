@@ -3,6 +3,7 @@ import getpass
 import pytest
 import shutil
 import subprocess
+import responses
 import tempfile
 from unittest.mock import patch
 
@@ -89,6 +90,14 @@ def test_virtualenv(virtualenvs_folder):
 def mock_subprocess():
     with patch('new_django_project_in_virtualenv.subprocess') as mock:
         yield mock
+
+
+
+@pytest.fixture
+def api_responses():
+    with responses.RequestsMock() as r:
+        yield r
+
 
 
 @pytest.fixture

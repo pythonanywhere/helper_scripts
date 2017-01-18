@@ -213,16 +213,15 @@ class TestUpdateSettingsFile:
 
 class TestCreateWebapp:
 
-    @responses.activate
-    def test_does_post_to_create_webapp(self, api_token):
+    def test_does_post_to_create_webapp(self, api_responses, api_token):
         expected_post_url = API_ENDPOINT.format(username=getpass.getuser())
         expected_patch_url = API_ENDPOINT.format(username=getpass.getuser()) + 'mydomain.com/'
-        responses.add(responses.POST, expected_post_url, status=201, body=json.dumps({'status': 'OK'}))
-        responses.add(responses.PATCH, expected_patch_url, status=200)
+        api_responses.add(responses.POST, expected_post_url, status=201, body=json.dumps({'status': 'OK'}))
+        api_responses.add(responses.PATCH, expected_patch_url, status=200)
 
         create_webapp('mydomain.com', '2.7', '/virtualenv/path', '/project/path')
 
-        post = responses.calls[0]
+        post = api_responses.calls[0]
         assert post.request.url == expected_post_url
         assert post.request.body == urlencode({
             'domain_name': 'mydomain.com',
@@ -231,16 +230,15 @@ class TestCreateWebapp:
         assert post.request.headers['Authorization'] == 'Token {}'.format(api_token)
 
 
-    @responses.activate
-    def test_does_patch_to_update_virtualenv_path(self, api_token):
+    def test_does_patch_to_update_virtualenv_path(self, api_responses, api_token):
         expected_post_url = API_ENDPOINT.format(username=getpass.getuser())
         expected_patch_url = API_ENDPOINT.format(username=getpass.getuser()) + 'mydomain.com/'
-        responses.add(responses.POST, expected_post_url, status=201, body=json.dumps({'status': 'OK'}))
-        responses.add(responses.PATCH, expected_patch_url, status=200)
+        api_responses.add(responses.POST, expected_post_url, status=201, body=json.dumps({'status': 'OK'}))
+        api_responses.add(responses.PATCH, expected_patch_url, status=200)
 
         create_webapp('mydomain.com', '2.7', '/virtualenv/path', '/project/path')
 
-        patch = responses.calls[1]
+        patch = api_responses.calls[1]
         assert patch.request.url == expected_patch_url
         assert patch.request.body == urlencode({
             'virtualenv_path': '/virtualenv/path'
@@ -248,12 +246,9 @@ class TestCreateWebapp:
         assert patch.request.headers['Authorization'] == 'Token {}'.format(api_token)
 
 
-    @responses.activate
-    def test_raises_if_post_does_not_20x(self):
+    def test_raises_if_post_does_not_20x(self, api_responses):
         expected_post_url = API_ENDPOINT.format(username=getpass.getuser())
-        expected_patch_url = API_ENDPOINT.format(username=getpass.getuser()) + 'mydomain.com/'
-        responses.add(responses.POST, expected_post_url, status=500, body='an error')
-        responses.add(responses.PATCH, expected_patch_url, status=200)
+        api_responses.add(responses.POST, expected_post_url, status=500, body='an error')
 
         with pytest.raises(Exception) as e:
             create_webapp('mydomain.com', '2.7', '/virtualenv/path', '/project/path')
@@ -262,14 +257,11 @@ class TestCreateWebapp:
         assert 'an error' in str(e.value)
 
 
-    @responses.activate
-    def test_raises_if_post_returns_a_200_with_status_error(self):
+    def test_raises_if_post_returns_a_200_with_status_error(self, api_responses):
         expected_post_url = API_ENDPOINT.format(username=getpass.getuser())
-        expected_patch_url = API_ENDPOINT.format(username=getpass.getuser()) + 'mydomain.com/'
-        responses.add(responses.POST, expected_post_url, status=200, body=json.dumps({
+        api_responses.add(responses.POST, expected_post_url, status=200, body=json.dumps({
             "status": "ERROR", "error_type": "bad", "error_message": "bad things happened"
         }))
-        responses.add(responses.PATCH, expected_patch_url, status=200)
 
         with pytest.raises(Exception) as e:
             create_webapp('mydomain.com', '2.7', '/virtualenv/path', '/project/path')
@@ -278,12 +270,11 @@ class TestCreateWebapp:
         assert 'bad things happened' in str(e.value)
 
 
-    @responses.activate
-    def test_raises_if_patch_does_not_20x(self):
+    def test_raises_if_patch_does_not_20x(self, api_responses):
         expected_post_url = API_ENDPOINT.format(username=getpass.getuser())
         expected_patch_url = API_ENDPOINT.format(username=getpass.getuser()) + 'mydomain.com/'
-        responses.add(responses.POST, expected_post_url, status=201, body=json.dumps({'status': 'OK'}))
-        responses.add(responses.PATCH, expected_patch_url, status=400, json={'message': 'an error'})
+        api_responses.add(responses.POST, expected_post_url, status=201, body=json.dumps({'status': 'OK'}))
+        api_responses.add(responses.PATCH, expected_patch_url, status=400, json={'message': 'an error'})
 
         with pytest.raises(Exception) as e:
             create_webapp('mydomain.com', '2.7', '/virtualenv/path', '/project/path')
@@ -309,22 +300,20 @@ class TestUpdateWsgiFileTest:
 class TestReloadWebapp:
 
 
-    @responses.activate
-    def test_does_post_to_reload_url(self):
+    def test_does_post_to_reload_url(self, api_responses):
         expected_url = API_ENDPOINT.format(username=getpass.getuser()) + 'mydomain.com/reload'
-        responses.add(responses.POST, expected_url, status=200)
+        api_responses.add(responses.POST, expected_url, status=200)
 
         reload_webapp('mydomain.com')
 
-        post = responses.calls[0]
+        post = api_responses.calls[0]
         assert post.request.url == expected_url
         assert post.request.body is None
 
 
-    @responses.activate
-    def test_raises_if_post_does_not_20x(self):
+    def test_raises_if_post_does_not_20x(self, api_responses):
         expected_url = API_ENDPOINT.format(username=getpass.getuser()) + 'mydomain.com/reload'
-        responses.add(responses.POST, expected_url, status=404, body='nope')
+        api_responses.add(responses.POST, expected_url, status=404, body='nope')
 
         with pytest.raises(Exception) as e:
             reload_webapp('mydomain.com')
