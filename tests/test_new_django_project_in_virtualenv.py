@@ -1,5 +1,6 @@
 from unittest.mock import call
 import getpass
+import json
 import os
 import pytest
 import responses
@@ -147,10 +148,10 @@ class TestStartDjangoProject:
 class TestCreateWebapp:
 
     @responses.activate
-    def test_does_post_to_create_webapp(self):
+    def test_does_post_to_create_webapp(self, api_token):
         expected_post_url = API_ENDPOINT.format(username=getpass.getuser())
         expected_patch_url = API_ENDPOINT.format(username=getpass.getuser()) + 'mydomain.com/'
-        responses.add(responses.POST, expected_post_url, status=201)
+        responses.add(responses.POST, expected_post_url, status=201, body=json.dumps({'status': 'OK'}))
         responses.add(responses.PATCH, expected_patch_url, status=200)
 
         create_webapp('mydomain.com', '2.7', '/virtualenv/path', '/project/path')
@@ -165,10 +166,10 @@ class TestCreateWebapp:
 
 
     @responses.activate
-    def test_does_patch_to_update_virtualenv_path(self):
+    def test_does_patch_to_update_virtualenv_path(self, api_token):
         expected_post_url = API_ENDPOINT.format(username=getpass.getuser())
         expected_patch_url = API_ENDPOINT.format(username=getpass.getuser()) + 'mydomain.com/'
-        responses.add(responses.POST, expected_post_url, status=201)
+        responses.add(responses.POST, expected_post_url, status=201, body=json.dumps({'status': 'OK'}))
         responses.add(responses.PATCH, expected_patch_url, status=200)
 
         create_webapp('mydomain.com', '2.7', '/virtualenv/path', '/project/path')
@@ -196,10 +197,26 @@ class TestCreateWebapp:
 
 
     @responses.activate
+    def test_raises_if_post_returns_a_200_with_status_error(self):
+        expected_post_url = API_ENDPOINT.format(username=getpass.getuser())
+        expected_patch_url = API_ENDPOINT.format(username=getpass.getuser()) + 'mydomain.com/'
+        responses.add(responses.POST, expected_post_url, status=200, body=json.dumps({
+            "status": "ERROR", "error_type": "bad", "error_message": "bad things happened"
+        }))
+        responses.add(responses.PATCH, expected_patch_url, status=200)
+
+        with pytest.raises(Exception) as e:
+            create_webapp('mydomain.com', '2.7', '/virtualenv/path', '/project/path')
+
+        assert 'POST to create webapp via API failed' in str(e.value)
+        assert 'bad things happened' in str(e.value)
+
+
+    @responses.activate
     def test_raises_if_patch_does_not_20x(self):
         expected_post_url = API_ENDPOINT.format(username=getpass.getuser())
         expected_patch_url = API_ENDPOINT.format(username=getpass.getuser()) + 'mydomain.com/'
-        responses.add(responses.POST, expected_post_url, status=201)
+        responses.add(responses.POST, expected_post_url, status=201, body=json.dumps({'status': 'OK'}))
         responses.add(responses.PATCH, expected_patch_url, status=400, json={'message': 'an error'})
 
         with pytest.raises(Exception) as e:

@@ -66,7 +66,8 @@ def create_webapp(domain, python_version, virtualenv_path, project_path):
         data={'domain_name': domain, 'python_version': python_version},
         headers={'Authorization': 'Token {}'.format(os.environ['API_TOKEN'])}
     )
-    if not response.ok:
+    print(response, response.text)
+    if not response.ok or response.json().get('status') == 'ERROR':
         raise Exception('POST to create webapp via API failed, got {}:{}'.format(response, response.text))
     response = requests.patch(
         patch_url,
