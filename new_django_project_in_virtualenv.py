@@ -29,6 +29,7 @@ def create_virtualenv(name, python_version, django_version):
         name=name, python_version=python_version, pip_install=pip_install
     )
     subprocess.check_call(['bash', '-c', 'source virtualenvwrapper.sh && {}'.format(command)])
+    return os.path.join(os.environ['WORKON_HOME'], name)
 
 
 

@@ -94,6 +94,11 @@ class TestCreateVirtualenv:
         assert command_list[2].endswith('pip install django')
 
 
+    def test_returns_virtualenv_path(self, mock_subprocess, virtualenvs_folder):
+        response = create_virtualenv('domain.com', '2.7', 'latest')
+        assert response == os.path.join(virtualenvs_folder, 'domain.com')
+
+
     @pytest.mark.slowtest
     def test_actually_creates_a_virtualenv_with_right_django_version_in(self, virtualenvs_folder):
         domain = 'mydomain.com'
