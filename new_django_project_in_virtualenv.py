@@ -7,8 +7,8 @@ Usage:
 
 Options:
   --domain=<domain>         Domain name, eg www.mydomain.com   [default: your-username.pythonanywhere.com]
-  --django=<django-version> Django version, eg "1.11" [default: latest]
-  --python=<python-version> Python version, eg "2.7"  [default: 3.5]
+  --django=<django-version> Django version, eg "1.8.4"  [default: latest]
+  --python=<python-version> Python version, eg "2.7"    [default: 3.5]
 """
 
 from docopt import docopt
