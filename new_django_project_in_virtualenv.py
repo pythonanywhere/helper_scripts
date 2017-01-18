@@ -61,18 +61,21 @@ def start_django_project(domain, virtualenv_path):
 
 
 def update_settings_file(domain, project_path):
-    with open(os.path.join(project_path, 'mysite', 'settings.py'), 'a') as f:
-        f.write(dedent(
-            """
-            MEDIA_URL = '/media/'
-            STATIC_ROOT = os.path.join(BASE_DIR, 'static')
-            MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-            """
-        ))
     with open(os.path.join(project_path, 'mysite', 'settings.py')) as f:
         settings = f.read()
+    new_settings = settings.replace(
+        'ALLOWED_HOSTS = []',
+        "ALLOWED_HOSTS = [{!r}]".format(domain)
+    )
+    new_settings += dedent(
+        """
+        MEDIA_URL = '/media/'
+        STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+        MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+        """
+    )
     with open(os.path.join(project_path, 'mysite', 'settings.py'), 'w') as f:
-        f.write(settings.replace('ALLOWED_HOSTS = []', "ALLOWED_HOSTS = [{!r}]".format(domain)))
+        f.write(new_settings)
 
 
 

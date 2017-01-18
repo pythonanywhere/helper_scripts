@@ -148,19 +148,18 @@ class TestStartDjangoProject:
         assert 'base.css' in os.listdir(os.path.join(fake_home, 'mydomain.com/static/admin/css'))
 
 
-    @pytest.mark.slowtest
-    def test_calls_update_settings_file(self, test_virtualenv, fake_home):
+    def test_calls_update_settings_file(self, mock_subprocess, fake_home):
         with patch('new_django_project_in_virtualenv.update_settings_file') as mock_update_settings_file:
-            start_django_project('mydomain.com', test_virtualenv)
+            start_django_project('mydomain.com', '/path/to/virtualenv')
         expected_path = os.path.join(fake_home, 'mydomain.com')
         assert mock_update_settings_file.call_args == call(
             'mydomain.com', expected_path
         )
 
 
-    @pytest.mark.slowtest
-    def test_returns_project_path(self, test_virtualenv, fake_home):
-        response = start_django_project('mydomain.com', test_virtualenv)
+    def test_returns_project_path(self, mock_subprocess, fake_home):
+        with patch('new_django_project_in_virtualenv.update_settings_file'):
+            response = start_django_project('mydomain.com', '/path/to/virtualenv')
         assert response == os.path.join(fake_home, 'mydomain.com')
 
 
