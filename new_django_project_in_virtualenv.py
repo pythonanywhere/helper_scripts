@@ -19,6 +19,13 @@ import subprocess
 from textwrap import dedent
 
 API_ENDPOINT = 'https://www.pythonanywhere.com/api/v0/user/{username}/webapps/'
+PYTHON_VERSIONS = {
+    '2.7': 'python27',
+    '3.3': 'python33',
+    '3.4': 'python34',
+    '3.5': 'python35',
+}
+
 
 
 def create_virtualenv(name, python_version, django_version):
@@ -63,10 +70,9 @@ def create_webapp(domain, python_version, virtualenv_path, project_path):
     patch_url = post_url + domain + '/'
     response = requests.post(
         post_url,
-        data={'domain_name': domain, 'python_version': python_version},
+        data={'domain_name': domain, 'python_version': PYTHON_VERSIONS[python_version]},
         headers={'Authorization': 'Token {}'.format(os.environ['API_TOKEN'])}
     )
-    print(response, response.text)
     if not response.ok or response.json().get('status') == 'ERROR':
         raise Exception('POST to create webapp via API failed, got {}:{}'.format(response, response.text))
     response = requests.patch(

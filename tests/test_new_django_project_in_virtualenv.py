@@ -11,6 +11,7 @@ from urllib.parse import urlencode
 import new_django_project_in_virtualenv
 from new_django_project_in_virtualenv import (
     API_ENDPOINT,
+    PYTHON_VERSIONS,
     create_virtualenv,
     create_webapp,
     main,
@@ -160,7 +161,7 @@ class TestCreateWebapp:
         assert post.request.url == expected_post_url
         assert post.request.body == urlencode({
             'domain_name': 'mydomain.com',
-            'python_version': '2.7',
+            'python_version': PYTHON_VERSIONS['2.7'],
         })
         assert post.request.headers['Authorization'] == 'Token {}'.format(api_token)
 
