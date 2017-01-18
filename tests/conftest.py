@@ -20,6 +20,10 @@ def mock_main_functions():
     create_webapp_patcher.start()
     update_wsgi_file_patcher = patch('new_django_project_in_virtualenv.update_wsgi_file', mocks.update_wsgi_file)
     update_wsgi_file_patcher.start()
+    update_settings_file_patcher = patch('new_django_project_in_virtualenv.update_settings_file', mocks.update_settings_file)
+    update_settings_file_patcher.start()
+    run_collectstatic_patcher = patch('new_django_project_in_virtualenv.run_collectstatic', mocks.run_collectstatic)
+    run_collectstatic_patcher.start()
     reload_webapp_patcher = patch('new_django_project_in_virtualenv.reload_webapp', mocks.reload_webapp)
     reload_webapp_patcher.start()
     yield mocks
@@ -27,6 +31,8 @@ def mock_main_functions():
     start_django_project_patcher.stop()
     create_webapp_patcher.stop()
     update_wsgi_file_patcher.stop()
+    update_settings_file_patcher.stop()
+    run_collectstatic_patcher.stop()
     reload_webapp_patcher.stop()
 
 

@@ -34,6 +34,13 @@ class TestMain:
             call.start_django_project(
                 'www.domain.com', mock_main_functions.create_virtualenv.return_value
             ),
+            call.update_settings_file(
+                'www.domain.com', mock_main_functions.start_django_project.return_value
+            ),
+            call.run_collectstatic(
+                mock_main_functions.create_virtualenv.return_value,
+                mock_main_functions.start_django_project.return_value
+            ),
             call.create_webapp(
                 'www.domain.com',
                 'python.version',
@@ -61,9 +68,6 @@ class TestMain:
         )
 
 
-
-
-class TestMainSemiFunctional:
 
     @pytest.mark.slowtest
     def test_creates_django_project_in_virtualenv_with_hacked_settings_and_static_files(
@@ -132,13 +136,21 @@ class TestCreateVirtualenv:
 class TestStartDjangoProject:
 
 
-    def test_calls_update_settings_file(self, mock_subprocess, fake_home):
-        with patch('new_django_project_in_virtualenv.update_settings_file') as mock_update_settings_file:
-            start_django_project('mydomain.com', '/path/to/virtualenv')
+    def test_creates_folder(self, mock_subprocess, fake_home):
+        start_django_project('mydomain.com', '/path/to/virtualenv')
         expected_path = os.path.join(fake_home, 'mydomain.com')
-        assert mock_update_settings_file.call_args == call(
-            'mydomain.com', expected_path
-        )
+        assert os.path.isdir(expected_path)
+
+
+    def test_calls_startproject(self, mock_subprocess, fake_home):
+        start_django_project('mydomain.com', '/path/to/virtualenv')
+        expected_path = os.path.join(fake_home, 'mydomain.com')
+        assert mock_subprocess.check_call.call_args == call([
+            '/path/to/virtualenv/bin/django-admin.py',
+            'startproject',
+            'mysite',
+            expected_path
+        ])
 
 
     def test_returns_project_path(self, mock_subprocess, fake_home):
@@ -281,8 +293,8 @@ class TestUpdateWsgiFileTest:
         assert contents == template.format(project_path='/project/path')
 
 
-class TestReloadWebapp:
 
+class TestReloadWebapp:
 
     def test_does_post_to_reload_url(self, api_responses):
         expected_url = API_ENDPOINT.format(username=getpass.getuser()) + 'mydomain.com/reload'

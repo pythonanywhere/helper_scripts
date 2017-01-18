@@ -49,14 +49,17 @@ def start_django_project(domain, virtualenv_path):
         'mysite',
         target_folder
     ])
-    update_settings_file(domain, target_folder)
+    return target_folder
+
+
+
+def run_collectstatic(virtualenv_path, target_folder):
     subprocess.check_call([
         os.path.join(virtualenv_path, 'bin/python'),
         os.path.join(target_folder, 'manage.py'),
         'collectstatic',
         '--noinput',
     ])
-    return target_folder
 
 
 
@@ -120,6 +123,8 @@ def main(domain, django_version, python_version):
         domain = '{}.pythonanywhere.com'.format(username)
     virtualenv_path = create_virtualenv(domain, python_version, django_version)
     project_path = start_django_project(domain, virtualenv_path)
+    update_settings_file(domain, project_path)
+    run_collectstatic(virtualenv_path, project_path)
     create_webapp(domain, python_version, virtualenv_path, project_path)
     wsgi_file_path = '/var/www/' + domain.replace('.', '_') + '_wsgi.py'
     update_wsgi_file(wsgi_file_path, project_path)
