@@ -57,6 +57,10 @@ def start_django_project(domain, virtualenv_path):
             MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
             """
         ))
+    with open(os.path.join(target_folder, 'mysite', 'settings.py')) as f:
+        settings = f.read()
+    with open(os.path.join(target_folder, 'mysite', 'settings.py'), 'w') as f:
+        f.write(settings.replace('ALLOWED_HOSTS = []', "ALLOWED_HOSTS = [{!r}]".format(domain)))
     subprocess.check_call([
         os.path.join(virtualenv_path, 'bin/python'),
         os.path.join(target_folder, 'manage.py'),

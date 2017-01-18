@@ -137,6 +137,7 @@ class TestStartDjangoProject:
         assert "MEDIA_URL = '/media/'" in lines
         assert "STATIC_ROOT = os.path.join(BASE_DIR, 'static')" in lines
         assert "MEDIA_ROOT = os.path.join(BASE_DIR, 'media')" in lines
+        assert "ALLOWED_HOSTS = ['mydomain.com']" in lines
 
 
     @pytest.mark.slowtest
