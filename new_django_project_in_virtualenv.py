@@ -49,18 +49,6 @@ def start_django_project(domain, virtualenv_path):
         'mysite',
         target_folder
     ])
-    with open(os.path.join(target_folder, 'mysite', 'settings.py'), 'a') as f:
-        f.write(dedent(
-            """
-            MEDIA_URL = '/media/'
-            STATIC_ROOT = os.path.join(BASE_DIR, 'static')
-            MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-            """
-        ))
-    with open(os.path.join(target_folder, 'mysite', 'settings.py')) as f:
-        settings = f.read()
-    with open(os.path.join(target_folder, 'mysite', 'settings.py'), 'w') as f:
-        f.write(settings.replace('ALLOWED_HOSTS = []', "ALLOWED_HOSTS = [{!r}]".format(domain)))
     update_settings_file(domain, target_folder)
     subprocess.check_call([
         os.path.join(virtualenv_path, 'bin/python'),
@@ -73,7 +61,18 @@ def start_django_project(domain, virtualenv_path):
 
 
 def update_settings_file(domain, project_path):
-    pass
+    with open(os.path.join(project_path, 'mysite', 'settings.py'), 'a') as f:
+        f.write(dedent(
+            """
+            MEDIA_URL = '/media/'
+            STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+            MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+            """
+        ))
+    with open(os.path.join(project_path, 'mysite', 'settings.py')) as f:
+        settings = f.read()
+    with open(os.path.join(project_path, 'mysite', 'settings.py'), 'w') as f:
+        f.write(settings.replace('ALLOWED_HOSTS = []', "ALLOWED_HOSTS = [{!r}]".format(domain)))
 
 
 

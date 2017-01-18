@@ -6,6 +6,7 @@ import pytest
 import responses
 import subprocess
 import tempfile
+from textwrap import dedent
 from urllib.parse import urlencode
 
 import new_django_project_in_virtualenv
@@ -165,7 +166,49 @@ class TestStartDjangoProject:
 
 
 class TestUpdateSettingsFile:
-    pass
+
+    def test_adds_STATIC_and_MEDIA_config_to_settings(self):
+        test_folder = tempfile.mkdtemp()
+        os.makedirs(os.path.join(test_folder, 'mysite'))
+        with open(os.path.join(test_folder, 'mysite/settings.py'), 'w') as f:
+            f.write(dedent(
+                """
+                # settings file
+                STATIC_URL = '/static/'
+                ALLOWED_HOSTS = []
+                """
+            ))
+
+        update_settings_file('mydomain.com', test_folder)
+        with open(os.path.join(test_folder, 'mysite/settings.py')) as f:
+            contents = f.read()
+
+        lines = contents.split('\n')
+        assert "STATIC_URL = '/static/'" in lines
+        assert "MEDIA_URL = '/media/'" in lines
+        assert "STATIC_ROOT = os.path.join(BASE_DIR, 'static')" in lines
+        assert "MEDIA_ROOT = os.path.join(BASE_DIR, 'media')" in lines
+
+
+    def test_adds_domain_to_ALLOWED_HOSTS(self):
+        test_folder = tempfile.mkdtemp()
+        os.makedirs(os.path.join(test_folder, 'mysite'))
+        with open(os.path.join(test_folder, 'mysite/settings.py'), 'w') as f:
+            f.write(dedent(
+                """
+                # settings file
+                STATIC_URL = '/static/'
+                ALLOWED_HOSTS = []
+                """
+            ))
+
+        update_settings_file('mydomain.com', test_folder)
+        with open(os.path.join(test_folder, 'mysite/settings.py')) as f:
+            contents = f.read()
+
+        lines = contents.split('\n')
+
+        assert "ALLOWED_HOSTS = ['mydomain.com']" in lines
 
 
 
