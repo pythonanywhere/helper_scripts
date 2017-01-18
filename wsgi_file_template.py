@@ -4,7 +4,7 @@ import os
 import sys
 
 # Add your project directory to the sys.path
-project_path = '{{ project_path }}'
+project_path = {project_path!r}
 sys.path.insert(0, project_path)
 
 # Set environment variable to tell django where your settings.py is
