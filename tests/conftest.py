@@ -5,32 +5,30 @@ import shutil
 import subprocess
 import responses
 import tempfile
-from unittest.mock import patch
-
-class _Mocks:
-    pass
+from unittest.mock import patch, Mock
 
 
 
 @pytest.fixture
 def mock_main_functions():
-    mocks = _Mocks()
-    create_virtualenv_patcher = patch('new_django_project_in_virtualenv.create_virtualenv')
-    mocks.create_virtualenv = create_virtualenv_patcher.start()
-    start_django_project_patcher = patch('new_django_project_in_virtualenv.start_django_project')
-    mocks.start_django_project = start_django_project_patcher.start()
-    create_webapp_patcher = patch('new_django_project_in_virtualenv.create_webapp')
-    mocks.create_webapp = create_webapp_patcher.start()
-    update_wsgi_file_patcher = patch('new_django_project_in_virtualenv.update_wsgi_file')
-    mocks.update_wsgi_file = update_wsgi_file_patcher.start()
-    reload_webapp_patcher = patch('new_django_project_in_virtualenv.reload_webapp')
-    mocks.reload_webapp = reload_webapp_patcher.start()
+    mocks = Mock()
+    create_virtualenv_patcher = patch('new_django_project_in_virtualenv.create_virtualenv', mocks.create_virtualenv)
+    create_virtualenv_patcher.start()
+    start_django_project_patcher = patch('new_django_project_in_virtualenv.start_django_project', mocks.start_django_project)
+    start_django_project_patcher.start()
+    create_webapp_patcher = patch('new_django_project_in_virtualenv.create_webapp', mocks.create_webapp)
+    create_webapp_patcher.start()
+    update_wsgi_file_patcher = patch('new_django_project_in_virtualenv.update_wsgi_file', mocks.update_wsgi_file)
+    update_wsgi_file_patcher.start()
+    reload_webapp_patcher = patch('new_django_project_in_virtualenv.reload_webapp', mocks.reload_webapp)
+    reload_webapp_patcher.start()
     yield mocks
     create_virtualenv_patcher.stop()
     start_django_project_patcher.stop()
     create_webapp_patcher.stop()
     update_wsgi_file_patcher.stop()
     reload_webapp_patcher.stop()
+
 
 
 @pytest.fixture

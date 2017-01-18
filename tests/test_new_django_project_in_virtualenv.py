@@ -25,11 +25,29 @@ from new_django_project_in_virtualenv import (
 
 class TestMain:
 
-    def test_calls_create_virtualenv(self, mock_main_functions):
-        main('domain', 'django.version', 'python.version')
-        assert mock_main_functions.create_virtualenv.call_args == call(
-            'domain', 'python.version', 'django.version'
-        )
+    def test_calls_all_the_right_stuff_in_order(self, mock_main_functions):
+        main('www.domain.com', 'django.version', 'python.version')
+        assert mock_main_functions.method_calls == [
+            call.create_virtualenv(
+                'www.domain.com', 'python.version', 'django.version'
+            ),
+            call.start_django_project(
+                'www.domain.com', mock_main_functions.create_virtualenv.return_value
+            ),
+            call.create_webapp(
+                'www.domain.com',
+                'python.version',
+                mock_main_functions.create_virtualenv.return_value,
+                mock_main_functions.start_django_project.return_value
+            ),
+            call.update_wsgi_file(
+                '/var/www/www_domain_com_wsgi.py',
+                mock_main_functions.start_django_project.return_value
+            ),
+            call.reload_webapp(
+                'www.domain.com'
+            )
+        ]
 
 
     def test_domain_defaults_to_using_current_username(self, mock_main_functions):
@@ -38,38 +56,11 @@ class TestMain:
         assert mock_main_functions.create_virtualenv.call_args == call(
             username + '.pythonanywhere.com', 'python.version', 'django.version'
         )
-
-
-    def test_calls_start_django_project_with_virtualenv(self, mock_main_functions):
-        main('domain', 'django.version', 'python.version')
-        assert mock_main_functions.start_django_project.call_args == call(
-            'domain', mock_main_functions.create_virtualenv.return_value
-        )
-
-
-    def test_calls_create_webapp_with_virtualenv_and_python_version(self, mock_main_functions):
-        main('domain', 'django.version', 'python.version')
-        assert mock_main_functions.create_webapp.call_args == call(
-            'domain',
-            'python.version',
-            mock_main_functions.create_virtualenv.return_value,
-            mock_main_functions.start_django_project.return_value
-        )
-
-
-    def test_calls_update_wsgi_file(self, mock_main_functions):
-        main('www.domain.com', 'django.version', 'python.version')
-        assert mock_main_functions.update_wsgi_file.call_args == call(
-            '/var/www/www_domain_com_wsgi.py',
-            mock_main_functions.start_django_project.return_value
-        )
-
-
-    def test_calls_reload_webapp(self, mock_main_functions):
-        main('domain', 'django.version', 'python.version')
         assert mock_main_functions.reload_webapp.call_args == call(
-            'domain',
+            username + '.pythonanywhere.com',
         )
+
+
 
 
 class TestMainSemiFunctional:
