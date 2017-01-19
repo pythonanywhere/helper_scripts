@@ -47,6 +47,10 @@ class TestMain:
                 mock_main_functions.create_virtualenv.return_value,
                 mock_main_functions.start_django_project.return_value
             ),
+            call.add_static_file_mappings(
+                'www.domain.com',
+                mock_main_functions.start_django_project.return_value
+            ),
             call.update_wsgi_file(
                 '/var/www/www_domain_com_wsgi.py',
                 mock_main_functions.start_django_project.return_value

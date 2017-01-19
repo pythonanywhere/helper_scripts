@@ -19,6 +19,7 @@ def mock_main_functions():
         'update_settings_file',
         'run_collectstatic',
         'create_webapp',
+        'add_static_file_mappings',
         'update_wsgi_file',
         'reload_webapp',
     ]

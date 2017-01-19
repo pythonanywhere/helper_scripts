@@ -102,6 +102,12 @@ def create_webapp(domain, python_version, virtualenv_path, project_path):
 
 
 
+def add_static_file_mappings(domain, project_path):
+    pass
+
+
+
+
 def update_wsgi_file(wsgi_file_path, project_path):
     template = open(os.path.join(os.path.dirname(__file__), 'wsgi_file_template.py')).read()
     with open(wsgi_file_path, 'w') as f:
@@ -126,6 +132,7 @@ def main(domain, django_version, python_version):
     update_settings_file(domain, project_path)
     run_collectstatic(virtualenv_path, project_path)
     create_webapp(domain, python_version, virtualenv_path, project_path)
+    add_static_file_mappings(domain, project_path)
     wsgi_file_path = '/var/www/' + domain.replace('.', '_') + '_wsgi.py'
     update_wsgi_file(wsgi_file_path, project_path)
     reload_webapp(domain)
