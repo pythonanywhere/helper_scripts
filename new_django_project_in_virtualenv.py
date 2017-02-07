@@ -49,20 +49,21 @@ def _virtualenv_path(domain):
 def _project_folder(domain):
     return os.path.expanduser('~/' + domain)
 
-def sanity_checks(domain):
+def sanity_checks(domain, nuke=False):
     token = os.environ.get('API_TOKEN')
     if not token:
         raise SanityException('Could not find your API token')
 
-    url = API_ENDPOINT.format(username=getpass.getuser()) + domain + '/'
-    response = _call_api(url, 'get')
-    if response.status_code != 404:
-        raise SanityException('You already have a webapp for {}.\n\nUse the --nuke option if you want to replace it.'.format(domain))
-    if os.path.exists(_virtualenv_path(domain)):
-        raise SanityException('You already have a virtualenv for {}.\n\nUse the --nuke option if you want to replace it.'.format(domain))
-    project_folder = _project_folder(domain)
-    if os.path.exists(project_folder):
-        raise SanityException('You already have a project folder at {}.\n\nUse the --nuke option if you want to replace it.'.format(project_folder))
+    if not nuke:
+        url = API_ENDPOINT.format(username=getpass.getuser()) + domain + '/'
+        response = _call_api(url, 'get')
+        if response.status_code != 404:
+            raise SanityException('You already have a webapp for {}.\n\nUse the --nuke option if you want to replace it.'.format(domain))
+        if os.path.exists(_virtualenv_path(domain)):
+            raise SanityException('You already have a virtualenv for {}.\n\nUse the --nuke option if you want to replace it.'.format(domain))
+        project_folder = _project_folder(domain)
+        if os.path.exists(project_folder):
+            raise SanityException('You already have a project folder at {}.\n\nUse the --nuke option if you want to replace it.'.format(project_folder))
 
 
 

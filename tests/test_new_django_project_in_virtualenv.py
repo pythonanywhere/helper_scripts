@@ -166,6 +166,15 @@ class TestSanityChecks:
 
 
 
+    def test_nuke_option_overrides_all_but_token_check(
+        self, api_token, api_responses, fake_home, virtualenvs_folder
+    ):
+        os.mkdir(os.path.join(fake_home, self.domain))
+        os.mkdir(os.path.join(virtualenvs_folder, self.domain))
+
+        sanity_checks(self.domain, nuke=True)  # should not raise
+
+
 class TestCreateVirtualenv:
 
     def test_uses_bash_and_sources_virtualenvwrapper(self, mock_subprocess):
