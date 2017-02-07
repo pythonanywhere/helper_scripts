@@ -50,6 +50,9 @@ def sanity_checks(domain):
     response = _call_api(url, 'get')
     if response.status_code != 404:
         raise SanityException('You already have a webapp for {}.\n\nUse the --nuke option if you want to replace it.'.format(domain))
+    if os.path.exists(os.path.join(os.environ['WORKON_HOME'], domain)):
+        raise SanityException('You already have a virtualenv for {}.\n\nUse the --nuke option if you want to replace it.'.format(domain))
+
 
 
 def create_virtualenv(name, python_version, django_version):

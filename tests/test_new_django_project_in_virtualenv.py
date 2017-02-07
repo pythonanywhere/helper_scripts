@@ -118,7 +118,6 @@ class TestSanityChecks:
 
 
     def test_raises_if_no_api_token_exists(self, api_responses):
-        assert os.environ.get('API_TOKEN') is None
         with pytest.raises(SanityException) as e:
             sanity_checks(self.domain)
         assert "Could not find your API token" in str(e.value)
@@ -137,10 +136,19 @@ class TestSanityChecks:
 
 
     def test_does_not_raise_if_no_webapp(self, api_token, api_responses):
-        assert os.environ.get('API_TOKEN')
         api_responses.add(responses.GET, self.expected_url, status=404)
         sanity_checks(self.domain)  # should not raise
 
+
+    def test_raises_if_virtualenv_exists(self, api_token, api_responses, virtualenvs_folder):
+        os.mkdir(os.path.join(virtualenvs_folder, self.domain))
+        api_responses.add(responses.GET, self.expected_url, status=404)
+
+        with pytest.raises(SanityException) as e:
+            sanity_checks(self.domain)  # should not raise
+
+        assert "You already have a virtualenv for " + self.domain in str(e.value)
+        assert "nuke" in str(e.value)
 
 
 class TestCreateVirtualenv:
