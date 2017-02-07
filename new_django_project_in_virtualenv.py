@@ -16,6 +16,7 @@ from docopt import docopt
 import getpass
 import os
 import requests
+import shutil
 import subprocess
 from textwrap import dedent
 
@@ -68,20 +69,26 @@ def sanity_checks(domain, nuke):
 
 
 
-def create_virtualenv(name, python_version, django_version):
+def create_virtualenv(name, python_version, django_version, nuke):
     pip_install = 'pip install django'
     if django_version != 'latest':
         pip_install += '==' + django_version
     command = 'mkvirtualenv --python=/usr/bin/python{python_version} {name} && {pip_install}'.format(
         name=name, python_version=python_version, pip_install=pip_install
     )
+    if nuke:
+        command = 'rmvirtualenv {name} && {old_command}'.format(
+            name=name, old_command=command
+        )
     subprocess.check_call(['bash', '-c', 'source virtualenvwrapper.sh && {}'.format(command)])
     return _virtualenv_path(name)
 
 
 
-def start_django_project(domain, virtualenv_path):
+def start_django_project(domain, virtualenv_path, nuke):
     target_folder = _project_folder(domain)
+    if nuke:
+        shutil.rmtree(target_folder)
     os.mkdir(target_folder)
     subprocess.check_call([
         os.path.join(virtualenv_path, 'bin/django-admin.py'),
@@ -122,15 +129,17 @@ def update_settings_file(domain, project_path):
 
 
 
-def create_webapp(domain, python_version, virtualenv_path, project_path):
+def create_webapp(domain, python_version, virtualenv_path, project_path, nuke):
     post_url = API_ENDPOINT.format(username=getpass.getuser())
-    patch_url = post_url + domain + '/'
+    webapp_url = post_url + domain + '/'
+    if nuke:
+        _call_api(webapp_url, 'delete')
     response = _call_api(post_url, 'post', data={
         'domain_name': domain, 'python_version': PYTHON_VERSIONS[python_version]},
     )
     if not response.ok or response.json().get('status') == 'ERROR':
         raise Exception('POST to create webapp via API failed, got {}:{}'.format(response, response.text))
-    response = _call_api(patch_url, 'patch', data={'virtualenv_path': virtualenv_path})
+    response = _call_api(webapp_url, 'patch', data={'virtualenv_path': virtualenv_path})
     if not response.ok:
         raise Exception('PATCH to set virtualenv path via API failed, got {}:{}'.format(response, response.text))
 
@@ -168,11 +177,11 @@ def main(domain, django_version, python_version, nuke):
         username = getpass.getuser()
         domain = '{}.pythonanywhere.com'.format(username)
     sanity_checks(domain, nuke=nuke)
-    virtualenv_path = create_virtualenv(domain, python_version, django_version)
-    project_path = start_django_project(domain, virtualenv_path)
+    virtualenv_path = create_virtualenv(domain, python_version, django_version, nuke=nuke)
+    project_path = start_django_project(domain, virtualenv_path, nuke=nuke)
     update_settings_file(domain, project_path)
     run_collectstatic(virtualenv_path, project_path)
-    create_webapp(domain, python_version, virtualenv_path, project_path)
+    create_webapp(domain, python_version, virtualenv_path, project_path, nuke=nuke)
     add_static_file_mappings(domain, project_path)
     wsgi_file_path = '/var/www/' + domain.replace('.', '_') + '_wsgi.py'
     update_wsgi_file(wsgi_file_path, project_path)

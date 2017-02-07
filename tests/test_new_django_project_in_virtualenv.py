@@ -29,14 +29,14 @@ from new_django_project_in_virtualenv import (
 class TestMain:
 
     def test_calls_all_the_right_stuff_in_order(self, mock_main_functions):
-        main('www.domain.com', 'django.version', 'python.version', nuke=False)
+        main('www.domain.com', 'django.version', 'python.version', nuke='nuke option')
         assert mock_main_functions.method_calls == [
-            call.sanity_checks('www.domain.com', nuke=False),
+            call.sanity_checks('www.domain.com', nuke='nuke option'),
             call.create_virtualenv(
-                'www.domain.com', 'python.version', 'django.version'
+                'www.domain.com', 'python.version', 'django.version', nuke='nuke option'
             ),
             call.start_django_project(
-                'www.domain.com', mock_main_functions.create_virtualenv.return_value
+                'www.domain.com', mock_main_functions.create_virtualenv.return_value, nuke='nuke option'
             ),
             call.update_settings_file(
                 'www.domain.com', mock_main_functions.start_django_project.return_value
@@ -49,7 +49,8 @@ class TestMain:
                 'www.domain.com',
                 'python.version',
                 mock_main_functions.create_virtualenv.return_value,
-                mock_main_functions.start_django_project.return_value
+                mock_main_functions.start_django_project.return_value,
+                nuke='nuke option',
             ),
             call.add_static_file_mappings(
                 'www.domain.com',
@@ -69,7 +70,7 @@ class TestMain:
         username = getpass.getuser()
         main('your-username.pythonanywhere.com', 'django.version', 'python.version', nuke=False)
         assert mock_main_functions.create_virtualenv.call_args == call(
-            username + '.pythonanywhere.com', 'python.version', 'django.version'
+            username + '.pythonanywhere.com', 'python.version', 'django.version', nuke=False
         )
         assert mock_main_functions.reload_webapp.call_args == call(
             username + '.pythonanywhere.com',
@@ -85,9 +86,13 @@ class TestMain:
         webapps_url = API_ENDPOINT.format(username=getpass.getuser())
         webapp_url = API_ENDPOINT.format(username=getpass.getuser()) + 'mydomain.com/'
         reload_url = webapp_url + 'reload'
+        static_files_url = webapp_url + 'static_files/'
+        api_responses.add(responses.GET, webapp_url, status=404)
         api_responses.add(responses.POST, webapps_url, status=201, body=json.dumps({'status': 'OK'}))
         api_responses.add(responses.PATCH, webapp_url, status=200)
         api_responses.add(responses.POST, reload_url, status=200, body=json.dumps({'status': 'OK'}))
+        api_responses.add(responses.POST, static_files_url, status=201)
+        api_responses.add(responses.POST, static_files_url, status=201)
 
         with patch('new_django_project_in_virtualenv.update_wsgi_file'):
             main('mydomain.com', '1.9.2', '2.7', nuke=False)
@@ -127,7 +132,6 @@ class TestMain:
         with patch('new_django_project_in_virtualenv.update_wsgi_file'):
             main('mydomain.com', '1.9.2', '2.7', nuke=False)
 
-            api_responses.add(responses.GET, webapp_url, status=200)
             api_responses.add(responses.DELETE, webapp_url, status=200)
             api_responses.add(responses.POST, webapps_url, status=201, body=json.dumps({'status': 'OK'}))
             api_responses.add(responses.PATCH, webapp_url, status=200)
@@ -209,7 +213,7 @@ class TestSanityChecks:
 class TestCreateVirtualenv:
 
     def test_uses_bash_and_sources_virtualenvwrapper(self, mock_subprocess):
-        create_virtualenv('domain.com', '2.7', 'latest')
+        create_virtualenv('domain.com', '2.7', 'latest', nuke=False)
         args, kwargs = mock_subprocess.check_call.call_args
         command_list = args[0]
         assert command_list[:2] == ['bash', '-c']
@@ -217,7 +221,7 @@ class TestCreateVirtualenv:
 
 
     def test_calls_mkvirtualenv_with_python_version_and_domain(self, mock_subprocess):
-        create_virtualenv('domain.com', '2.7', 'latest')
+        create_virtualenv('domain.com', '2.7', 'latest', nuke=False)
         args, kwargs = mock_subprocess.check_call.call_args
         command_list = args[0]
         bash_command = command_list[2]
@@ -225,31 +229,36 @@ class TestCreateVirtualenv:
 
 
     def test_django_version_for_latest(self, mock_subprocess):
-        create_virtualenv('domain.com', '2.7', 'latest')
+        create_virtualenv('domain.com', '2.7', 'latest', nuke=False)
         args, kwargs = mock_subprocess.check_call.call_args
         command_list = args[0]
         assert command_list[2].endswith('pip install django')
 
 
     def test_returns_virtualenv_path(self, mock_subprocess, virtualenvs_folder):
-        response = create_virtualenv('domain.com', '2.7', 'latest')
+        response = create_virtualenv('domain.com', '2.7', 'latest', nuke=False)
         assert response == os.path.join(virtualenvs_folder, 'domain.com')
 
 
+    def test_nuke_option_deletes_virtualenv_first(self, mock_subprocess, virtualenvs_folder):
+        create_virtualenv('domain.com', '2.7', 'latest', nuke=True)
+        args, kwargs = mock_subprocess.check_call.call_args
+        command_list = args[0]
+        assert command_list[:2] == ['bash', '-c']
+        assert command_list[2].startswith('source virtualenvwrapper.sh && rmvirtualenv domain.com && mkvirtualenv')
 
 
 
 class TestStartDjangoProject:
 
-
     def test_creates_folder(self, mock_subprocess, fake_home):
-        start_django_project('mydomain.com', '/path/to/virtualenv')
+        start_django_project('mydomain.com', '/path/to/virtualenv', nuke=False)
         expected_path = os.path.join(fake_home, 'mydomain.com')
         assert os.path.isdir(expected_path)
 
 
     def test_calls_startproject(self, mock_subprocess, fake_home):
-        start_django_project('mydomain.com', '/path/to/virtualenv')
+        start_django_project('mydomain.com', '/path/to/virtualenv', nuke=False)
         expected_path = os.path.join(fake_home, 'mydomain.com')
         assert mock_subprocess.check_call.call_args == call([
             '/path/to/virtualenv/bin/django-admin.py',
@@ -261,8 +270,21 @@ class TestStartDjangoProject:
 
     def test_returns_project_path(self, mock_subprocess, fake_home):
         with patch('new_django_project_in_virtualenv.update_settings_file'):
-            response = start_django_project('mydomain.com', '/path/to/virtualenv')
+            response = start_django_project('mydomain.com', '/path/to/virtualenv', nuke=False)
         assert response == os.path.join(fake_home, 'mydomain.com')
+
+
+    def test_nuke_option_deletes_directory_first(self, mock_subprocess, fake_home):
+        domain = 'mydomain.com'
+        os.mkdir(os.path.join(fake_home, domain))
+        old_file = os.path.join(fake_home, domain, 'old_file.py')
+        with open(old_file, 'w') as f:
+            f.write('old stuff')
+
+        start_django_project(domain, '/path/to/virtualenv', nuke=True)  # should not raise
+
+        assert not os.path.exists(old_file)
+
 
 
 
@@ -321,7 +343,7 @@ class TestCreateWebapp:
         api_responses.add(responses.POST, expected_post_url, status=201, body=json.dumps({'status': 'OK'}))
         api_responses.add(responses.PATCH, expected_patch_url, status=200)
 
-        create_webapp('mydomain.com', '2.7', '/virtualenv/path', '/project/path')
+        create_webapp('mydomain.com', '2.7', '/virtualenv/path', '/project/path', nuke=False)
 
         post = api_responses.calls[0]
         assert post.request.url == expected_post_url
@@ -338,7 +360,7 @@ class TestCreateWebapp:
         api_responses.add(responses.POST, expected_post_url, status=201, body=json.dumps({'status': 'OK'}))
         api_responses.add(responses.PATCH, expected_patch_url, status=200)
 
-        create_webapp('mydomain.com', '2.7', '/virtualenv/path', '/project/path')
+        create_webapp('mydomain.com', '2.7', '/virtualenv/path', '/project/path', nuke=False)
 
         patch = api_responses.calls[1]
         assert patch.request.url == expected_patch_url
@@ -353,7 +375,7 @@ class TestCreateWebapp:
         api_responses.add(responses.POST, expected_post_url, status=500, body='an error')
 
         with pytest.raises(Exception) as e:
-            create_webapp('mydomain.com', '2.7', '/virtualenv/path', '/project/path')
+            create_webapp('mydomain.com', '2.7', '/virtualenv/path', '/project/path', nuke=False)
 
         assert 'POST to create webapp via API failed' in str(e.value)
         assert 'an error' in str(e.value)
@@ -366,7 +388,7 @@ class TestCreateWebapp:
         }))
 
         with pytest.raises(Exception) as e:
-            create_webapp('mydomain.com', '2.7', '/virtualenv/path', '/project/path')
+            create_webapp('mydomain.com', '2.7', '/virtualenv/path', '/project/path', nuke=False)
 
         assert 'POST to create webapp via API failed' in str(e.value)
         assert 'bad things happened' in str(e.value)
@@ -379,10 +401,35 @@ class TestCreateWebapp:
         api_responses.add(responses.PATCH, expected_patch_url, status=400, json={'message': 'an error'})
 
         with pytest.raises(Exception) as e:
-            create_webapp('mydomain.com', '2.7', '/virtualenv/path', '/project/path')
+            create_webapp('mydomain.com', '2.7', '/virtualenv/path', '/project/path', nuke=False)
 
         assert 'PATCH to set virtualenv path via API failed' in str(e.value)
         assert 'an error' in str(e.value)
+
+
+    def test_does_delete_first_for_nuke_call(self, api_responses, api_token):
+        post_url = API_ENDPOINT.format(username=getpass.getuser())
+        webapp_url = API_ENDPOINT.format(username=getpass.getuser()) + 'mydomain.com/'
+        api_responses.add(responses.DELETE, webapp_url, status=200)
+        api_responses.add(responses.POST, post_url, status=201, body=json.dumps({'status': 'OK'}))
+        api_responses.add(responses.PATCH, webapp_url, status=200)
+
+        create_webapp('mydomain.com', '2.7', '/virtualenv/path', '/project/path', nuke=True)
+
+        delete = api_responses.calls[0]
+        assert delete.request.method == 'DELETE'
+        assert delete.request.url == webapp_url
+        assert delete.request.headers['Authorization'] == 'Token {}'.format(api_token)
+
+
+    def test_ignores_404_from_delete_call_when_nuking(self, api_responses, api_token):
+        post_url = API_ENDPOINT.format(username=getpass.getuser())
+        webapp_url = API_ENDPOINT.format(username=getpass.getuser()) + 'mydomain.com/'
+        api_responses.add(responses.DELETE, webapp_url, status=404)
+        api_responses.add(responses.POST, post_url, status=201, body=json.dumps({'status': 'OK'}))
+        api_responses.add(responses.PATCH, webapp_url, status=200)
+
+        create_webapp('mydomain.com', '2.7', '/virtualenv/path', '/project/path', nuke=True)
 
 
 
