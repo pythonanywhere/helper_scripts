@@ -3,12 +3,13 @@
 your free domain, the latest version of Django and Python 3.5
 
 Usage:
-  new_django_project_in_virtualenv.py [--domain=<domain> --django=<django-version> --python=<python-version>]
+  new_django_project_in_virtualenv.py [--domain=<domain> --django=<django-version> --python=<python-version>] [--nuke]
 
 Options:
   --domain=<domain>         Domain name, eg www.mydomain.com   [default: your-username.pythonanywhere.com]
   --django=<django-version> Django version, eg "1.8.4"  [default: latest]
   --python=<python-version> Python version, eg "2.7"    [default: 3.5]
+  --nuke                    *Irrevocably* delete any existing web app config on this domain. Irrevocably.
 """
 
 from docopt import docopt
@@ -49,7 +50,7 @@ def _virtualenv_path(domain):
 def _project_folder(domain):
     return os.path.expanduser('~/' + domain)
 
-def sanity_checks(domain, nuke=False):
+def sanity_checks(domain, nuke):
     token = os.environ.get('API_TOKEN')
     if not token:
         raise SanityException('Could not find your API token')
@@ -162,11 +163,11 @@ def reload_webapp(domain):
 
 
 
-def main(domain, django_version, python_version):
+def main(domain, django_version, python_version, nuke):
     if domain == 'your-username.pythonanywhere.com':
         username = getpass.getuser()
         domain = '{}.pythonanywhere.com'.format(username)
-    sanity_checks(domain)
+    sanity_checks(domain, nuke=nuke)
     virtualenv_path = create_virtualenv(domain, python_version, django_version)
     project_path = start_django_project(domain, virtualenv_path)
     update_settings_file(domain, project_path)
@@ -181,5 +182,5 @@ def main(domain, django_version, python_version):
 
 if __name__ == '__main__':
     arguments = docopt(__doc__)
-    main(arguments['--domain'], arguments['--django'], arguments['--python'])
+    main(arguments['--domain'], arguments['--django'], arguments['--python'], nuke=arguments.get('--nuke'))
 
