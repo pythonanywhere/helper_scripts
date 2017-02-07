@@ -13,6 +13,7 @@ import new_django_project_in_virtualenv
 from new_django_project_in_virtualenv import (
     API_ENDPOINT,
     PYTHON_VERSIONS,
+    add_static_file_mappings,
     create_virtualenv,
     create_webapp,
     main,
@@ -284,7 +285,31 @@ class TestCreateWebapp:
 
 
 
-class TestUpdateWsgiFileTest:
+class TestAddStaticFilesMapping:
+
+    def test_does_two_posts_to_static_files_endpoint(self, api_responses):
+        expected_url = API_ENDPOINT.format(username=getpass.getuser()) + 'mydomain.com/static_files/'
+        api_responses.add(responses.POST, expected_url, status=201)
+        api_responses.add(responses.POST, expected_url, status=201)
+
+        add_static_file_mappings('mydomain.com', '/project/path')
+
+        post1 = api_responses.calls[0]
+        assert post1.request.url == expected_url
+        assert post1.request.headers['content-type'] == 'application/json'
+        assert json.loads(post1.request.body.decode('utf8')) == {
+            'url': '/static/', 'path': '/project/path/static'
+        }
+        post2 = api_responses.calls[1]
+        assert post2.request.url == expected_url
+        assert post2.request.headers['content-type'] == 'application/json'
+        assert json.loads(post2.request.body.decode('utf8')) == {
+            'url': '/media/', 'path': '/project/path/media'
+        }
+
+
+
+class TestUpdateWsgiFile:
 
     def test_updates_wsgi_file_from_template(self):
         wsgi_file = tempfile.NamedTemporaryFile().name
