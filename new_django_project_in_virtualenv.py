@@ -118,8 +118,16 @@ def create_webapp(domain, python_version, virtualenv_path, project_path):
 
 def add_static_file_mappings(domain, project_path):
     url = API_ENDPOINT.format(username=getpass.getuser()) + domain + '/static_files/'
-    requests.post(url, json=dict(url='/static/', path=os.path.join(project_path, 'static')))
-    requests.post(url, json=dict(url='/media/', path=os.path.join(project_path, 'media')))
+    requests.post(
+        url,
+        json=dict(url='/static/', path=os.path.join(project_path, 'static')),
+        headers={'Authorization': 'Token {}'.format(os.environ['API_TOKEN'])}
+    )
+    requests.post(
+        url,
+        json=dict(url='/media/', path=os.path.join(project_path, 'media')),
+        headers={'Authorization': 'Token {}'.format(os.environ['API_TOKEN'])}
+    )
 
 
 

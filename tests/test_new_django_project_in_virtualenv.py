@@ -325,7 +325,7 @@ class TestCreateWebapp:
 
 class TestAddStaticFilesMapping:
 
-    def test_does_two_posts_to_static_files_endpoint(self, api_responses):
+    def test_does_two_posts_to_static_files_endpoint(self, api_token, api_responses):
         expected_url = API_ENDPOINT.format(username=getpass.getuser()) + 'mydomain.com/static_files/'
         api_responses.add(responses.POST, expected_url, status=201)
         api_responses.add(responses.POST, expected_url, status=201)
@@ -335,12 +335,14 @@ class TestAddStaticFilesMapping:
         post1 = api_responses.calls[0]
         assert post1.request.url == expected_url
         assert post1.request.headers['content-type'] == 'application/json'
+        assert post1.request.headers['Authorization'] == 'Token {}'.format(api_token)
         assert json.loads(post1.request.body.decode('utf8')) == {
             'url': '/static/', 'path': '/project/path/static'
         }
         post2 = api_responses.calls[1]
         assert post2.request.url == expected_url
         assert post2.request.headers['content-type'] == 'application/json'
+        assert post2.request.headers['Authorization'] == 'Token {}'.format(api_token)
         assert json.loads(post2.request.body.decode('utf8')) == {
             'url': '/media/', 'path': '/project/path/media'
         }
