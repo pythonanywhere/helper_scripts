@@ -14,6 +14,7 @@ def mock_main_functions():
     mocks = Mock()
     patchers = []
     functions = [
+        'sanity_checks',
         'create_virtualenv',
         'start_django_project',
         'update_settings_file',
@@ -107,12 +108,16 @@ def api_responses():
 
 
 
-@pytest.fixture
+@pytest.fixture(scope="function")
 def api_token():
-    token = 'sekrit.token'
     old_token = os.environ.get('API_TOKEN')
+    token = 'sekrit.token'
     os.environ['API_TOKEN'] = token
+
     yield token
-    if old_token is not None:
+
+    if old_token is None:
+        del os.environ['API_TOKEN']
+    else:
         os.environ['API_TOKEN'] = old_token
 

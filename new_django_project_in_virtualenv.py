@@ -27,6 +27,14 @@ PYTHON_VERSIONS = {
 }
 
 
+class SanityException(Exception):
+    pass
+
+
+def sanity_checks():
+    if 'API_TOKEN' not in os.environ:
+        raise SanityException('Could not find your API token')
+
 
 def create_virtualenv(name, python_version, django_version):
     pip_install = 'pip install django'
@@ -129,6 +137,7 @@ def main(domain, django_version, python_version):
     if domain == 'your-username.pythonanywhere.com':
         username = getpass.getuser()
         domain = '{}.pythonanywhere.com'.format(username)
+    sanity_checks()
     virtualenv_path = create_virtualenv(domain, python_version, django_version)
     project_path = start_django_project(domain, virtualenv_path)
     update_settings_file(domain, project_path)

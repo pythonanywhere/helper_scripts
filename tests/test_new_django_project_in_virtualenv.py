@@ -13,10 +13,12 @@ import new_django_project_in_virtualenv
 from new_django_project_in_virtualenv import (
     API_ENDPOINT,
     PYTHON_VERSIONS,
+    SanityException,
     add_static_file_mappings,
     create_virtualenv,
     create_webapp,
     main,
+    sanity_checks,
     start_django_project,
     update_settings_file,
     update_wsgi_file,
@@ -29,6 +31,7 @@ class TestMain:
     def test_calls_all_the_right_stuff_in_order(self, mock_main_functions):
         main('www.domain.com', 'django.version', 'python.version')
         assert mock_main_functions.method_calls == [
+            call.sanity_checks(),
             call.create_virtualenv(
                 'www.domain.com', 'python.version', 'django.version'
             ),
@@ -102,6 +105,20 @@ class TestMain:
         assert "ALLOWED_HOSTS = ['mydomain.com']" in lines
 
         assert 'base.css' in os.listdir(os.path.join(fake_home, 'mydomain.com/static/admin/css'))
+
+
+
+class TestSanityChecks:
+
+    def test_does_not_complain_if_api_token_exists(self, api_token):
+        sanity_checks()
+
+    def test_raises_if_no_api_token_exists(self):
+        assert os.environ.get('API_TOKEN') is None
+        with pytest.raises(SanityException) as e:
+            sanity_checks()
+        assert "Could not find your API token" in str(e.value)
+
 
 
 
@@ -247,7 +264,7 @@ class TestCreateWebapp:
         assert patch.request.headers['Authorization'] == 'Token {}'.format(api_token)
 
 
-    def test_raises_if_post_does_not_20x(self, api_responses):
+    def test_raises_if_post_does_not_20x(self, api_responses, api_token):
         expected_post_url = API_ENDPOINT.format(username=getpass.getuser())
         api_responses.add(responses.POST, expected_post_url, status=500, body='an error')
 
@@ -258,7 +275,7 @@ class TestCreateWebapp:
         assert 'an error' in str(e.value)
 
 
-    def test_raises_if_post_returns_a_200_with_status_error(self, api_responses):
+    def test_raises_if_post_returns_a_200_with_status_error(self, api_responses, api_token):
         expected_post_url = API_ENDPOINT.format(username=getpass.getuser())
         api_responses.add(responses.POST, expected_post_url, status=200, body=json.dumps({
             "status": "ERROR", "error_type": "bad", "error_message": "bad things happened"
@@ -271,7 +288,7 @@ class TestCreateWebapp:
         assert 'bad things happened' in str(e.value)
 
 
-    def test_raises_if_patch_does_not_20x(self, api_responses):
+    def test_raises_if_patch_does_not_20x(self, api_responses, api_token):
         expected_post_url = API_ENDPOINT.format(username=getpass.getuser())
         expected_patch_url = API_ENDPOINT.format(username=getpass.getuser()) + 'mydomain.com/'
         api_responses.add(responses.POST, expected_post_url, status=201, body=json.dumps({'status': 'OK'}))
