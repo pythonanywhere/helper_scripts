@@ -27,6 +27,16 @@ PYTHON_VERSIONS = {
 }
 
 
+
+def _call_api(url, method, **kwargs):
+    return requests.request(
+        method=method,
+        url=url,
+        headers={'Authorization': 'Token {}'.format(os.environ['API_TOKEN'])},
+        **kwargs,
+    )
+
+
 class SanityException(Exception):
     pass
 
@@ -37,7 +47,7 @@ def sanity_checks(domain):
         raise SanityException('Could not find your API token')
 
     url = API_ENDPOINT.format(username=getpass.getuser()) + domain + '/'
-    response = requests.get(url)
+    response = _call_api(url, 'get')
     if response.status_code != 404:
         raise SanityException('Could not find your API token')
 
@@ -99,18 +109,12 @@ def update_settings_file(domain, project_path):
 def create_webapp(domain, python_version, virtualenv_path, project_path):
     post_url = API_ENDPOINT.format(username=getpass.getuser())
     patch_url = post_url + domain + '/'
-    response = requests.post(
-        post_url,
-        data={'domain_name': domain, 'python_version': PYTHON_VERSIONS[python_version]},
-        headers={'Authorization': 'Token {}'.format(os.environ['API_TOKEN'])}
+    response = _call_api(post_url, 'post', data={
+        'domain_name': domain, 'python_version': PYTHON_VERSIONS[python_version]},
     )
     if not response.ok or response.json().get('status') == 'ERROR':
         raise Exception('POST to create webapp via API failed, got {}:{}'.format(response, response.text))
-    response = requests.patch(
-        patch_url,
-        data={'virtualenv_path': virtualenv_path},
-        headers={'Authorization': 'Token {}'.format(os.environ['API_TOKEN'])}
-    )
+    response = _call_api(patch_url, 'patch', data={'virtualenv_path': virtualenv_path})
     if not response.ok:
         raise Exception('PATCH to set virtualenv path via API failed, got {}:{}'.format(response, response.text))
 
@@ -118,16 +122,12 @@ def create_webapp(domain, python_version, virtualenv_path, project_path):
 
 def add_static_file_mappings(domain, project_path):
     url = API_ENDPOINT.format(username=getpass.getuser()) + domain + '/static_files/'
-    requests.post(
-        url,
-        json=dict(url='/static/', path=os.path.join(project_path, 'static')),
-        headers={'Authorization': 'Token {}'.format(os.environ['API_TOKEN'])}
-    )
-    requests.post(
-        url,
-        json=dict(url='/media/', path=os.path.join(project_path, 'media')),
-        headers={'Authorization': 'Token {}'.format(os.environ['API_TOKEN'])}
-    )
+    _call_api(url, 'post', json=dict(
+        url='/static/', path=os.path.join(project_path, 'static')
+    ))
+    _call_api(url, 'post', json=dict(
+        url='/media/', path=os.path.join(project_path, 'media')
+    ))
 
 
 
