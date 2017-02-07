@@ -49,7 +49,7 @@ def sanity_checks(domain):
     url = API_ENDPOINT.format(username=getpass.getuser()) + domain + '/'
     response = _call_api(url, 'get')
     if response.status_code != 404:
-        raise SanityException('Could not find your API token')
+        raise SanityException('You already have a webapp for {}.\n\nUse the --nuke option if you want to replace it.'.format(domain))
 
 
 def create_virtualenv(name, python_version, django_version):

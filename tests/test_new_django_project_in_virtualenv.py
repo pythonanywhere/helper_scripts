@@ -124,7 +124,7 @@ class TestSanityChecks:
         assert "Could not find your API token" in str(e.value)
 
 
-    def DONTtest_raises_if_webapp_already_exists(self, api_token, api_responses):
+    def test_raises_if_webapp_already_exists(self, api_token, api_responses):
         api_responses.add(responses.GET, self.expected_url, status=200, body=json.dumps({
             'id': 1, 'domain_name': self.domain,
         }))
@@ -132,7 +132,7 @@ class TestSanityChecks:
         with pytest.raises(SanityException) as e:
             sanity_checks(self.domain)
 
-        assert "You already have a webapp for www.mydomain.com" in str(e.value)
+        assert "You already have a webapp for " + self.domain in str(e.value)
         assert "nuke" in str(e.value)
 
 
