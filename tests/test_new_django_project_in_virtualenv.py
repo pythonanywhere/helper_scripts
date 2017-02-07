@@ -151,6 +151,21 @@ class TestSanityChecks:
         assert "nuke" in str(e.value)
 
 
+    def test_raises_if_project_path_exists(self, api_token, api_responses, fake_home):
+        api_responses.add(responses.GET, self.expected_url, status=404)
+        os.mkdir(os.path.join(fake_home, self.domain))
+
+        with pytest.raises(SanityException) as e:
+            sanity_checks(self.domain)  # should not raise
+
+        expected_msg = "You already have a project folder at {home}/{domain}".format(
+            home=fake_home, domain=self.domain
+        )
+        assert expected_msg in str(e.value)
+        assert "nuke" in str(e.value)
+
+
+
 class TestCreateVirtualenv:
 
     def test_uses_bash_and_sources_virtualenvwrapper(self, mock_subprocess):

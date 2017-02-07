@@ -46,6 +46,9 @@ def _virtualenv_path(domain):
     return os.path.join(os.environ['WORKON_HOME'], domain)
 
 
+def _project_folder(domain):
+    return os.path.expanduser('~/' + domain)
+
 def sanity_checks(domain):
     token = os.environ.get('API_TOKEN')
     if not token:
@@ -57,6 +60,9 @@ def sanity_checks(domain):
         raise SanityException('You already have a webapp for {}.\n\nUse the --nuke option if you want to replace it.'.format(domain))
     if os.path.exists(_virtualenv_path(domain)):
         raise SanityException('You already have a virtualenv for {}.\n\nUse the --nuke option if you want to replace it.'.format(domain))
+    project_folder = _project_folder(domain)
+    if os.path.exists(project_folder):
+        raise SanityException('You already have a project folder at {}.\n\nUse the --nuke option if you want to replace it.'.format(project_folder))
 
 
 
@@ -73,7 +79,7 @@ def create_virtualenv(name, python_version, django_version):
 
 
 def start_django_project(domain, virtualenv_path):
-    target_folder = os.path.expanduser('~/' + domain)
+    target_folder = _project_folder(domain)
     os.mkdir(target_folder)
     subprocess.check_call([
         os.path.join(virtualenv_path, 'bin/django-admin.py'),
