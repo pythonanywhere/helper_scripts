@@ -31,7 +31,7 @@ class TestMain:
     def test_calls_all_the_right_stuff_in_order(self, mock_main_functions):
         main('www.domain.com', 'django.version', 'python.version')
         assert mock_main_functions.method_calls == [
-            call.sanity_checks(),
+            call.sanity_checks('www.domain.com'),
             call.create_virtualenv(
                 'www.domain.com', 'python.version', 'django.version'
             ),
@@ -109,16 +109,37 @@ class TestMain:
 
 
 class TestSanityChecks:
+    domain = 'www.domain.com'
+    expected_url = API_ENDPOINT.format(username=getpass.getuser()) + domain + '/'
 
-    def test_does_not_complain_if_api_token_exists(self, api_token):
-        sanity_checks()
+    def test_does_not_complain_if_api_token_exists(self, api_token, api_responses):
+        api_responses.add(responses.GET, self.expected_url, status=404)
+        sanity_checks(self.domain)  # should not raise
 
-    def test_raises_if_no_api_token_exists(self):
+
+    def test_raises_if_no_api_token_exists(self, api_responses):
         assert os.environ.get('API_TOKEN') is None
         with pytest.raises(SanityException) as e:
-            sanity_checks()
+            sanity_checks(self.domain)
         assert "Could not find your API token" in str(e.value)
 
+
+    def DONTtest_raises_if_webapp_already_exists(self, api_token, api_responses):
+        api_responses.add(responses.GET, self.expected_url, status=200, body=json.dumps({
+            'id': 1, 'domain_name': self.domain,
+        }))
+
+        with pytest.raises(SanityException) as e:
+            sanity_checks(self.domain)
+
+        assert "You already have a webapp for www.mydomain.com" in str(e.value)
+        assert "nuke" in str(e.value)
+
+
+    def test_does_not_raise_if_no_webapp(self, api_token, api_responses):
+        assert os.environ.get('API_TOKEN')
+        api_responses.add(responses.GET, self.expected_url, status=404)
+        sanity_checks(self.domain)  # should not raise
 
 
 
