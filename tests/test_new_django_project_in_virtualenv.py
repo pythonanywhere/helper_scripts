@@ -85,9 +85,15 @@ class TestMain:
         webapps_url = API_ENDPOINT.format(username=getpass.getuser())
         webapp_url = API_ENDPOINT.format(username=getpass.getuser()) + 'mydomain.com/'
         reload_url = webapp_url + 'reload'
+        static_url = API_ENDPOINT.format(username=getpass.getuser()) + 'mydomain.com/static_files/'
+
+        api_responses.add(responses.GET, webapp_url, status=404)
         api_responses.add(responses.POST, webapps_url, status=201, body=json.dumps({'status': 'OK'}))
         api_responses.add(responses.PATCH, webapp_url, status=200)
         api_responses.add(responses.POST, reload_url, status=200, body=json.dumps({'status': 'OK'}))
+        api_responses.add(responses.POST, static_url, status=201)
+        api_responses.add(responses.POST, static_url, status=201)
+
 
         with patch('new_django_project_in_virtualenv.update_wsgi_file'):
             main('mydomain.com', '1.9.2', '2.7')
