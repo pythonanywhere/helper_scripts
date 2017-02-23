@@ -9,8 +9,8 @@ import tempfile
 from textwrap import dedent
 from urllib.parse import urlencode
 
-import new_django_project_in_virtualenv
-from new_django_project_in_virtualenv import (
+import pa_start_django_webapp_with_virtualenv
+from pa_start_django_webapp_with_virtualenv import (
     API_ENDPOINT,
     PYTHON_VERSIONS,
     SanityException,
@@ -95,7 +95,7 @@ class TestMain:
         api_responses.add(responses.POST, static_url, status=201)
 
 
-        with patch('new_django_project_in_virtualenv.update_wsgi_file'):
+        with patch('pa_start_django_webapp_with_virtualenv.update_wsgi_file'):
             main('mydomain.com', '1.9.2', '2.7')
 
         django_version = subprocess.check_output([
@@ -226,7 +226,7 @@ class TestStartDjangoProject:
 
 
     def test_returns_project_path(self, mock_subprocess, fake_home):
-        with patch('new_django_project_in_virtualenv.update_settings_file'):
+        with patch('pa_start_django_webapp_with_virtualenv.update_settings_file'):
             response = start_django_project('mydomain.com', '/path/to/virtualenv')
         assert response == os.path.join(fake_home, 'mydomain.com')
 
@@ -382,7 +382,7 @@ class TestUpdateWsgiFile:
 
     def test_updates_wsgi_file_from_template(self):
         wsgi_file = tempfile.NamedTemporaryFile().name
-        template = open(os.path.join(os.path.dirname(new_django_project_in_virtualenv.__file__), 'wsgi_file_template.py')).read()
+        template = open(os.path.join(os.path.dirname(pa_start_django_webapp_with_virtualenv.__file__), 'wsgi_file_template.py')).read()
 
         update_wsgi_file(wsgi_file, '/project/path')
 

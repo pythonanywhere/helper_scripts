@@ -3,7 +3,7 @@
 your free domain, the latest version of Django and Python 3.5
 
 Usage:
-  new_django_project_in_virtualenv.py [--domain=<domain> --django=<django-version> --python=<python-version>]
+  pa_start_django_webapp_with_virtualenv.py [--domain=<domain> --django=<django-version> --python=<python-version>]
 
 Options:
   --domain=<domain>         Domain name, eg www.mydomain.com   [default: your-username.pythonanywhere.com]

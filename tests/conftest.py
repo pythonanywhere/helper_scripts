@@ -27,7 +27,7 @@ def mock_main_functions():
     for function in functions:
         mock = getattr(mocks, function)
         patcher = patch(
-            'new_django_project_in_virtualenv.{}'.format(function),
+            'pa_start_django_webapp_with_virtualenv.{}'.format(function),
             mock
         )
         patchers.append(patcher)
@@ -96,7 +96,7 @@ def test_virtualenv(virtualenvs_folder):
 
 @pytest.fixture
 def mock_subprocess():
-    with patch('new_django_project_in_virtualenv.subprocess') as mock:
+    with patch('pa_start_django_webapp_with_virtualenv.subprocess') as mock:
         yield mock
 
 
