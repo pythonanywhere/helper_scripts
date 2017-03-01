@@ -49,10 +49,11 @@ def _virtualenv_path(domain):
 def _project_folder(domain):
     return os.path.expanduser('~/' + domain)
 
+
 def sanity_checks(domain):
     token = os.environ.get('API_TOKEN')
     if not token:
-        raise SanityException('Could not find your API token')
+        raise SanityException('Could not find your API token. You may need to create it on the Accounts page?')
 
     url = API_ENDPOINT.format(username=getpass.getuser()) + domain + '/'
     response = _call_api(url, 'get')
