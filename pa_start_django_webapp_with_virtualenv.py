@@ -28,17 +28,30 @@ PYTHON_VERSIONS = {
 
 
 
-def _call_api(url, method, **kwargs):
-    return requests.request(
-        method=method,
-        url=url,
-        headers={'Authorization': 'Token {}'.format(os.environ['API_TOKEN'])},
-        **kwargs,
-    )
 
 
 class SanityException(Exception):
     pass
+
+
+class AuthenticationError(Exception):
+    pass
+
+
+
+def call_api(url, method, **kwargs):
+    response = requests.request(
+        method=method,
+        url=url,
+        headers={'Authorization': 'Token {}'.format(os.environ['API_TOKEN'])},
+        **kwargs
+    )
+    if response.status_code in (401, 403):
+        print(response, response.text)
+        raise AuthenticationError('Authentication error {} calling API: {}'.format(
+            response.status_code, response.text
+        ))
+    return response
 
 
 
@@ -56,7 +69,7 @@ def sanity_checks(domain):
         raise SanityException('Could not find your API token. You may need to create it on the Accounts page?')
 
     url = API_ENDPOINT.format(username=getpass.getuser()) + domain + '/'
-    response = _call_api(url, 'get')
+    response = call_api(url, 'get')
     if response.status_code != 404:
         raise SanityException('You already have a webapp for {}.\n\nUse the --nuke option if you want to replace it.'.format(domain))
     if os.path.exists(_virtualenv_path(domain)):
@@ -124,12 +137,12 @@ def update_settings_file(domain, project_path):
 def create_webapp(domain, python_version, virtualenv_path, project_path):
     post_url = API_ENDPOINT.format(username=getpass.getuser())
     patch_url = post_url + domain + '/'
-    response = _call_api(post_url, 'post', data={
+    response = call_api(post_url, 'post', data={
         'domain_name': domain, 'python_version': PYTHON_VERSIONS[python_version]},
     )
     if not response.ok or response.json().get('status') == 'ERROR':
         raise Exception('POST to create webapp via API failed, got {}:{}'.format(response, response.text))
-    response = _call_api(patch_url, 'patch', data={'virtualenv_path': virtualenv_path})
+    response = call_api(patch_url, 'patch', data={'virtualenv_path': virtualenv_path})
     if not response.ok:
         raise Exception('PATCH to set virtualenv path via API failed, got {}:{}'.format(response, response.text))
 
@@ -137,10 +150,10 @@ def create_webapp(domain, python_version, virtualenv_path, project_path):
 
 def add_static_file_mappings(domain, project_path):
     url = API_ENDPOINT.format(username=getpass.getuser()) + domain + '/static_files/'
-    _call_api(url, 'post', json=dict(
+    call_api(url, 'post', json=dict(
         url='/static/', path=os.path.join(project_path, 'static')
     ))
-    _call_api(url, 'post', json=dict(
+    call_api(url, 'post', json=dict(
         url='/media/', path=os.path.join(project_path, 'media')
     ))
 

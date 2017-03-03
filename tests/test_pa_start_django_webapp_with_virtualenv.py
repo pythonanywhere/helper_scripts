@@ -13,8 +13,10 @@ import pa_start_django_webapp_with_virtualenv
 from pa_start_django_webapp_with_virtualenv import (
     API_ENDPOINT,
     PYTHON_VERSIONS,
+    AuthenticationError,
     SanityException,
     add_static_file_mappings,
+    call_api,
     create_virtualenv,
     create_webapp,
     main,
@@ -414,4 +416,22 @@ class TestReloadWebapp:
 
         assert 'POST to reload webapp via API failed' in str(e.value)
         assert 'nope' in str(e.value)
+
+
+class TestCallAPI:
+
+    def test_raises_on_401(self, api_token, api_responses):
+        url = 'https://foo.com/'
+        api_responses.add(responses.POST, url, status=401, body='nope')
+        with pytest.raises(AuthenticationError) as e:
+            call_api(url, 'post')
+        assert str(e.value) == 'Authentication error 401 calling API: nope'
+
+
+    def test_raises_on_403(self, api_token, api_responses):
+        url = 'https://foo.com/'
+        api_responses.add(responses.GET, url, status=403, body='nope')
+        with pytest.raises(AuthenticationError) as e:
+            call_api(url, 'get')
+        assert str(e.value) == 'Authentication error 403 calling API: nope'
 
