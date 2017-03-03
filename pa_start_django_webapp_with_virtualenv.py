@@ -46,7 +46,7 @@ def call_api(url, method, **kwargs):
         headers={'Authorization': 'Token {}'.format(os.environ['API_TOKEN'])},
         **kwargs
     )
-    if response.status_code in (401, 403):
+    if response.status_code == 401:
         print(response, response.text)
         raise AuthenticationError('Authentication error {} calling API: {}'.format(
             response.status_code, response.text
@@ -70,7 +70,7 @@ def sanity_checks(domain):
 
     url = API_ENDPOINT.format(username=getpass.getuser()) + domain + '/'
     response = call_api(url, 'get')
-    if response.status_code != 404:
+    if response.status_code == 200:
         raise SanityException('You already have a webapp for {}.\n\nUse the --nuke option if you want to replace it.'.format(domain))
     if os.path.exists(_virtualenv_path(domain)):
         raise SanityException('You already have a virtualenv for {}.\n\nUse the --nuke option if you want to replace it.'.format(domain))

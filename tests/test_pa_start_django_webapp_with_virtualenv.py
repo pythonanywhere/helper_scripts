@@ -428,10 +428,3 @@ class TestCallAPI:
         assert str(e.value) == 'Authentication error 401 calling API: nope'
 
 
-    def test_raises_on_403(self, api_token, api_responses):
-        url = 'https://foo.com/'
-        api_responses.add(responses.GET, url, status=403, body='nope')
-        with pytest.raises(AuthenticationError) as e:
-            call_api(url, 'get')
-        assert str(e.value) == 'Authentication error 403 calling API: nope'
-
