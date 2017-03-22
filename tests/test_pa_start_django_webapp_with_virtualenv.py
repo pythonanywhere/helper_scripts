@@ -125,7 +125,7 @@ class TestSanityChecks:
         sanity_checks(self.domain)  # should not raise
 
 
-    def test_raises_if_no_api_token_exists(self, api_responses):
+    def test_raises_if_no_api_token_exists(self, api_responses, no_api_token):
         with pytest.raises(SanityException) as e:
             sanity_checks(self.domain)
         assert "Could not find your API token" in str(e.value)
