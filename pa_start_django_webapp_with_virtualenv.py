@@ -168,8 +168,8 @@ def update_wsgi_file(wsgi_file_path, project_path):
 
 
 def reload_webapp(domain):
-    url = API_ENDPOINT.format(username=getpass.getuser()) + domain + '/reload'
-    response = requests.post(url)
+    url = API_ENDPOINT.format(username=getpass.getuser()) + domain + '/reload/'
+    response = call_api(url, 'post')
     if not response.ok:
         raise Exception('POST to reload webapp via API failed, got {}:{}'.format(response, response.text))
 

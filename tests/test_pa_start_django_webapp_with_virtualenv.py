@@ -396,8 +396,8 @@ class TestUpdateWsgiFile:
 
 class TestReloadWebapp:
 
-    def test_does_post_to_reload_url(self, api_responses):
-        expected_url = API_ENDPOINT.format(username=getpass.getuser()) + 'mydomain.com/reload'
+    def test_does_post_to_reload_url(self, api_responses, api_token):
+        expected_url = API_ENDPOINT.format(username=getpass.getuser()) + 'mydomain.com/reload/'
         api_responses.add(responses.POST, expected_url, status=200)
 
         reload_webapp('mydomain.com')
@@ -405,10 +405,11 @@ class TestReloadWebapp:
         post = api_responses.calls[0]
         assert post.request.url == expected_url
         assert post.request.body is None
+        assert post.request.headers['Authorization'] == 'Token {}'.format(api_token)
 
 
     def test_raises_if_post_does_not_20x(self, api_responses):
-        expected_url = API_ENDPOINT.format(username=getpass.getuser()) + 'mydomain.com/reload'
+        expected_url = API_ENDPOINT.format(username=getpass.getuser()) + 'mydomain.com/reload/'
         api_responses.add(responses.POST, expected_url, status=404, body='nope')
 
         with pytest.raises(Exception) as e:
