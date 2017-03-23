@@ -71,7 +71,13 @@ def sanity_checks(domain):
 
     token = os.environ.get('API_TOKEN')
     if not token:
-        raise SanityException('Could not find your API token. You may need to create it on the Accounts page?')
+        raise SanityException(dedent(
+            '''
+            Could not find your API token.
+            You may need to create it on the Accounts page?
+            You will also need to close this console and open a new one once you've done that.
+            '''
+        ))
 
     url = API_ENDPOINT.format(username=getpass.getuser()) + domain + '/'
     response = call_api(url, 'get')
