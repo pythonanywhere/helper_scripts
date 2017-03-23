@@ -77,6 +77,16 @@ class TestMain:
             username + '.pythonanywhere.com',
         )
 
+    def test_lowercases_username(self, mock_main_functions):
+        with patch('pa_start_django_webapp_with_virtualenv.getpass') as mock_getpass:
+            mock_getpass.getuser.return_value = 'UserName1'
+            main('your-username.pythonanywhere.com', 'django.version', 'python.version')
+            assert mock_main_functions.create_virtualenv.call_args == call(
+                'username1.pythonanywhere.com', 'python.version', 'django.version'
+            )
+            assert mock_main_functions.reload_webapp.call_args == call(
+                'username1.pythonanywhere.com',
+            )
 
 
     @pytest.mark.slowtest

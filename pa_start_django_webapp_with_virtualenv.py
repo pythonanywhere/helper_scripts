@@ -106,7 +106,7 @@ def create_virtualenv(name, python_version, django_version):
 
 
 def start_django_project(domain, virtualenv_path):
-    print(snakesay('Starting django project'))
+    print(snakesay('Starting Django project'))
 
     target_folder = _project_folder(domain)
     os.mkdir(target_folder)
@@ -203,7 +203,7 @@ def reload_webapp(domain):
 
 def main(domain, django_version, python_version):
     if domain == 'your-username.pythonanywhere.com':
-        username = getpass.getuser()
+        username = getpass.getuser().lower()
         domain = '{}.pythonanywhere.com'.format(username)
     sanity_checks(domain)
     virtualenv_path = create_virtualenv(domain, python_version, django_version)
