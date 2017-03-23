@@ -124,9 +124,12 @@ def api_token():
 
 @pytest.fixture(scope="function")
 def no_api_token():
-    old_token = os.environ.get('API_TOKEN')
-    del os.environ['API_TOKEN']
-    yield
-    if old_token is not None:
+    if 'API_TOKEN' not in os.environ:
+        yield
+
+    else:
+        old_token = os.environ['API_TOKEN']
+        del os.environ['API_TOKEN']
+        yield
         os.environ['API_TOKEN'] = old_token
 
