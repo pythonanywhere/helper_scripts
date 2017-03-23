@@ -18,6 +18,9 @@ import requests
 import subprocess
 from textwrap import dedent
 
+from snakesay import snakesay
+
+
 API_ENDPOINT = 'https://www.pythonanywhere.com/api/v0/user/{username}/webapps/'
 PYTHON_VERSIONS = {
     '2.7': 'python27',
@@ -64,6 +67,8 @@ def _project_folder(domain):
 
 
 def sanity_checks(domain):
+    print(snakesay('Running sanity checks'))
+
     token = os.environ.get('API_TOKEN')
     if not token:
         raise SanityException('Could not find your API token. You may need to create it on the Accounts page?')
@@ -81,6 +86,8 @@ def sanity_checks(domain):
 
 
 def create_virtualenv(name, python_version, django_version):
+    print(snakesay(f'Creating virtualenv with Python{python_version} and Django=={django_version}'))
+
     pip_install = 'pip install django'
     if django_version != 'latest':
         pip_install += '==' + django_version
@@ -93,6 +100,8 @@ def create_virtualenv(name, python_version, django_version):
 
 
 def start_django_project(domain, virtualenv_path):
+    print(snakesay('Starting django project'))
+
     target_folder = _project_folder(domain)
     os.mkdir(target_folder)
     subprocess.check_call([
@@ -106,6 +115,8 @@ def start_django_project(domain, virtualenv_path):
 
 
 def run_collectstatic(virtualenv_path, target_folder):
+    print(snakesay('Running collectstatic'))
+
     subprocess.check_call([
         os.path.join(virtualenv_path, 'bin/python'),
         os.path.join(target_folder, 'manage.py'),
@@ -116,6 +127,8 @@ def run_collectstatic(virtualenv_path, target_folder):
 
 
 def update_settings_file(domain, project_path):
+    print(snakesay('Updating settings.py'))
+
     with open(os.path.join(project_path, 'mysite', 'settings.py')) as f:
         settings = f.read()
     new_settings = settings.replace(
@@ -135,6 +148,8 @@ def update_settings_file(domain, project_path):
 
 
 def create_webapp(domain, python_version, virtualenv_path, project_path):
+    print(snakesay('Creating web app via API'))
+
     post_url = API_ENDPOINT.format(username=getpass.getuser())
     patch_url = post_url + domain + '/'
     response = call_api(post_url, 'post', data={
@@ -149,6 +164,8 @@ def create_webapp(domain, python_version, virtualenv_path, project_path):
 
 
 def add_static_file_mappings(domain, project_path):
+    print(snakesay('Adding static files mappings for /static/ and /media/'))
+
     url = API_ENDPOINT.format(username=getpass.getuser()) + domain + '/static_files/'
     call_api(url, 'post', json=dict(
         url='/static/', path=os.path.join(project_path, 'static')
@@ -161,6 +178,8 @@ def add_static_file_mappings(domain, project_path):
 
 
 def update_wsgi_file(wsgi_file_path, project_path):
+    print(snakesay(f'Updating wsgi file at {wsgi_file_path}'))
+
     template = open(os.path.join(os.path.dirname(__file__), 'wsgi_file_template.py')).read()
     with open(wsgi_file_path, 'w') as f:
         f.write(template.format(project_path=project_path))
@@ -168,6 +187,7 @@ def update_wsgi_file(wsgi_file_path, project_path):
 
 
 def reload_webapp(domain):
+    print(snakesay(f'Reloading {domain} via API'))
     url = API_ENDPOINT.format(username=getpass.getuser()) + domain + '/reload/'
     response = call_api(url, 'post')
     if not response.ok:
@@ -189,6 +209,8 @@ def main(domain, django_version, python_version):
     wsgi_file_path = '/var/www/' + domain.replace('.', '_') + '_wsgi.py'
     update_wsgi_file(wsgi_file_path, project_path)
     reload_webapp(domain)
+
+    print(snakesay(f'All done!  Your site is now live at https://{domain}'))
 
 
 
