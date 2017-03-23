@@ -8,7 +8,7 @@ Usage:
 Options:
   --domain=<domain>         Domain name, eg www.mydomain.com   [default: your-username.pythonanywhere.com]
   --django=<django-version> Django version, eg "1.8.4"  [default: latest]
-  --python=<python-version> Python version, eg "2.7"    [default: 3.5]
+  --python=<python-version> Python version, eg "2.7"    [default: 3.6]
 """
 
 from docopt import docopt
@@ -24,9 +24,9 @@ from snakesay import snakesay
 API_ENDPOINT = 'https://www.pythonanywhere.com/api/v0/user/{username}/webapps/'
 PYTHON_VERSIONS = {
     '2.7': 'python27',
-    '3.3': 'python33',
     '3.4': 'python34',
     '3.5': 'python35',
+    '3.6': 'python36',
 }
 
 
