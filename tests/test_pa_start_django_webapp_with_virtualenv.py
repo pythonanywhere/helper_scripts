@@ -408,7 +408,7 @@ class TestReloadWebapp:
         assert post.request.headers['Authorization'] == 'Token {}'.format(api_token)
 
 
-    def test_raises_if_post_does_not_20x(self, api_responses):
+    def test_raises_if_post_does_not_20x(self, api_responses, api_token):
         expected_url = API_ENDPOINT.format(username=getpass.getuser()) + 'mydomain.com/reload/'
         api_responses.add(responses.POST, expected_url, status=404, body='nope')
 
