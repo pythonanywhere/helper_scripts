@@ -1,6 +1,6 @@
 -f /usr/share/pip-wheels
 docopt==0.6.2
-pytest==3.0.5
+pytest-3.0.7
 virtualenvwrapper==4.7.2
-requests==2.12.4
+requests-2.13.0
 responses==0.5.1
