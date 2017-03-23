@@ -1,4 +1,4 @@
-#!/usr/bin/python3.5
+#!/usr/bin/python3.6
 """Create a new Django webapp with a virtualenv.  Defaults to
 your free domain, the latest version of Django and Python 3.5
 
