@@ -86,7 +86,7 @@ class TestMain:
 
         webapps_url = API_ENDPOINT.format(username=getpass.getuser())
         webapp_url = API_ENDPOINT.format(username=getpass.getuser()) + 'mydomain.com/'
-        reload_url = webapp_url + 'reload'
+        reload_url = webapp_url + 'reload/'
         static_url = API_ENDPOINT.format(username=getpass.getuser()) + 'mydomain.com/static_files/'
 
         api_responses.add(responses.GET, webapp_url, status=404)
