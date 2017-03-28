@@ -39,11 +39,17 @@ def mock_main_functions():
         patcher.stop()
 
 
+@pytest.fixture(scope="session")
+def local_pip_cache():
+    return tempfile.mkdtemp()
 
 
 @pytest.fixture
-def fake_home():
+def fake_home(local_pip_cache):
     tempdir = tempfile.mkdtemp()
+    os.mkdir(os.path.join(tempdir, '.cache'))
+    os.symlink(local_pip_cache, os.path.join(tempdir, '.cache', 'pip'))
+
     old_home = os.environ['HOME']
     old_home_contents = os.listdir(old_home)
 
