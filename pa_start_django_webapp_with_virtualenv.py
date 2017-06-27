@@ -1,6 +1,6 @@
 #!/usr/bin/python3.6
 """Create a new Django webapp with a virtualenv.  Defaults to
-your free domain, the latest version of Django and Python 3.5
+your free domain, the latest version of Django and Python 3.6
 
 Usage:
   pa_start_django_webapp_with_virtualenv.py [--domain=<domain> --django=<django-version> --python=<python-version>] [--nuke]
