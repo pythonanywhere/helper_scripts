@@ -45,17 +45,16 @@ class AuthenticationError(Exception):
 
 
 def call_api(url, method, **kwargs):
+    token = os.environ['API_TOKEN']
     response = requests.request(
         method=method,
         url=url,
-        headers={'Authorization': 'Token {}'.format(os.environ['API_TOKEN'])},
+        headers={'Authorization': f'Token {token}'},
         **kwargs
     )
     if response.status_code == 401:
         print(response, response.text)
-        raise AuthenticationError('Authentication error {} calling API: {}'.format(
-            response.status_code, response.text
-        ))
+        raise AuthenticationError(f'Authentication error {response.status_code} calling API: {response.text}')
     return response
 
 
@@ -85,12 +84,12 @@ def sanity_checks(domain, nuke):
     url = API_ENDPOINT.format(username=getpass.getuser()) + domain + '/'
     response = call_api(url, 'get')
     if response.status_code == 200:
-        raise SanityException('You already have a webapp for {}.\n\nUse the --nuke option if you want to replace it.'.format(domain))
+        raise SanityException(f'You already have a webapp for {domain}.\n\nUse the --nuke option if you want to replace it.')
     if os.path.exists(_virtualenv_path(domain)):
-        raise SanityException('You already have a virtualenv for {}.\n\nUse the --nuke option if you want to replace it.'.format(domain))
+        raise SanityException(f'You already have a virtualenv for {domain}.\n\nUse the --nuke option if you want to replace it.')
     project_folder = _project_folder(domain)
     if os.path.exists(project_folder):
-        raise SanityException('You already have a project folder at {}.\n\nUse the --nuke option if you want to replace it.'.format(project_folder))
+        raise SanityException(f'You already have a project folder at {project_folder}.\n\nUse the --nuke option if you want to replace it.')
 
 
 
@@ -99,14 +98,10 @@ def create_virtualenv(name, python_version, django_version, nuke):
     pip_install = 'pip install django'
     if django_version != 'latest':
         pip_install += '==' + django_version
-    command = 'mkvirtualenv --python=/usr/bin/python{python_version} {name} && {pip_install}'.format(
-        name=name, python_version=python_version, pip_install=pip_install
-    )
+    command = f'mkvirtualenv --python=/usr/bin/python{python_version} {name} && {pip_install}'
     if nuke:
-        command = 'rmvirtualenv {name} && {old_command}'.format(
-            name=name, old_command=command
-        )
-    subprocess.check_call(['bash', '-c', 'source virtualenvwrapper.sh && {}'.format(command)])
+        command = f'rmvirtualenv {name} && {command}'
+    subprocess.check_call(['bash', '-c', f'source virtualenvwrapper.sh && {command}'])
     return _virtualenv_path(name)
 
 
@@ -147,7 +142,7 @@ def update_settings_file(domain, project_path):
         settings = f.read()
     new_settings = settings.replace(
         'ALLOWED_HOSTS = []',
-        "ALLOWED_HOSTS = [{!r}]".format(domain)
+        f'ALLOWED_HOSTS = [{domain!r}]'
     )
     new_settings += dedent(
         """
@@ -172,10 +167,10 @@ def create_webapp(domain, python_version, virtualenv_path, project_path, nuke):
         'domain_name': domain, 'python_version': PYTHON_VERSIONS[python_version]},
     )
     if not response.ok or response.json().get('status') == 'ERROR':
-        raise Exception('POST to create webapp via API failed, got {}:{}'.format(response, response.text))
+        raise Exception(f'POST to create webapp via API failed, got {response}:{response.text}')
     response = call_api(patch_url, 'patch', data={'virtualenv_path': virtualenv_path})
     if not response.ok:
-        raise Exception('PATCH to set virtualenv path via API failed, got {}:{}'.format(response, response.text))
+        raise Exception(f'PATCH to set virtualenv path via API failed, got {response}:{response.text}')
 
 
 
@@ -207,14 +202,14 @@ def reload_webapp(domain):
     url = API_ENDPOINT.format(username=getpass.getuser()) + domain + '/reload/'
     response = call_api(url, 'post')
     if not response.ok:
-        raise Exception('POST to reload webapp via API failed, got {}:{}'.format(response, response.text))
+        raise Exception(f'POST to reload webapp via API failed, got {response}:{response.text}')
 
 
 
 def main(domain, django_version, python_version, nuke):
     if domain == 'your-username.pythonanywhere.com':
         username = getpass.getuser().lower()
-        domain = '{}.pythonanywhere.com'.format(username)
+        domain = f'{username}.pythonanywhere.com'
     sanity_checks(domain, nuke=nuke)
     virtualenv_path = create_virtualenv(domain, python_version, django_version, nuke=nuke)
     project_path = start_django_project(domain, virtualenv_path, nuke=nuke)
