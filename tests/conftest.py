@@ -27,7 +27,7 @@ def mock_main_functions():
     for function in functions:
         mock = getattr(mocks, function)
         patcher = patch(
-            'pa_start_django_webapp_with_virtualenv.{}'.format(function),
+            'scripts.pa_start_django_webapp_with_virtualenv.{}'.format(function),
             mock
         )
         patchers.append(patcher)
@@ -102,8 +102,12 @@ def test_virtualenv(virtualenvs_folder):
 
 @pytest.fixture
 def mock_subprocess():
-    with patch('pa_start_django_webapp_with_virtualenv.subprocess') as mock:
-        yield mock
+    mock = Mock()
+    with patch('subprocess.check_call') as mock_check_call:
+        mock.check_call = mock_check_call
+        with patch('subprocess.check_output') as mock_check_output:
+            mock.check_output = mock_check_output
+            yield mock
 
 
 

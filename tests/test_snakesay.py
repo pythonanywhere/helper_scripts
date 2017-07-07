@@ -1,4 +1,4 @@
-from snakesay import snakesay, MESSAGE
+from pythonanywhere.snakesay import snakesay, MESSAGE
 
 
 def test_nothing():
