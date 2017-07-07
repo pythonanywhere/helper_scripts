@@ -1,4 +1,4 @@
-from unittest.mock import call, patch
+from unittest.mock import call, patch, Mock
 import getpass
 import json
 import os
@@ -8,6 +8,36 @@ import subprocess
 
 from pythonanywhere.api import API_ENDPOINT
 from scripts.pa_start_django_webapp_with_virtualenv import main
+
+@pytest.fixture
+def mock_main_functions():
+    mocks = Mock()
+    patchers = []
+    functions = [
+        'sanity_checks',
+        'create_virtualenv',
+        'start_django_project',
+        'update_settings_file',
+        'run_collectstatic',
+        'create_webapp',
+        'add_static_file_mappings',
+        'update_wsgi_file',
+        'reload_webapp',
+    ]
+    for function in functions:
+        mock = getattr(mocks, function)
+        patcher = patch(
+            'scripts.pa_start_django_webapp_with_virtualenv.{}'.format(function),
+            mock
+        )
+        patchers.append(patcher)
+        patcher.start()
+
+    yield mocks
+
+    for patcher in patchers:
+        patcher.stop()
+
 
 
 class TestMain:

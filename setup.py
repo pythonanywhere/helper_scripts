@@ -1,5 +1,5 @@
 import os
-from setuptools import setup, find_packages
+from setuptools import setup
 
 here = os.path.abspath(os.path.dirname(__file__))
 
@@ -38,6 +38,8 @@ setup(
     entry_points={},
     scripts=[
         'scripts/pa_start_django_webapp_with_virtualenv.py',
+        'scripts/pa_autoconfigure_webapp.py',
+        'pythonanywhere/snakesay.py',
     ]
 )
 

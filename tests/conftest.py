@@ -9,36 +9,6 @@ from unittest.mock import patch, Mock
 
 
 
-@pytest.fixture
-def mock_main_functions():
-    mocks = Mock()
-    patchers = []
-    functions = [
-        'sanity_checks',
-        'create_virtualenv',
-        'start_django_project',
-        'update_settings_file',
-        'run_collectstatic',
-        'create_webapp',
-        'add_static_file_mappings',
-        'update_wsgi_file',
-        'reload_webapp',
-    ]
-    for function in functions:
-        mock = getattr(mocks, function)
-        patcher = patch(
-            'scripts.pa_start_django_webapp_with_virtualenv.{}'.format(function),
-            mock
-        )
-        patchers.append(patcher)
-        patcher.start()
-
-    yield mocks
-
-    for patcher in patchers:
-        patcher.stop()
-
-
 @pytest.fixture(scope="session")
 def local_pip_cache():
     return tempfile.mkdtemp()
