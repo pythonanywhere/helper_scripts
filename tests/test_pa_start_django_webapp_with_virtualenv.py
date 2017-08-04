@@ -47,7 +47,7 @@ class TestMain:
         assert mock_main_functions.method_calls == [
             call.sanity_checks('www.domain.com', nuke='nuke option'),
             call.create_virtualenv(
-                'www.domain.com', 'python.version', 'django.version', nuke='nuke option'
+                'www.domain.com', 'python.version', 'django==django.version', nuke='nuke option'
             ),
             call.start_django_project(
                 'www.domain.com', mock_main_functions.create_virtualenv.return_value, nuke='nuke option'
@@ -84,7 +84,7 @@ class TestMain:
         username = getpass.getuser()
         main('your-username.pythonanywhere.com', 'django.version', 'python.version', nuke=False)
         assert mock_main_functions.create_virtualenv.call_args == call(
-            username + '.pythonanywhere.com', 'python.version', 'django.version', nuke=False
+            username + '.pythonanywhere.com', 'python.version', 'django==django.version', nuke=False
         )
         assert mock_main_functions.reload_webapp.call_args == call(
             username + '.pythonanywhere.com',
@@ -96,11 +96,18 @@ class TestMain:
             mock_getpass.getuser.return_value = 'UserName1'
             main('your-username.pythonanywhere.com', 'django.version', 'python.version', 'nukey')
             assert mock_main_functions.create_virtualenv.call_args == call(
-                'username1.pythonanywhere.com', 'python.version', 'django.version', nuke='nukey'
+                'username1.pythonanywhere.com', 'python.version', 'django==django.version', nuke='nukey'
             )
             assert mock_main_functions.reload_webapp.call_args == call(
                 'username1.pythonanywhere.com',
             )
+
+
+    def test_django_latest_is_just_django_for_virtualenv(self, mock_main_functions):
+        main('www.domain.com', 'latest', 'python.version', nuke='nuke option')
+        assert mock_main_functions.create_virtualenv.call_args == call(
+            'www.domain.com', 'python.version', 'django', nuke='nuke option'
+        )
 
 
     @pytest.mark.slowtest

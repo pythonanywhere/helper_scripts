@@ -37,7 +37,8 @@ def main(domain, django_version, python_version, nuke):
         username = getpass.getuser().lower()
         domain = f'{username}.pythonanywhere.com'
     sanity_checks(domain, nuke=nuke)
-    virtualenv_path = create_virtualenv(domain, python_version, django_version, nuke=nuke)
+    packages = 'django' if django_version=='latest' else f'django=={django_version}'
+    virtualenv_path = create_virtualenv(domain, python_version, packages, nuke=nuke)
     project_path = start_django_project(domain, virtualenv_path, nuke=nuke)
     update_settings_file(domain, project_path)
     run_collectstatic(virtualenv_path, project_path)
