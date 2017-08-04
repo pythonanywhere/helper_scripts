@@ -33,9 +33,9 @@ def main(repo_url, domain, python_version, nuke):
         username = getpass.getuser().lower()
         domain = f'{username}.pythonanywhere.com'
 
-    sanity_checks(domain, nuke)
+    sanity_checks(domain, nuke=nuke)
     download_repo(repo_url)
-    create_virtualenv(domain, python_version, 'foo', nuke)
+    create_virtualenv(domain, python_version, nuke=nuke)
 
 
 
