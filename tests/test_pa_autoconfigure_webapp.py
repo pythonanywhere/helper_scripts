@@ -1,8 +1,10 @@
 from unittest.mock import call, patch, Mock
 import getpass
+import os
+from pathlib import Path
 import pytest
 
-from scripts.pa_autoconfigure_webapp import main
+from scripts.pa_autoconfigure_webapp import main, download_repo
 
 
 @pytest.fixture
@@ -41,7 +43,7 @@ class TestMain:
         main('https://github.com/pythonanywhere.com/example-django-project.git', 'www.domain.com', 'python.version', nuke='nuke option')
         assert mock_main_functions.method_calls[:4] == [
             call.sanity_checks('www.domain.com', nuke='nuke option'),
-            call.download_repo('https://github.com/pythonanywhere.com/example-django-project.git'),
+            call.download_repo('https://github.com/pythonanywhere.com/example-django-project.git', 'www.domain.com'),
             call.create_virtualenv(
                 'www.domain.com', 'python.version', nuke='nuke option'
             ),
@@ -69,4 +71,22 @@ class TestMain:
             assert mock_main_functions.sanity_checks.call_args == call(
                 'username1.pythonanywhere.com', nuke='nukey'
             )
+
+class TestDownloadRepo:
+
+    def test_calls_git_subprocess(self, mock_subprocess, fake_home):
+        repo = 'https://gist.github.com/hjwp/4173bcface139beb7632ec93726f91ea'
+        new_folder = download_repo(repo, 'a-domain.com')
+        assert new_folder == Path(fake_home) / 'a-domain.com'
+        assert mock_subprocess.check_call.call_args == call(
+            ['git', 'clone', repo, new_folder]
+        )
+
+    @pytest.mark.slowtest
+    def test_actually_downloads_repo(self, fake_home):
+        new_folder = download_repo('https://gist.github.com/hjwp/4173bcface139beb7632ec93726f91ea', 'a-domain.com')
+        print(os.listdir(fake_home))
+        assert new_folder.is_dir()
+        assert 'file1.py' in os.listdir(new_folder)
+        assert 'file2.py' in os.listdir(new_folder)
 
