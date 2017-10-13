@@ -25,6 +25,7 @@ import shutil
 from pythonanywhere.sanity_checks import sanity_checks
 from pythonanywhere.virtualenvs import create_virtualenv
 from pythonanywhere.api import create_webapp
+from pythonanywhere.django_project import DjangoProject
 
 
 def download_repo(repo, domain, nuke):
@@ -43,15 +44,14 @@ def main(repo_url, domain, python_version, nuke):
     project_path = download_repo(repo_url, domain, nuke=nuke)
     virtualenv = create_virtualenv(domain, python_version, nuke=nuke)
 
-    # update_settings_file(domain, project_path)
-    # run_collectstatic(virtualenv_path, project_path)
 
     create_webapp(domain, python_version, virtualenv, project_path, nuke=nuke)
 
-    # create_webapp(domain, python_version, virtualenv_path, project_path, nuke=nuke)
+    project = DjangoProject(domain, virtualenv)
+    project.update_wsgi_file()
+    project.update_settings_file()
+    # run_collectstatic(virtualenv_path, project_path)
     # add_static_file_mappings(domain, project_path)
-    # wsgi_file_path = '/var/www/' + domain.replace('.', '_') + '_wsgi.py'
-    # update_wsgi_file(wsgi_file_path, project_path)
     # reload_webapp(domain)
 
     # print(snakesay(f'All done!  Your site is now live at https://{domain}'))

@@ -16,7 +16,7 @@ def mock_main_functions():
         'download_repo',
         'create_virtualenv',
         'create_webapp',
-        # 'run_collectstatic',
+        'DjangoProject',
         # 'add_static_file_mappings',
         # 'update_wsgi_file',
         # 'reload_webapp',
@@ -39,9 +39,9 @@ def mock_main_functions():
 
 class TestMain:
 
-    def test_sanity_checks_then_downloads_repo_creates_virtualenv_and_webapp(self, mock_main_functions):
+    def test_calls_all_stuff_in_right_order(self, mock_main_functions):
         main('https://github.com/pythonanywhere.com/example-django-project.git', 'www.domain.com', 'python.version', nuke='nuke option')
-        assert mock_main_functions.method_calls[:4] == [
+        assert mock_main_functions.method_calls[:6] == [
             call.sanity_checks('www.domain.com', nuke='nuke option'),
             call.download_repo('https://github.com/pythonanywhere.com/example-django-project.git', 'www.domain.com', nuke='nuke option'),
             call.create_virtualenv(
@@ -54,7 +54,13 @@ class TestMain:
                 mock_main_functions.download_repo.return_value,
                 nuke='nuke option'
             ),
+            call.DjangoProject('www.domain.com', mock_main_functions.create_virtualenv.return_value),
         ]
+        assert mock_main_functions.DjangoProject.return_value.method_calls == [
+            call.update_wsgi_file(),
+            call.update_settings_file(),
+        ]
+
 
     def test_domain_defaults_to_using_current_username(self, mock_main_functions):
         username = getpass.getuser()
