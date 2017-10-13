@@ -31,7 +31,7 @@ class TestStartDjangoProject:
 
 
     def test_returns_project_path(self, mock_subprocess, fake_home):
-        with patch('pa_start_django_webapp_with_virtualenv.update_settings_file'):
+        with patch('pythonanywhere.django_project.update_settings_file'):
             response = start_django_project('mydomain.com', '/path/to/virtualenv', nuke=False)
         assert response == os.path.join(fake_home, 'mydomain.com')
 
