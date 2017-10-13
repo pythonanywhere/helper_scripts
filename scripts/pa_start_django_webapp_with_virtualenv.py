@@ -23,12 +23,7 @@ from pythonanywhere.api import (
 )
 
 from pythonanywhere.virtualenvs import create_virtualenv
-from pythonanywhere.django_project import (
-    start_django_project,
-    update_settings_file,
-    run_collectstatic,
-    update_wsgi_file,
-)
+from pythonanywhere.django_project import DjangoProject
 from pythonanywhere.sanity_checks import sanity_checks
 
 
@@ -37,15 +32,19 @@ def main(domain, django_version, python_version, nuke):
         username = getpass.getuser().lower()
         domain = f'{username}.pythonanywhere.com'
     sanity_checks(domain, nuke=nuke)
-    packages = 'django' if django_version=='latest' else f'django=={django_version}'
-    virtualenv_path = create_virtualenv(domain, python_version, packages, nuke=nuke)
-    project_path = start_django_project(domain, virtualenv_path, nuke=nuke)
-    update_settings_file(domain, project_path)
-    run_collectstatic(virtualenv_path, project_path)
-    create_webapp(domain, python_version, virtualenv_path, project_path, nuke=nuke)
-    add_static_file_mappings(domain, project_path)
-    wsgi_file_path = '/var/www/' + domain.replace('.', '_') + '_wsgi.py'
-    update_wsgi_file(wsgi_file_path, project_path)
+    packages = 'django' if django_version == 'latest' else f'django=={django_version}'
+    virtualenv = create_virtualenv(domain, python_version, packages, nuke=nuke)
+
+    project = DjangoProject(domain, virtualenv)
+    project.run_startproject(nuke=nuke)
+    project.update_settings_file()
+    project.run_collectstatic()
+
+    create_webapp(domain, python_version, virtualenv, project.project_path, nuke=nuke)
+    add_static_file_mappings(domain, project.project_path)
+
+    project.update_wsgi_file()
+
     reload_webapp(domain)
 
     print(snakesay(f'All done!  Your site is now live at https://{domain}'))

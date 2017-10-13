@@ -11,6 +11,7 @@ class DjangoProject:
         self.domain = domain
         self.virtualenv_path = virtualenv_path
         self.project_path = Path('~/').expanduser() / self.domain
+        self.wsgi_file_path = '/var/www/' + domain.replace('.', '_') + '_wsgi.py'
 
 
     def run_startproject(self, nuke):
@@ -46,7 +47,21 @@ class DjangoProject:
             f.write(new_settings)
 
 
+    def run_collectstatic(self):
+        print(snakesay('Running collectstatic'))
+        subprocess.check_call([
+            Path(self.virtualenv_path) / 'bin/python',
+            self.project_path / 'manage.py',
+            'collectstatic',
+            '--noinput',
+        ])
 
+
+    def update_wsgi_file(self):
+        print(snakesay(f'Updating wsgi file at {self.wsgi_file_path}'))
+        template = open(Path(__file__).parent / 'wsgi_file_template.py').read()
+        with open(self.wsgi_file_path, 'w') as f:
+            f.write(template.format(project_path=self.project_path))
 
 
 
@@ -59,14 +74,9 @@ def start_django_project(domain, virtualenv_path, nuke):
 
 
 def run_collectstatic(virtualenv_path, target_folder):
-    print(snakesay('Running collectstatic'))
-
-    subprocess.check_call([
-        Path(virtualenv_path) / 'bin/python',
-        target_folder / 'manage.py',
-        'collectstatic',
-        '--noinput',
-    ])
+    project = DjangoProject('ignored', virtualenv_path)
+    project.project_path = target_folder
+    project.run_collectstatic()
 
 
 
@@ -77,9 +87,8 @@ def update_settings_file(domain, project_path):
 
 
 def update_wsgi_file(wsgi_file_path, project_path):
-    print(snakesay(f'Updating wsgi file at {wsgi_file_path}'))
-
-    template = open(Path(__file__).parent / 'wsgi_file_template.py').read()
-    with open(wsgi_file_path, 'w') as f:
-        f.write(template.format(project_path=project_path))
+    project = DjangoProject('ignored', 'ignored')
+    project.wsgi_file_path = wsgi_file_path
+    project.project_path = project_path
+    project.update_wsgi_file()
 

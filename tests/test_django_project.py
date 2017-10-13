@@ -11,11 +11,17 @@ from pythonanywhere.django_project import (
     DjangoProject,
 )
 
-class DjangoProjectTest:
+class TestDjangoProject:
 
-    def test_project_path(self, mock_subprocess, fake_home):
+    def test_project_path(self, fake_home):
         project = DjangoProject('mydomain.com', '/path/to/virtualenv')
         assert project.project_path == fake_home / 'mydomain.com'
+
+
+    def test_wsgi_file_path(self, fake_home):
+        project = DjangoProject('mydomain.com', '/path/to/virtualenv')
+        assert project.wsgi_file_path == '/var/www/mydomain_com_wsgi.py'
+
 
 
 class TestRunStartproject:
@@ -100,15 +106,29 @@ class TestUpdateSettingsFile:
 
 
 
+class TestRunCollectStatic:
+
+    def test_runs_manage_py_in_correct_virtualenv(self, mock_subprocess, fake_home):
+        domain, virtualenv = 'mydomain.com', '/path/to/virtualenv'
+        project = DjangoProject(domain, virtualenv)
+        project.run_collectstatic()
+        assert mock_subprocess.check_call.call_args == call([
+            Path(virtualenv) / 'bin/python', project.project_path / 'manage.py', 'collectstatic', '--noinput'
+        ])
+
+
+
 class TestUpdateWsgiFile:
 
     def test_updates_wsgi_file_from_template(self):
-        wsgi_file = tempfile.NamedTemporaryFile().name
+        domain, virtualenv = 'mydomain.com', '/path/to/virtualenv'
+        project = DjangoProject(domain, virtualenv)
+        project.wsgi_file_path = tempfile.NamedTemporaryFile().name
         template = open(Path(pythonanywhere.django_project.__file__).parent / 'wsgi_file_template.py').read()
 
-        update_wsgi_file(wsgi_file, '/project/path')
+        project.update_wsgi_file()
 
-        with open(wsgi_file) as f:
+        with open(project.wsgi_file_path) as f:
             contents = f.read()
-        assert contents == template.format(project_path='/project/path')
+        assert contents == template.format(project_path=project.project_path)
 

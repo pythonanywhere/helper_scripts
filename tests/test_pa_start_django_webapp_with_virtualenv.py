@@ -16,12 +16,12 @@ def mock_main_functions():
     functions = [
         'sanity_checks',
         'create_virtualenv',
-        'start_django_project',
-        'update_settings_file',
-        'run_collectstatic',
+        'DjangoProject.run_startproject',
+        'DjangoProject.update_settings_file',
+        'DjangoProject.run_collectstatic',
         'create_webapp',
         'add_static_file_mappings',
-        'update_wsgi_file',
+        'DjangoProject.update_wsgi_file',
         'reload_webapp',
     ]
     for function in functions:
@@ -41,44 +41,6 @@ def mock_main_functions():
 
 
 class TestMain:
-
-    def test_calls_all_the_right_stuff_in_order(self, mock_main_functions):
-        main('www.domain.com', 'django.version', 'python.version', nuke='nuke option')
-        assert mock_main_functions.method_calls == [
-            call.sanity_checks('www.domain.com', nuke='nuke option'),
-            call.create_virtualenv(
-                'www.domain.com', 'python.version', 'django==django.version', nuke='nuke option'
-            ),
-            call.start_django_project(
-                'www.domain.com', mock_main_functions.create_virtualenv.return_value, nuke='nuke option'
-            ),
-            call.update_settings_file(
-                'www.domain.com', mock_main_functions.start_django_project.return_value
-            ),
-            call.run_collectstatic(
-                mock_main_functions.create_virtualenv.return_value,
-                mock_main_functions.start_django_project.return_value
-            ),
-            call.create_webapp(
-                'www.domain.com',
-                'python.version',
-                mock_main_functions.create_virtualenv.return_value,
-                mock_main_functions.start_django_project.return_value,
-                nuke='nuke option',
-            ),
-            call.add_static_file_mappings(
-                'www.domain.com',
-                mock_main_functions.start_django_project.return_value
-            ),
-            call.update_wsgi_file(
-                '/var/www/www_domain_com_wsgi.py',
-                mock_main_functions.start_django_project.return_value
-            ),
-            call.reload_webapp(
-                'www.domain.com'
-            )
-        ]
-
 
     def test_domain_defaults_to_using_current_username(self, mock_main_functions):
         username = getpass.getuser()
@@ -128,7 +90,7 @@ class TestMain:
         api_responses.add(responses.POST, static_url, status=201)
 
 
-        with patch('scripts.pa_start_django_webapp_with_virtualenv.update_wsgi_file'):
+        with patch('scripts.pa_start_django_webapp_with_virtualenv.DjangoProject.update_wsgi_file'):
             main('mydomain.com', '1.9.2', '2.7', nuke=False)
 
         django_version = subprocess.check_output([
@@ -163,7 +125,7 @@ class TestMain:
         api_responses.add(responses.POST, static_files_url, status=201)
         api_responses.add(responses.POST, static_files_url, status=201)
 
-        with patch('scripts.pa_start_django_webapp_with_virtualenv.update_wsgi_file'):
+        with patch('scripts.pa_start_django_webapp_with_virtualenv.DjangoProject.update_wsgi_file'):
             main('mydomain.com', '1.9.2', '2.7', nuke=False)
 
             api_responses.add(responses.DELETE, webapp_url, status=200)
