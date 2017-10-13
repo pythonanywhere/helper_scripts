@@ -6,24 +6,37 @@ from textwrap import dedent
 from pythonanywhere.snakesay import snakesay
 
 
-def _project_folder(domain):
-    return Path('~/').expanduser() / domain
+class DjangoProject:
+    def __init__(self, domain, virtualenv_path):
+        self.domain = domain
+        self.virtualenv_path = virtualenv_path
+
+
+    @property
+    def project_folder(self):
+        return Path('~/').expanduser() / self.domain
+
+
+    def run_startproject(self, nuke):
+        print(snakesay('Starting Django project'))
+        if nuke:
+            shutil.rmtree(self.project_folder)
+        self.project_folder.mkdir()
+        subprocess.check_call([
+            Path(self.virtualenv_path) / 'bin/django-admin.py',
+            'startproject',
+            'mysite',
+            self.project_folder
+        ])
+
 
 
 
 def start_django_project(domain, virtualenv_path, nuke):
-    print(snakesay('Starting Django project'))
-    target_folder = _project_folder(domain)
-    if nuke:
-        shutil.rmtree(target_folder)
-    target_folder.mkdir()
-    subprocess.check_call([
-        Path(virtualenv_path) / 'bin/django-admin.py',
-        'startproject',
-        'mysite',
-        target_folder
-    ])
-    return target_folder
+    project = DjangoProject(domain, virtualenv_path)
+    project.run_startproject(nuke=nuke)
+    return project.project_folder
+
 
 
 

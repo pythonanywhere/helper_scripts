@@ -5,7 +5,7 @@ from textwrap import dedent
 from pythonanywhere.snakesay import snakesay
 from pythonanywhere.api import API_ENDPOINT, call_api
 from pythonanywhere.virtualenvs import _virtualenv_path
-from pythonanywhere.django_project import _project_folder
+from pythonanywhere.django_project import DjangoProject
 
 
 class SanityException(Exception):
@@ -32,7 +32,7 @@ def sanity_checks(domain, nuke):
         raise SanityException(f'You already have a webapp for {domain}.\n\nUse the --nuke option if you want to replace it.')
     if _virtualenv_path(domain).exists():
         raise SanityException(f'You already have a virtualenv for {domain}.\n\nUse the --nuke option if you want to replace it.')
-    project_folder = _project_folder(domain)
-    if project_folder.exists():
-        raise SanityException(f'You already have a project folder at {project_folder}.\n\nUse the --nuke option if you want to replace it.')
+    project = DjangoProject(domain, '')  # TODO: make non-django-specific parent class
+    if project.project_folder.exists():
+        raise SanityException(f'You already have a project folder at {project.project_folder}.\n\nUse the --nuke option if you want to replace it.')
 

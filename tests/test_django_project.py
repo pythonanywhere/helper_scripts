@@ -8,18 +8,26 @@ from pythonanywhere.django_project import (
     start_django_project,
     update_settings_file,
     update_wsgi_file,
+    DjangoProject,
 )
 
+class DjangoProjectTest:
 
-class TestStartDjangoProject:
+    def test_project_path(self, mock_subprocess, fake_home):
+        project = DjangoProject('mydomain.com', '/path/to/virtualenv')
+        assert project.project_path == fake_home / 'mydomain.com'
+
+
+class TestRunStartproject:
 
     def test_creates_folder(self, mock_subprocess, fake_home):
-        start_django_project('mydomain.com', '/path/to/virtualenv', nuke=False)
+        project = DjangoProject('mydomain.com', '/path/to/virtualenv')
+        project.run_startproject(nuke=False)
         assert (fake_home / 'mydomain.com').is_dir()
 
 
     def test_calls_startproject(self, mock_subprocess, fake_home):
-        start_django_project('mydomain.com', '/path/to/virtualenv', nuke=False)
+        DjangoProject('mydomain.com', '/path/to/virtualenv').run_startproject(nuke=False)
         assert mock_subprocess.check_call.call_args == call([
             Path('/path/to/virtualenv/bin/django-admin.py'),
             'startproject',
@@ -28,11 +36,6 @@ class TestStartDjangoProject:
         ])
 
 
-    def test_returns_project_path(self, mock_subprocess, fake_home):
-        with patch('pythonanywhere.django_project.update_settings_file'):
-            response = start_django_project('mydomain.com', '/path/to/virtualenv', nuke=False)
-        assert response == fake_home / 'mydomain.com'
-
     def test_nuke_option_deletes_directory_first(self, mock_subprocess, fake_home):
         domain = 'mydomain.com'
         (fake_home / domain).mkdir()
@@ -40,10 +43,9 @@ class TestStartDjangoProject:
         with open(old_file, 'w') as f:
             f.write('old stuff')
 
-        start_django_project(domain, '/path/to/virtualenv', nuke=True)  # should not raise
+        DjangoProject(domain, '/path/to/virtualenv').run_startproject(nuke=True)  # should not raise
 
         assert not old_file.exists()
-
 
 
 
