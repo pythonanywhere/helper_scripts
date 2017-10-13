@@ -10,11 +10,7 @@ class DjangoProject:
     def __init__(self, domain, virtualenv_path):
         self.domain = domain
         self.virtualenv_path = virtualenv_path
-
-
-    @property
-    def project_folder(self):
-        return Path('~/').expanduser() / self.domain
+        self.project_folder = Path('~/').expanduser() / self.domain
 
 
     def run_startproject(self, nuke):
