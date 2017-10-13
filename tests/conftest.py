@@ -1,6 +1,7 @@
 import os
-import getpass
+from getpass import getuser
 import pytest
+from pathlib import Path
 import shutil
 import subprocess
 import responses
@@ -8,28 +9,31 @@ import tempfile
 from unittest.mock import patch, Mock
 
 
+def _get_temp_dir():
+    return Path(tempfile.mkdtemp())
+
 
 @pytest.fixture(scope="session")
 def local_pip_cache():
-    return tempfile.mkdtemp()
+    return _get_temp_dir()
 
 
 @pytest.fixture
 def fake_home(local_pip_cache):
-    tempdir = tempfile.mkdtemp()
-    os.mkdir(os.path.join(tempdir, '.cache'))
-    os.symlink(local_pip_cache, os.path.join(tempdir, '.cache', 'pip'))
+    tempdir = _get_temp_dir()
+    cache_dir = tempdir / '.cache'
+    cache_dir.mkdir()
+    (cache_dir / 'pip').symlink_to(local_pip_cache)
 
     old_home = os.environ['HOME']
-    old_home_contents = os.listdir(old_home)
+    old_home_contents = set(Path(old_home).iterdir())
 
-    os.environ['HOME'] = tempdir
+    os.environ['HOME'] = str(tempdir)
     yield tempdir
     os.environ['HOME'] = old_home
     shutil.rmtree(tempdir)
 
-    new_home_contents = os.listdir(old_home)
-    new_stuff = set(new_home_contents) - set(old_home_contents)
+    new_stuff = set(Path(old_home).iterdir()) - old_home_contents
     if new_stuff:
         raise Exception('home mocking failed somewehere: {}, {}'.format(
             new_stuff, tempdir
@@ -38,18 +42,17 @@ def fake_home(local_pip_cache):
 
 @pytest.fixture
 def virtualenvs_folder():
-    actual_virtualenvs = '/home/{}/.virtualenvs'.format(getpass.getuser())
-    old_virtualenvs = os.listdir(actual_virtualenvs)
+    actual_virtualenvs = Path(f'/home/{getuser()}/.virtualenvs')
+    old_virtualenvs = set(Path(actual_virtualenvs).iterdir())
 
-    tempdir = tempfile.mkdtemp()
+    tempdir = _get_temp_dir()
     old_workon = os.environ['WORKON_HOME']
-    os.environ['WORKON_HOME'] = tempdir
+    os.environ['WORKON_HOME'] = str(tempdir)
     yield tempdir
     os.environ['WORKON_HOME'] = old_workon
     shutil.rmtree(tempdir)
 
-    latest_virtualenvs = os.listdir(actual_virtualenvs)
-    new_envs = set(latest_virtualenvs) - set(old_virtualenvs)
+    new_envs = set(actual_virtualenvs.iterdir()) - set(old_virtualenvs)
     if new_envs:
         raise Exception('virtualenvs path mocking failed somewehere: {}, {}'.format(
             new_envs, tempdir
@@ -58,14 +61,14 @@ def virtualenvs_folder():
 
 @pytest.fixture
 def test_virtualenv(virtualenvs_folder):
-    virtualenv_name = os.path.basename(tempfile.NamedTemporaryFile().name)
+    virtualenv_name = Path(tempfile.NamedTemporaryFile().name).name
     subprocess.check_output([
         'bash', '-c',
         'source virtualenvwrapper.sh && mkvirtualenv {} && pip install django==1.8.7'.format(
             virtualenv_name
         )
     ])
-    return os.path.join(virtualenvs_folder, virtualenv_name)
+    return virtualenvs_folder / virtualenv_name
 
 
 
