@@ -1,4 +1,3 @@
-import os
 from pythonanywhere.virtualenvs import create_virtualenv
 
 
@@ -29,7 +28,7 @@ class TestCreateVirtualenv:
 
     def test_returns_virtualenv_path(self, mock_subprocess, virtualenvs_folder):
         response = create_virtualenv('domain.com', '2.7', 'django', nuke=False)
-        assert response == os.path.join(virtualenvs_folder, 'domain.com')
+        assert response == virtualenvs_folder / 'domain.com'
 
 
     def test_nuke_option_deletes_virtualenv_first(self, mock_subprocess, virtualenvs_folder):

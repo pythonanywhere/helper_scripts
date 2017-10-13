@@ -30,9 +30,9 @@ def sanity_checks(domain, nuke):
     response = call_api(url, 'get')
     if response.status_code == 200:
         raise SanityException(f'You already have a webapp for {domain}.\n\nUse the --nuke option if you want to replace it.')
-    if os.path.exists(_virtualenv_path(domain)):
+    if _virtualenv_path(domain).exists():
         raise SanityException(f'You already have a virtualenv for {domain}.\n\nUse the --nuke option if you want to replace it.')
     project_folder = _project_folder(domain)
-    if os.path.exists(project_folder):
+    if project_folder.exists():
         raise SanityException(f'You already have a project folder at {project_folder}.\n\nUse the --nuke option if you want to replace it.')
 

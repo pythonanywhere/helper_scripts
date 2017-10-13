@@ -1,5 +1,6 @@
 import getpass
 import os
+from pathlib import Path
 import requests
 
 from pythonanywhere.snakesay import snakesay
@@ -58,10 +59,10 @@ def add_static_file_mappings(domain, project_path):
 
     url = API_ENDPOINT.format(username=getpass.getuser()) + domain + '/static_files/'
     call_api(url, 'post', json=dict(
-        url='/static/', path=os.path.join(project_path, 'static')
+        url='/static/', path=str(Path(project_path) / 'static'),
     ))
     call_api(url, 'post', json=dict(
-        url='/media/', path=os.path.join(project_path, 'media')
+        url='/media/', path=str(Path(project_path) / 'media'),
     ))
 
 

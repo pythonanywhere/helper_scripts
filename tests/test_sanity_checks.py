@@ -1,6 +1,5 @@
 import getpass
 import json
-import os
 import pytest
 import responses
 
@@ -42,7 +41,7 @@ class TestSanityChecks:
 
 
     def test_raises_if_virtualenv_exists(self, api_token, api_responses, virtualenvs_folder):
-        os.mkdir(os.path.join(virtualenvs_folder, self.domain))
+        (virtualenvs_folder / self.domain).mkdir()
         api_responses.add(responses.GET, self.expected_url, status=404)
 
         with pytest.raises(SanityException) as e:
@@ -54,7 +53,7 @@ class TestSanityChecks:
 
     def test_raises_if_project_path_exists(self, api_token, api_responses, fake_home):
         api_responses.add(responses.GET, self.expected_url, status=404)
-        os.mkdir(os.path.join(fake_home, self.domain))
+        (fake_home / self.domain).mkdir()
 
         with pytest.raises(SanityException) as e:
             sanity_checks(self.domain, nuke=False)  # should not raise
@@ -68,8 +67,8 @@ class TestSanityChecks:
     def test_nuke_option_overrides_all_but_token_check(
         self, api_token, api_responses, fake_home, virtualenvs_folder
     ):
-        os.mkdir(os.path.join(fake_home, self.domain))
-        os.mkdir(os.path.join(virtualenvs_folder, self.domain))
+        (fake_home / self.domain).mkdir()
+        (virtualenvs_folder / self.domain).mkdir()
 
         sanity_checks(self.domain, nuke=True)  # should not raise
 

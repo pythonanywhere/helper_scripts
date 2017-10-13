@@ -1,11 +1,12 @@
 import os
+from pathlib import Path
 import subprocess
 
 from pythonanywhere.snakesay import snakesay
 
 
 def _virtualenv_path(domain):
-    return os.path.join(os.environ['WORKON_HOME'], domain)
+    return Path(os.environ['WORKON_HOME']) / domain
 
 
 def create_virtualenv(name, python_version, packages, nuke):

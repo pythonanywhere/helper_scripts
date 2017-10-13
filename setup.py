@@ -1,10 +1,10 @@
-import os
+from pathlib import Path
 from setuptools import setup
 
-here = os.path.abspath(os.path.dirname(__file__))
+here = Path(__file__).parent
 
 # Get the long description from the README file
-with open(os.path.join(here, 'README.md'), encoding='utf-8') as f:
+with open(here / 'README.md', encoding='utf-8') as f:
     long_description = f.read()
 
 setup(
