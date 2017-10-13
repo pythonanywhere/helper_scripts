@@ -167,11 +167,13 @@ class TestMain:
             main('mydomain.com', '1.9.2', '2.7', nuke=False)
 
             api_responses.add(responses.DELETE, webapp_url, status=200)
-            api_responses.add(responses.POST, webapps_url, status=201, body=json.dumps({'status': 'OK'}))
-            api_responses.add(responses.PATCH, webapp_url, status=200)
-            api_responses.add(responses.POST, reload_url, status=200, body=json.dumps({'status': 'OK'}))
-            api_responses.add(responses.POST, static_files_url, status=201)
-            api_responses.add(responses.POST, static_files_url, status=201)
 
-            main('mydomain.com', '1.9.2', '2.7', nuke=True)
+            main('mydomain.com', '1.11.3', '3.6', nuke=True)
+
+        django_version = subprocess.check_output([
+            os.path.join(virtualenvs_folder, 'mydomain.com/bin/python'),
+            '-c'
+            'import django; print(django.get_version())'
+        ]).decode().strip()
+        assert django_version == '1.11.3'
 
