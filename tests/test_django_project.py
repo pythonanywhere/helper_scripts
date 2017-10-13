@@ -52,9 +52,10 @@ class TestRunStartproject:
 class TestUpdateSettingsFile:
 
     def test_adds_STATIC_and_MEDIA_config_to_settings(self):
-        test_folder = Path(tempfile.mkdtemp())
-        (test_folder / 'mysite').mkdir(parents=True)
-        with open(test_folder / 'mysite/settings.py', 'w') as f:
+        project = DjangoProject('mydomain.com', 'ignored')
+        project.project_path = Path(tempfile.mkdtemp())
+        (project.project_path / 'mysite').mkdir(parents=True)
+        with open(project.project_path / 'mysite/settings.py', 'w') as f:
             f.write(dedent(
                 """
                 # settings file
@@ -63,8 +64,9 @@ class TestUpdateSettingsFile:
                 """
             ))
 
-        update_settings_file('mydomain.com', test_folder)
-        with open(test_folder / 'mysite/settings.py') as f:
+        project.update_settings_file()
+
+        with open(project.project_path / 'mysite/settings.py') as f:
             contents = f.read()
 
         lines = contents.split('\n')
@@ -75,9 +77,10 @@ class TestUpdateSettingsFile:
 
 
     def test_adds_domain_to_ALLOWED_HOSTS(self):
-        test_folder = Path(tempfile.mkdtemp())
-        (test_folder / 'mysite').mkdir(parents=True)
-        with open(test_folder / 'mysite/settings.py', 'w') as f:
+        project = DjangoProject('mydomain.com', 'ignored')
+        project.project_path = Path(tempfile.mkdtemp())
+        (project.project_path / 'mysite').mkdir(parents=True)
+        with open(project.project_path / 'mysite/settings.py', 'w') as f:
             f.write(dedent(
                 """
                 # settings file
@@ -86,8 +89,9 @@ class TestUpdateSettingsFile:
                 """
             ))
 
-        update_settings_file('mydomain.com', test_folder)
-        with open(test_folder / 'mysite/settings.py') as f:
+        project.update_settings_file()
+
+        with open(project.project_path / 'mysite/settings.py') as f:
             contents = f.read()
 
         lines = contents.split('\n')

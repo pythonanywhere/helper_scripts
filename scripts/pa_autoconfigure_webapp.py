@@ -40,13 +40,13 @@ def main(repo_url, domain, python_version, nuke):
         domain = f'{username}.pythonanywhere.com'
 
     sanity_checks(domain, nuke=nuke)
-    project_folder = download_repo(repo_url, domain, nuke=nuke)
+    project_path = download_repo(repo_url, domain, nuke=nuke)
     virtualenv = create_virtualenv(domain, python_version, nuke=nuke)
 
     # update_settings_file(domain, project_path)
     # run_collectstatic(virtualenv_path, project_path)
 
-    create_webapp(domain, python_version, virtualenv, project_folder, nuke=nuke)
+    create_webapp(domain, python_version, virtualenv, project_path, nuke=nuke)
 
     # create_webapp(domain, python_version, virtualenv_path, project_path, nuke=nuke)
     # add_static_file_mappings(domain, project_path)
