@@ -20,14 +20,17 @@ from docopt import docopt
 import getpass
 from pathlib import Path
 import subprocess
+import shutil
 
 from pythonanywhere.sanity_checks import sanity_checks
 from pythonanywhere.virtualenvs import create_virtualenv
 from pythonanywhere.api import create_webapp
 
 
-def download_repo(repo, domain):
+def download_repo(repo, domain, nuke):
     target = Path('~').expanduser() / domain
+    if nuke:
+        shutil.rmtree(target)
     subprocess.check_call(['git', 'clone', repo, target])
     return target
 
@@ -38,7 +41,7 @@ def main(repo_url, domain, python_version, nuke):
         domain = f'{username}.pythonanywhere.com'
 
     sanity_checks(domain, nuke=nuke)
-    project_folder = download_repo(repo_url, domain)
+    project_folder = download_repo(repo_url, domain, nuke=nuke)
     virtualenv = create_virtualenv(domain, python_version, nuke=nuke)
     create_webapp(domain, python_version, virtualenv, project_folder, nuke=nuke)
 

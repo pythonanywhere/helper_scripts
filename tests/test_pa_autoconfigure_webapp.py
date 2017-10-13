@@ -43,7 +43,7 @@ class TestMain:
         main('https://github.com/pythonanywhere.com/example-django-project.git', 'www.domain.com', 'python.version', nuke='nuke option')
         assert mock_main_functions.method_calls[:4] == [
             call.sanity_checks('www.domain.com', nuke='nuke option'),
-            call.download_repo('https://github.com/pythonanywhere.com/example-django-project.git', 'www.domain.com'),
+            call.download_repo('https://github.com/pythonanywhere.com/example-django-project.git', 'www.domain.com', nuke='nuke option'),
             call.create_virtualenv(
                 'www.domain.com', 'python.version', nuke='nuke option'
             ),
@@ -72,21 +72,31 @@ class TestMain:
                 'username1.pythonanywhere.com', nuke='nukey'
             )
 
-class TestDownloadRepo:
 
-    def test_calls_git_subprocess(self, mock_subprocess, fake_home):
-        repo = 'https://gist.github.com/hjwp/4173bcface139beb7632ec93726f91ea'
-        new_folder = download_repo(repo, 'a-domain.com')
-        assert new_folder == Path(fake_home) / 'a-domain.com'
-        assert mock_subprocess.check_call.call_args == call(
-            ['git', 'clone', repo, new_folder]
-        )
+
+class TestDownloadRepo:
 
     @pytest.mark.slowtest
     def test_actually_downloads_repo(self, fake_home):
-        new_folder = download_repo('https://gist.github.com/hjwp/4173bcface139beb7632ec93726f91ea', 'a-domain.com')
+        new_folder = download_repo('https://gist.github.com/hjwp/4173bcface139beb7632ec93726f91ea', 'a-domain.com', nuke=False)
         print(os.listdir(fake_home))
         assert new_folder.is_dir()
         assert 'file1.py' in os.listdir(new_folder)
         assert 'file2.py' in os.listdir(new_folder)
+
+
+    def test_calls_git_subprocess(self, mock_subprocess, fake_home):
+        new_folder = download_repo('repo', 'a-domain.com', nuke=False)
+        assert new_folder == Path(fake_home) / 'a-domain.com'
+        assert mock_subprocess.check_call.call_args == call(
+            ['git', 'clone', 'repo', new_folder]
+        )
+
+
+    def test_nuke_option(self, mock_subprocess, fake_home):
+        mock_subprocess.check_call.side_effect = lambda *_, **__: Path(fake_home / 'a-domain.com').mkdir()
+        Path(fake_home / 'a-domain.com').mkdir()
+        Path(fake_home / 'a-domain.com' / 'old-thing.txt').touch()
+        new_folder = download_repo('repo', 'a-domain.com', nuke=True)
+        assert 'old-thing.txt' not in new_folder.iterdir()
 
