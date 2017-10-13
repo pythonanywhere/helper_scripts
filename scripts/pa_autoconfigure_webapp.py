@@ -34,8 +34,9 @@ def main(repo_url, domain, python_version, nuke):
         domain = f'{username}.pythonanywhere.com'
 
     sanity_checks(domain, nuke=nuke)
-    download_repo(repo_url)
-    create_virtualenv(domain, python_version, nuke=nuke)
+    project_folder = download_repo(repo_url)
+    virtualenv = create_virtualenv(domain, python_version, nuke=nuke)
+    create_webapp(domain, python_version, virtualenv, project_folder, nuke=nuke)
 
 
 

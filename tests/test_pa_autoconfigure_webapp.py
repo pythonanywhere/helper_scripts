@@ -13,7 +13,7 @@ def mock_main_functions():
         'sanity_checks',
         'download_repo',
         'create_virtualenv',
-        # 'create_webapp',
+        'create_webapp',
         # 'run_collectstatic',
         # 'add_static_file_mappings',
         # 'update_wsgi_file',
@@ -37,13 +37,20 @@ def mock_main_functions():
 
 class TestMain:
 
-    def test_sanity_checks_then_downloads_repo_and_finds_virtualenv(self, mock_main_functions):
+    def test_sanity_checks_then_downloads_repo_creates_virtualenv_and_webapp(self, mock_main_functions):
         main('https://github.com/pythonanywhere.com/example-django-project.git', 'www.domain.com', 'python.version', nuke='nuke option')
-        assert mock_main_functions.method_calls[:3] == [
+        assert mock_main_functions.method_calls[:4] == [
             call.sanity_checks('www.domain.com', nuke='nuke option'),
             call.download_repo('https://github.com/pythonanywhere.com/example-django-project.git'),
             call.create_virtualenv(
                 'www.domain.com', 'python.version', nuke='nuke option'
+            ),
+            call.create_webapp(
+                'www.domain.com',
+                'python.version',
+                mock_main_functions.create_virtualenv.return_value,
+                mock_main_functions.download_repo.return_value,
+                nuke='nuke option'
             ),
         ]
 
