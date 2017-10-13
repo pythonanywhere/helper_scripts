@@ -1,15 +1,12 @@
-from unittest.mock import call, patch
+from unittest.mock import call
 from pathlib import Path
 import tempfile
 from textwrap import dedent
 
 import pythonanywhere.django_project
-from pythonanywhere.django_project import (
-    start_django_project,
-    update_settings_file,
-    update_wsgi_file,
-    DjangoProject,
-)
+from pythonanywhere.django_project import DjangoProject
+
+
 
 class TestDjangoProject:
 

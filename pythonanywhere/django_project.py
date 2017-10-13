@@ -63,32 +63,3 @@ class DjangoProject:
         with open(self.wsgi_file_path, 'w') as f:
             f.write(template.format(project_path=self.project_path))
 
-
-
-def start_django_project(domain, virtualenv_path, nuke):
-    project = DjangoProject(domain, virtualenv_path)
-    project.run_startproject(nuke=nuke)
-    return project.project_path
-
-
-
-
-def run_collectstatic(virtualenv_path, target_folder):
-    project = DjangoProject('ignored', virtualenv_path)
-    project.project_path = target_folder
-    project.run_collectstatic()
-
-
-
-def update_settings_file(domain, project_path):
-    project = DjangoProject(domain, '')
-    project.update_settings_file()
-
-
-
-def update_wsgi_file(wsgi_file_path, project_path):
-    project = DjangoProject('ignored', 'ignored')
-    project.wsgi_file_path = wsgi_file_path
-    project.project_path = project_path
-    project.update_wsgi_file()
-
