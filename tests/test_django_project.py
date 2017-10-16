@@ -216,11 +216,19 @@ def non_nested_submodule():
         cwd=submodule_path
     )
     yield submodule_path
+    subprocess.check_call(['git', 'submodule', 'update', '--init', '--recursive'])
+
+
+@pytest.fixture
+def more_nested_submodule():
+    subprocess.check_call(['git', 'submodule', 'update', '--init', '--recursive'])
+    submodule_path = Path(__file__).parents[1] / 'submodules' / 'example-django-project'
     subprocess.check_call(
-        ['git', 'checkout', 'master'],
+        ['git', 'checkout', 'morenested'],
         cwd=submodule_path
     )
-
+    yield submodule_path
+    subprocess.check_call(['git', 'submodule', 'update', '--init', '--recursive'])
 
 
 
@@ -232,6 +240,20 @@ class TestFindDjangoFiles:
         expected_settings_path = project.project_path / 'myproject/settings.py'
         assert expected_settings_path.exists()
         expected_manage_py = project.project_path / 'manage.py'
+        assert expected_manage_py.exists()
+
+        project.find_django_files()
+
+        assert project.settings_path == expected_settings_path
+        assert project.manage_py_path == expected_manage_py
+
+
+    def test_nested(self, fake_home, more_nested_submodule):
+        project = DjangoProject('mydomain.com')
+        shutil.copytree(more_nested_submodule, project.project_path)
+        expected_settings_path = project.project_path / 'mysite/mysite/settings.py'
+        assert expected_settings_path.exists()
+        expected_manage_py = project.project_path / 'mysite/manage.py'
         assert expected_manage_py.exists()
 
         project.find_django_files()
@@ -268,6 +290,7 @@ class TestFindDjangoFiles:
             project.find_django_files()
 
         assert 'Could not find your manage.py' in str(e.value)
+
 
 
 class TestUpdateSettingsFile:
