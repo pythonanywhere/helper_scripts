@@ -78,6 +78,21 @@ class TestSanityChecks:
 
 
 
+class TestDetectDjangoVersion:
+
+    def test_is_django_by_default(self, fake_home):
+        project = DjangoProject('mydomain.com')
+        assert project.detect_django_version() == 'django'
+
+
+    def test_if_requirements_txt_exists(self, fake_home):
+        project = DjangoProject('mydomain.com')
+        project.project_path.mkdir()
+        requirements_txt = project.project_path / 'requirements.txt'
+        requirements_txt.touch()
+        assert project.detect_django_version() == f'-r {requirements_txt.resolve()}'
+
+
 class TestCreateVirtualenv:
 
     def test_calls_create_virtualenv(self):
@@ -95,6 +110,16 @@ class TestCreateVirtualenv:
             project.create_virtualenv('python.version', django_version='latest', nuke='nuke option')
         assert mock_create_virtualenv.call_args == call(
             project.domain, 'python.version', 'django', nuke='nuke option'
+        )
+
+
+    def test_uses_detect_if_django_version_not_specified(self):
+        project = DjangoProject('mydomain.com')
+        project.detect_django_version = Mock()
+        with patch('pythonanywhere.django_project.create_virtualenv') as mock_create_virtualenv:
+            project.create_virtualenv('python.version', nuke='nuke option')
+        assert mock_create_virtualenv.call_args == call(
+            project.domain, 'python.version', project.detect_django_version.return_value, nuke='nuke option'
         )
 
 

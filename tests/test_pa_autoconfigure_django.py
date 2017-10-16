@@ -42,7 +42,7 @@ class TestMain:
         ]
         assert mock_django_project.method_calls == [
             call.sanity_checks(nuke='nuke option'),
-            call.create_virtualenv('python.version', 'django', nuke='nuke option'),
+            call.create_virtualenv('python.version', nuke='nuke option'),
             call.update_settings_file(),
             call.run_collectstatic(),
             call.create_webapp(nuke='nuke option'),
@@ -97,7 +97,7 @@ class TestDownloadRepo:
 
 
 def test_todos():
-    assert not 'checking for a requirements.txt'
-    assert not 'existing-project sanity checks eg settings.py not found'
+    assert not 'move download_repo onto djangoproject'
+    assert not 'existing-project sanity checks eg settings.py not found, requirements empty'
     assert not 'database stuff?'
 
