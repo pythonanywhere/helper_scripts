@@ -88,16 +88,16 @@ class Webapp:
 
 
 
-def add_static_file_mappings(domain, project_path):
-    print(snakesay('Adding static files mappings for /static/ and /media/'))
+    def add_default_static_files_mappings(self, project_path):
+        print(snakesay('Adding static files mappings for /static/ and /media/'))
 
-    url = API_ENDPOINT.format(username=getpass.getuser()) + domain + '/static_files/'
-    call_api(url, 'post', json=dict(
-        url='/static/', path=str(Path(project_path) / 'static'),
-    ))
-    call_api(url, 'post', json=dict(
-        url='/media/', path=str(Path(project_path) / 'media'),
-    ))
+        url = API_ENDPOINT.format(username=getpass.getuser()) + self.domain + '/static_files/'
+        call_api(url, 'post', json=dict(
+            url='/static/', path=str(Path(project_path) / 'static'),
+        ))
+        call_api(url, 'post', json=dict(
+            url='/media/', path=str(Path(project_path) / 'media'),
+        ))
 
 
 

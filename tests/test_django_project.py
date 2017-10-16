@@ -225,6 +225,7 @@ class TestUpdateWsgiFile:
         assert contents == template.format(project_path=project.project_path)
 
 
+
 class TestCreateWebapp:
 
     def test_calls_webapp_create(self):
@@ -237,4 +238,15 @@ class TestCreateWebapp:
             'python.version', project.virtualenv_path, project.project_path, nuke='nuke option'
         )
 
+
+
+class TestAddStaticFilesMappings:
+
+    def test_calls_webapp_add_default_static_files_mappings(self):
+        project = DjangoProject('mydomain.com')
+        project.webapp.add_default_static_files_mappings = Mock()
+        project.add_static_file_mappings()
+        assert project.webapp.add_default_static_files_mappings.call_args == call(
+            project.project_path,
+        )
 

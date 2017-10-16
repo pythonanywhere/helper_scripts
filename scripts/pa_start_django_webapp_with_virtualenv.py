@@ -17,7 +17,6 @@ import getpass
 
 from pythonanywhere.snakesay import snakesay
 from pythonanywhere.api import (
-    add_static_file_mappings,
     reload_webapp,
 )
 
@@ -36,7 +35,7 @@ def main(domain, django_version, python_version, nuke):
     project.update_settings_file()
     project.run_collectstatic()
     project.create_webapp(nuke=nuke)
-    add_static_file_mappings(domain, project.project_path)
+    project.add_static_file_mappings()
 
     project.update_wsgi_file()
 

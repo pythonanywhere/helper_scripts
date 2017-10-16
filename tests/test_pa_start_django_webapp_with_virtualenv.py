@@ -15,7 +15,6 @@ def mock_main_functions():
     patchers = []
     functions = [
         'DjangoProject',
-        'add_static_file_mappings',
         'reload_webapp',
     ]
     for function in functions:
@@ -41,7 +40,6 @@ class TestMain:
         mock_django_project = mock_main_functions.DjangoProject.return_value
         assert mock_main_functions.method_calls == [
             call.DjangoProject('www.domain.com'),
-            call.add_static_file_mappings('www.domain.com', mock_django_project.project_path),
             call.reload_webapp('www.domain.com')
         ]
         assert mock_django_project.method_calls == [
@@ -51,6 +49,7 @@ class TestMain:
             call.update_settings_file(),
             call.run_collectstatic(),
             call.create_webapp(nuke='nuke option'),
+            call.add_static_file_mappings(),
             call.update_wsgi_file(),
         ]
 

@@ -43,8 +43,6 @@ def main(repo_url, domain, python_version, nuke):
     project = DjangoProject(domain)
     project.sanity_checks(nuke=nuke)
     project.create_virtualenv(python_version, 'django', nuke=nuke)
-
-
     project.update_settings_file()
     project.run_collectstatic()
     project.create_webapp(nuke=nuke)

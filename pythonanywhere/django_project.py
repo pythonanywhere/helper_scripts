@@ -92,3 +92,8 @@ class DjangoProject:
     def create_webapp(self, nuke):
         self.webapp.create(self.python_version, self.virtualenv_path, self.project_path, nuke=nuke)
 
+
+    def add_static_file_mappings(self):
+        self.webapp.add_default_static_files_mappings(self.project_path)
+
+

@@ -9,7 +9,6 @@ from pythonanywhere.api import (
     PYTHON_VERSIONS,
     AuthenticationError,
     Webapp,
-    add_static_file_mappings,
     call_api,
     reload_webapp,
 )
@@ -186,14 +185,14 @@ class TestCreateWebapp:
 
 
 
-class TestAddStaticFilesMapping:
+class TestAddDefaultStaticFilesMapping:
 
     def test_does_two_posts_to_static_files_endpoint(self, api_token, api_responses):
         expected_url = API_ENDPOINT.format(username=getpass.getuser()) + 'mydomain.com/static_files/'
         api_responses.add(responses.POST, expected_url, status=201)
         api_responses.add(responses.POST, expected_url, status=201)
 
-        add_static_file_mappings('mydomain.com', '/project/path')
+        Webapp('mydomain.com').add_default_static_files_mappings('/project/path')
 
         post1 = api_responses.calls[0]
         assert post1.request.url == expected_url
