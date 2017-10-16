@@ -9,38 +9,14 @@ import subprocess
 from pythonanywhere.api import API_ENDPOINT
 from scripts.pa_start_django_webapp_with_virtualenv import main
 
-@pytest.fixture
-def mock_main_functions():
-    mocks = Mock()
-    patchers = []
-    functions = [
-        'DjangoProject',
-    ]
-    for function in functions:
-        mock = getattr(mocks, function)
-        patcher = patch(
-            'scripts.pa_start_django_webapp_with_virtualenv.{}'.format(function),
-            mock
-        )
-        patchers.append(patcher)
-        patcher.start()
-
-    yield mocks
-
-    for patcher in patchers:
-        patcher.stop()
-
-
 
 class TestMain:
 
-    def test_calls_all_stuff_in_right_order(self, mock_main_functions):
-        main('www.domain.com', 'django.version', 'python.version', nuke='nuke option')
-        mock_django_project = mock_main_functions.DjangoProject.return_value
-        assert mock_main_functions.method_calls == [
-            call.DjangoProject('www.domain.com'),
-        ]
-        assert mock_django_project.method_calls == [
+    def test_calls_all_stuff_in_right_order(self):
+        with patch('scripts.pa_start_django_webapp_with_virtualenv.DjangoProject') as mock_DjangoProject:
+            main('www.domain.com', 'django.version', 'python.version', nuke='nuke option')
+        assert mock_DjangoProject.call_args == call('www.domain.com')
+        assert mock_DjangoProject.return_value.method_calls == [
             call.sanity_checks(nuke='nuke option'),
             call.create_virtualenv('python.version', 'django.version', nuke='nuke option'),
             call.run_startproject(nuke='nuke option'),
@@ -53,21 +29,19 @@ class TestMain:
         ]
 
 
-    def test_domain_defaults_to_using_current_username(self, mock_main_functions):
+    def test_domain_defaults_to_using_current_username(self):
         username = getpass.getuser()
-        main('your-username.pythonanywhere.com', 'django.version', 'python.version', nuke=False)
-        assert mock_main_functions.DjangoProject.call_args == call(
-            username + '.pythonanywhere.com'
-        )
+        with patch('scripts.pa_start_django_webapp_with_virtualenv.DjangoProject') as mock_DjangoProject:
+            main('your-username.pythonanywhere.com', 'django.version', 'python.version', nuke=False)
+        assert mock_DjangoProject.call_args == call(username + '.pythonanywhere.com')
 
 
-    def test_lowercases_username(self, mock_main_functions):
+    def test_lowercases_username(self):
         with patch('scripts.pa_start_django_webapp_with_virtualenv.getpass') as mock_getpass:
             mock_getpass.getuser.return_value = 'UserName1'
-            main('your-username.pythonanywhere.com', 'django.version', 'python.version', 'nukey')
-            assert mock_main_functions.DjangoProject.call_args == call(
-                'username1.pythonanywhere.com'
-            )
+            with patch('scripts.pa_start_django_webapp_with_virtualenv.DjangoProject') as mock_DjangoProject:
+                main('your-username.pythonanywhere.com', 'django.version', 'python.version', 'nukey')
+            assert mock_DjangoProject.call_args == call('username1.pythonanywhere.com')
 
 
     @pytest.mark.slowtest
