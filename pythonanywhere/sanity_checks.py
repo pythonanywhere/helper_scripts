@@ -32,7 +32,7 @@ def sanity_checks(domain, nuke):
         raise SanityException(f'You already have a webapp for {domain}.\n\nUse the --nuke option if you want to replace it.')
     if _virtualenv_path(domain).exists():
         raise SanityException(f'You already have a virtualenv for {domain}.\n\nUse the --nuke option if you want to replace it.')
-    project = DjangoProject(domain, '')  # TODO: make non-django-specific parent class
+    project = DjangoProject(domain)  # TODO: make non-django-specific parent class
     if project.project_path.exists():
         raise SanityException(f'You already have a project folder at {project.project_path}.\n\nUse the --nuke option if you want to replace it.')
 

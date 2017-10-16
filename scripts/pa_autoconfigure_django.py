@@ -47,7 +47,8 @@ def main(repo_url, domain, python_version, nuke):
 
     create_webapp(domain, python_version, virtualenv, project_path, nuke=nuke)
 
-    project = DjangoProject(domain, virtualenv)
+    project = DjangoProject(domain)
+    project.virtualenv = virtualenv
     project.update_wsgi_file()
     project.update_settings_file()
     project.run_collectstatic()

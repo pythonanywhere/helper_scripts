@@ -35,7 +35,8 @@ def main(domain, django_version, python_version, nuke):
     packages = 'django' if django_version == 'latest' else f'django=={django_version}'
     virtualenv = create_virtualenv(domain, python_version, packages, nuke=nuke)
 
-    project = DjangoProject(domain, virtualenv)
+    project = DjangoProject(domain)
+    project.virtualenv_path = virtualenv
     project.run_startproject(nuke=nuke)
     project.update_settings_file()
     project.run_collectstatic()

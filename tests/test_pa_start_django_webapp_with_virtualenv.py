@@ -14,14 +14,11 @@ def mock_main_functions():
     mocks = Mock()
     patchers = []
     functions = [
+        'DjangoProject',
         'sanity_checks',
         'create_virtualenv',
-        'DjangoProject.run_startproject',
-        'DjangoProject.update_settings_file',
-        'DjangoProject.run_collectstatic',
         'create_webapp',
         'add_static_file_mappings',
-        'DjangoProject.update_wsgi_file',
         'reload_webapp',
     ]
     for function in functions:
@@ -41,6 +38,33 @@ def mock_main_functions():
 
 
 class TestMain:
+
+    def test_calls_all_stuff_in_right_order(self, mock_main_functions):
+        main('www.domain.com', 'django.version', 'python.version', nuke='nuke option')
+        mock_django_project = mock_main_functions.DjangoProject.return_value
+        assert mock_main_functions.method_calls == [
+            call.sanity_checks('www.domain.com', nuke='nuke option'),
+            call.create_virtualenv(
+                'www.domain.com', 'python.version', 'django==django.version', nuke='nuke option'
+            ),
+            call.DjangoProject('www.domain.com'),
+            call.create_webapp(
+                'www.domain.com',
+                'python.version',
+                mock_main_functions.create_virtualenv.return_value,
+                mock_django_project.project_path,
+                nuke='nuke option'
+            ),
+            call.add_static_file_mappings('www.domain.com', mock_django_project.project_path),
+            call.reload_webapp('www.domain.com')
+        ]
+        assert mock_django_project.method_calls == [
+            call.run_startproject(nuke='nuke option'),
+            call.update_settings_file(),
+            call.run_collectstatic(),
+            call.update_wsgi_file(),
+        ]
+
 
     def test_domain_defaults_to_using_current_username(self, mock_main_functions):
         username = getpass.getuser()

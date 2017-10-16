@@ -40,6 +40,7 @@ class TestMain:
 
     def test_calls_all_stuff_in_right_order(self, mock_main_functions):
         main('https://github.com/pythonanywhere.com/example-django-project.git', 'www.domain.com', 'python.version', nuke='nuke option')
+        mock_django_project = mock_main_functions.DjangoProject.return_value
         assert mock_main_functions.method_calls == [
             call.sanity_checks('www.domain.com', nuke='nuke option'),
             call.download_repo('https://github.com/pythonanywhere.com/example-django-project.git', 'www.domain.com', nuke='nuke option'),
@@ -53,9 +54,9 @@ class TestMain:
                 mock_main_functions.download_repo.return_value,
                 nuke='nuke option'
             ),
-            call.DjangoProject('www.domain.com', mock_main_functions.create_virtualenv.return_value),
+            call.DjangoProject('www.domain.com'),
         ]
-        assert mock_main_functions.DjangoProject.return_value.method_calls == [
+        assert mock_django_project.method_calls == [
             call.update_wsgi_file(),
             call.update_settings_file(),
             call.run_collectstatic(),

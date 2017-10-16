@@ -7,9 +7,9 @@ from pythonanywhere.snakesay import snakesay
 
 
 class DjangoProject:
-    def __init__(self, domain, virtualenv_path):
+
+    def __init__(self, domain):
         self.domain = domain
-        self.virtualenv_path = virtualenv_path
         self.project_path = Path('~/').expanduser() / self.domain
         self.wsgi_file_path = '/var/www/' + domain.replace('.', '_') + '_wsgi.py'
 

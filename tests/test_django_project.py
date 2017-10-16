@@ -11,12 +11,12 @@ from pythonanywhere.django_project import DjangoProject
 class TestDjangoProject:
 
     def test_project_path(self, fake_home):
-        project = DjangoProject('mydomain.com', '/path/to/virtualenv')
+        project = DjangoProject('mydomain.com')
         assert project.project_path == fake_home / 'mydomain.com'
 
 
     def test_wsgi_file_path(self, fake_home):
-        project = DjangoProject('mydomain.com', '/path/to/virtualenv')
+        project = DjangoProject('mydomain.com')
         assert project.wsgi_file_path == '/var/www/mydomain_com_wsgi.py'
 
 
@@ -24,7 +24,7 @@ class TestDjangoProject:
 class TestCreateVirtualenv:
 
     def xtest_calls_create_virtualenv_with_latest_django_by_default(self):
-        project = DjangoProject('mydomain.com', '/path/to/virtualenv')
+        project = DjangoProject('mydomain.com')
         with patch('pythonanywhere.django_project.create_virtualenv') as mock_create_virtualenv:
             project.create_virtualenv()
         assert mock_create_virtualenv.call_args == call(
@@ -35,13 +35,16 @@ class TestCreateVirtualenv:
 class TestRunStartproject:
 
     def test_creates_folder(self, mock_subprocess, fake_home):
-        project = DjangoProject('mydomain.com', '/path/to/virtualenv')
+        project = DjangoProject('mydomain.com')
+        project.virtualenv_path = '/path/to/virtualenv'
         project.run_startproject(nuke=False)
         assert (fake_home / 'mydomain.com').is_dir()
 
 
     def test_calls_startproject(self, mock_subprocess, fake_home):
-        DjangoProject('mydomain.com', '/path/to/virtualenv').run_startproject(nuke=False)
+        project = DjangoProject('mydomain.com')
+        project.virtualenv_path = '/path/to/virtualenv'
+        project.run_startproject(nuke=False)
         assert mock_subprocess.check_call.call_args == call([
             Path('/path/to/virtualenv/bin/django-admin.py'),
             'startproject',
@@ -51,13 +54,14 @@ class TestRunStartproject:
 
 
     def test_nuke_option_deletes_directory_first(self, mock_subprocess, fake_home):
-        domain = 'mydomain.com'
-        (fake_home / domain).mkdir()
-        old_file = fake_home / domain / 'old_file.py'
+        project = DjangoProject('mydomain.com')
+        project.virtualenv_path = '/path/to/virtualenv'
+        (fake_home / project.domain).mkdir()
+        old_file = fake_home / project.domain / 'old_file.py'
         with open(old_file, 'w') as f:
             f.write('old stuff')
 
-        DjangoProject(domain, '/path/to/virtualenv').run_startproject(nuke=True)  # should not raise
+        project.run_startproject(nuke=True)  # should not raise
 
         assert not old_file.exists()
 
@@ -66,7 +70,7 @@ class TestRunStartproject:
 class TestUpdateSettingsFile:
 
     def test_adds_STATIC_and_MEDIA_config_to_settings(self):
-        project = DjangoProject('mydomain.com', 'ignored')
+        project = DjangoProject('mydomain.com')
         project.project_path = Path(tempfile.mkdtemp())
         (project.project_path / 'mysite').mkdir(parents=True)
         with open(project.project_path / 'mysite/settings.py', 'w') as f:
@@ -91,7 +95,7 @@ class TestUpdateSettingsFile:
 
 
     def test_adds_domain_to_ALLOWED_HOSTS(self):
-        project = DjangoProject('mydomain.com', 'ignored')
+        project = DjangoProject('mydomain.com')
         project.project_path = Path(tempfile.mkdtemp())
         (project.project_path / 'mysite').mkdir(parents=True)
         with open(project.project_path / 'mysite/settings.py', 'w') as f:
@@ -117,11 +121,11 @@ class TestUpdateSettingsFile:
 class TestRunCollectStatic:
 
     def test_runs_manage_py_in_correct_virtualenv(self, mock_subprocess, fake_home):
-        domain, virtualenv = 'mydomain.com', '/path/to/virtualenv'
-        project = DjangoProject(domain, virtualenv)
+        project = DjangoProject('mydomain.com')
+        project.virtualenv_path = '/path/to/virtualenv'
         project.run_collectstatic()
         assert mock_subprocess.check_call.call_args == call([
-            Path(virtualenv) / 'bin/python', project.project_path / 'manage.py', 'collectstatic', '--noinput'
+            Path(project.virtualenv_path) / 'bin/python', project.project_path / 'manage.py', 'collectstatic', '--noinput'
         ])
 
 
@@ -129,8 +133,7 @@ class TestRunCollectStatic:
 class TestUpdateWsgiFile:
 
     def test_updates_wsgi_file_from_template(self):
-        domain, virtualenv = 'mydomain.com', '/path/to/virtualenv'
-        project = DjangoProject(domain, virtualenv)
+        project = DjangoProject('mydomain.com')
         project.wsgi_file_path = tempfile.NamedTemporaryFile().name
         template = open(Path(pythonanywhere.django_project.__file__).parent / 'wsgi_file_template.py').read()
 
