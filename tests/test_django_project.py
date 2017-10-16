@@ -81,9 +81,8 @@ class TestCreateVirtualenv:
 
     def test_calls_create_virtualenv(self):
         project = DjangoProject('mydomain.com')
-        project.python_version = 'python.version'
         with patch('pythonanywhere.django_project.create_virtualenv') as mock_create_virtualenv:
-            project.create_virtualenv(django_version='django.version', nuke='nuke option')
+            project.create_virtualenv('python.version', 'django.version', nuke='nuke option')
         assert mock_create_virtualenv.call_args == call(
             project.domain, 'python.version', 'django==django.version', nuke='nuke option'
         )
@@ -91,9 +90,8 @@ class TestCreateVirtualenv:
 
     def test_special_cases_latest_django_version(self):
         project = DjangoProject('mydomain.com')
-        project.python_version = 'python.version'
         with patch('pythonanywhere.django_project.create_virtualenv') as mock_create_virtualenv:
-            project.create_virtualenv(django_version='latest', nuke='nuke option')
+            project.create_virtualenv('python.version', django_version='latest', nuke='nuke option')
         assert mock_create_virtualenv.call_args == call(
             project.domain, 'python.version', 'django', nuke='nuke option'
         )
@@ -101,11 +99,16 @@ class TestCreateVirtualenv:
 
     def test_sets_virtualenv_attribute(self):
         project = DjangoProject('mydomain.com')
-        project.python_version = 'python.version'
         with patch('pythonanywhere.django_project.create_virtualenv') as mock_create_virtualenv:
-            project.create_virtualenv(django_version='django.version', nuke='nuke option')
+            project.create_virtualenv('python.version', django_version='django.version', nuke='nuke option')
         assert project.virtualenv_path == mock_create_virtualenv.return_value
 
+
+    def test_sets_python_version_attribute(self):
+        project = DjangoProject('mydomain.com')
+        with patch('pythonanywhere.django_project.create_virtualenv'):
+            project.create_virtualenv('python.version', django_version='django.version', nuke='nuke option')
+        assert project.python_version == 'python.version'
 
 
 class TestRunStartproject:

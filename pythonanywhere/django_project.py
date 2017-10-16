@@ -30,11 +30,12 @@ class DjangoProject:
 
 
 
-    def create_virtualenv(self, django_version, nuke):
+    def create_virtualenv(self, python_version, django_version, nuke):
         packages = 'django' if django_version == 'latest' else f'django=={django_version}'
         self.virtualenv_path = create_virtualenv(
-            self.domain, self.python_version, packages, nuke=nuke
+            self.domain, python_version, packages, nuke=nuke
         )
+        self.python_version = python_version
 
 
 

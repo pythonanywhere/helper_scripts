@@ -31,10 +31,8 @@ def main(domain, django_version, python_version, nuke):
         domain = f'{username}.pythonanywhere.com'
 
     project = DjangoProject(domain)
-    project.python_version = python_version
-
     project.sanity_checks(nuke=nuke)
-    project.create_virtualenv(django_version, nuke=nuke)
+    project.create_virtualenv(python_version, django_version, nuke=nuke)
     project.run_startproject(nuke=nuke)
     project.update_settings_file()
     project.run_collectstatic()

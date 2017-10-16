@@ -42,10 +42,8 @@ def main(repo_url, domain, python_version, nuke):
     project_path = download_repo(repo_url, domain, nuke=nuke)
 
     project = DjangoProject(domain)
-    project.python_version = python_version
-
     project.sanity_checks(nuke=nuke)
-    project.create_virtualenv('django', nuke=nuke)
+    project.create_virtualenv(python_version, 'django', nuke=nuke)
 
     create_webapp(domain, python_version, project.virtualenv_path, project_path, nuke=nuke)
 

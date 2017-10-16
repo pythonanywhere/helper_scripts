@@ -50,10 +50,9 @@ class TestMain:
                 nuke='nuke option'
             ),
         ]
-        assert mock_django_project.python_version == 'python.version'
         assert mock_django_project.method_calls == [
             call.sanity_checks(nuke='nuke option'),
-            call.create_virtualenv('django', nuke='nuke option'),
+            call.create_virtualenv('python.version', 'django', nuke='nuke option'),
             call.update_wsgi_file(),
             call.update_settings_file(),
             call.run_collectstatic(),
