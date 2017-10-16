@@ -45,10 +45,10 @@ def main(repo_url, domain, python_version, nuke):
     project.create_virtualenv(python_version, 'django', nuke=nuke)
 
 
-    project.update_wsgi_file()
     project.update_settings_file()
     project.run_collectstatic()
     project.create_webapp(nuke=nuke)
+    project.update_wsgi_file()
     # add_static_file_mappings(domain, project_path)
     # reload_webapp(domain)
 
