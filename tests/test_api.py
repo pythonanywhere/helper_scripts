@@ -14,6 +14,7 @@ from pythonanywhere.api import (
     create_webapp,
     reload_webapp,
 )
+from pythonanywhere.exceptions import SanityException
 
 class TestCallAPI:
 
@@ -31,6 +32,54 @@ class TestWebapp:
         app = Webapp('www.my-domain.com')
         assert app.domain == 'www.my-domain.com'
 
+
+
+
+
+class TestWebappSanityChecks:
+    domain = 'www.domain.com'
+    expected_url = API_ENDPOINT.format(username=getpass.getuser()) + domain + '/'
+
+    def test_does_not_complain_if_api_token_exists(self, api_token, api_responses):
+        webapp = Webapp(self.domain)
+        api_responses.add(responses.GET, self.expected_url, status=404)
+        webapp.sanity_checks(nuke=False)  # should not raise
+
+
+    def test_raises_if_no_api_token_exists(self, api_responses, no_api_token):
+        webapp = Webapp(self.domain)
+        with pytest.raises(SanityException) as e:
+            webapp.sanity_checks(nuke=False)
+        assert "Could not find your API token" in str(e.value)
+
+
+    def test_raises_if_webapp_already_exists(self, api_token, api_responses):
+        webapp = Webapp(self.domain)
+        api_responses.add(responses.GET, self.expected_url, status=200, body=json.dumps({
+            'id': 1, 'domain_name': self.domain,
+        }))
+
+        with pytest.raises(SanityException) as e:
+            webapp.sanity_checks(nuke=False)
+
+        assert "You already have a webapp for " + self.domain in str(e.value)
+        assert "nuke" in str(e.value)
+
+
+    def test_does_not_raise_if_no_webapp(self, api_token, api_responses):
+        webapp = Webapp(self.domain)
+        api_responses.add(responses.GET, self.expected_url, status=404)
+        webapp.sanity_checks(nuke=False)  # should not raise
+
+
+    def test_nuke_option_overrides_all_but_token_check(
+        self, api_token, api_responses, fake_home, virtualenvs_folder
+    ):
+        webapp = Webapp(self.domain)
+        (fake_home / self.domain).mkdir()
+        (virtualenvs_folder / self.domain).mkdir()
+
+        webapp.sanity_checks(nuke=True)  # should not raise
 
 
 

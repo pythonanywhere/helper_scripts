@@ -1,8 +1,10 @@
+from textwrap import dedent
 import getpass
 import os
 from pathlib import Path
 import requests
 
+from pythonanywhere.exceptions import SanityException
 from pythonanywhere.snakesay import snakesay
 
 
@@ -21,12 +23,6 @@ class AuthenticationError(Exception):
 
 
 
-class Webapp:
-    def __init__(self, domain):
-        self.domain = domain
-
-
-
 def call_api(url, method, **kwargs):
     token = os.environ['API_TOKEN']
     response = requests.request(
@@ -39,6 +35,34 @@ def call_api(url, method, **kwargs):
         print(response, response.text)
         raise AuthenticationError(f'Authentication error {response.status_code} calling API: {response.text}')
     return response
+
+
+
+class Webapp:
+
+    def __init__(self, domain):
+        self.domain = domain
+
+
+    def sanity_checks(self, nuke):
+        print(snakesay('Running API sanity checks'))
+        token = os.environ.get('API_TOKEN')
+        if not token:
+            raise SanityException(dedent(
+                '''
+                Could not find your API token.
+                You may need to create it on the Accounts page?
+                You will also need to close this console and open a new one once you've done that.
+                '''
+            ))
+
+        if nuke:
+            return
+
+        url = API_ENDPOINT.format(username=getpass.getuser()) + self.domain + '/'
+        response = call_api(url, 'get')
+        if response.status_code == 200:
+            raise SanityException(f'You already have a webapp for {self.domain}.\n\nUse the --nuke option if you want to replace it.')
 
 
 

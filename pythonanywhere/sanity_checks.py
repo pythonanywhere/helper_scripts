@@ -2,14 +2,12 @@ import getpass
 import os
 from textwrap import dedent
 
-from pythonanywhere.snakesay import snakesay
 from pythonanywhere.api import API_ENDPOINT, call_api
-from pythonanywhere.virtualenvs import _virtualenv_path
 from pythonanywhere.django_project import DjangoProject
+from pythonanywhere.exceptions import SanityException
+from pythonanywhere.snakesay import snakesay
+from pythonanywhere.virtualenvs import _virtualenv_path
 
-
-class SanityException(Exception):
-    pass
 
 
 def sanity_checks(domain, nuke):
