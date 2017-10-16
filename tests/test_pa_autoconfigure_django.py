@@ -99,5 +99,6 @@ class TestDownloadRepo:
 def test_todos():
     assert not 'move download_repo onto djangoproject'
     assert not 'existing-project sanity checks eg settings.py not found, requirements empty'
+    assert not 'SECRET_KEY'
     assert not 'database stuff?'
 
