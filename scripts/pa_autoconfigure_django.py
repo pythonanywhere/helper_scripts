@@ -18,20 +18,9 @@ Options:
 
 from docopt import docopt
 import getpass
-from pathlib import Path
-import subprocess
-import shutil
 
 from pythonanywhere.django_project import DjangoProject
 from pythonanywhere.snakesay import snakesay
-
-
-def download_repo(repo, domain, nuke):
-    target = Path('~').expanduser() / domain
-    if nuke:
-        shutil.rmtree(target)
-    subprocess.check_call(['git', 'clone', repo, target])
-    return target
 
 
 def main(repo_url, domain, python_version, nuke):
@@ -39,10 +28,9 @@ def main(repo_url, domain, python_version, nuke):
         username = getpass.getuser().lower()
         domain = f'{username}.pythonanywhere.com'
 
-    download_repo(repo_url, domain, nuke=nuke)
-
     project = DjangoProject(domain)
     project.sanity_checks(nuke=nuke)
+    project.download_repo(repo_url, nuke=nuke),
     project.create_virtualenv(python_version, nuke=nuke)
     project.update_settings_file()
     project.run_collectstatic()

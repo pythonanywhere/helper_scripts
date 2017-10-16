@@ -1,5 +1,6 @@
 from unittest.mock import call, patch, Mock
 from pathlib import Path
+import os
 import tempfile
 from textwrap import dedent
 import pytest
@@ -32,6 +33,7 @@ class TestDjangoProject:
     def test_virtualenv_path(self, fake_home):
         project = DjangoProject('mydomain.com')
         assert project.virtualenv_path == virtualenv_path('mydomain.com')
+
 
 
 class TestSanityChecks:
@@ -75,6 +77,37 @@ class TestSanityChecks:
         project.virtualenv_path.mkdir()
 
         project.sanity_checks(nuke=True)  # should not raise
+
+
+
+class TestDownloadRepo:
+
+    @pytest.mark.slowtest
+    def test_actually_downloads_repo(self, fake_home):
+        repo = 'https://gist.github.com/hjwp/4173bcface139beb7632ec93726f91ea'
+        project = DjangoProject('www.a.domain.com')
+        project.download_repo(repo, nuke=False)
+        assert project.project_path.is_dir()
+        assert 'file1.py' in os.listdir(project.project_path)
+        assert 'file2.py' in os.listdir(project.project_path)
+
+
+    def test_calls_git_subprocess(self, mock_subprocess, fake_home):
+        project = DjangoProject('www.a.domain.com')
+        project.download_repo('repo', nuke=False)
+        assert mock_subprocess.check_call.call_args == call(
+            ['git', 'clone', 'repo', project.project_path]
+        )
+
+
+    def test_nuke_option(self, mock_subprocess, fake_home):
+        project = DjangoProject('www.a.domain.com')
+        project.project_path.mkdir()
+        (project.project_path / 'old-thing.txt').touch()
+        mock_subprocess.check_call.side_effect = lambda *_, **__: Path(project.project_path).mkdir()
+
+        project.download_repo('repo', nuke=True)
+        assert 'old-thing.txt' not in project.project_path.iterdir()
 
 
 

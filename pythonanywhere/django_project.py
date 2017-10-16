@@ -30,6 +30,12 @@ class DjangoProject:
 
 
 
+    def download_repo(self, repo, nuke):
+        if nuke:
+            shutil.rmtree(self.project_path)
+        subprocess.check_call(['git', 'clone', repo, self.project_path])
+
+
     def create_virtualenv(self, python_version, django_version=None, nuke=False):
         if django_version is None:
             packages = self.detect_django_version()
