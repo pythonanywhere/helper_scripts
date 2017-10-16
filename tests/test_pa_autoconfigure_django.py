@@ -69,7 +69,6 @@ class TestMain:
             )
 
 
-
 class TestDownloadRepo:
 
     @pytest.mark.slowtest
@@ -95,4 +94,10 @@ class TestDownloadRepo:
         Path(fake_home / 'a-domain.com' / 'old-thing.txt').touch()
         new_folder = download_repo('repo', 'a-domain.com', nuke=True)
         assert 'old-thing.txt' not in new_folder.iterdir()
+
+
+def test_todos():
+    assert not 'checking for a requirements.txt'
+    assert not 'existing-project sanity checks eg settings.py not found'
+    assert not 'database stuff?'
 
