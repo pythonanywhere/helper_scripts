@@ -47,6 +47,8 @@ class TestMain:
             call.run_collectstatic(),
             call.create_webapp(nuke='nuke option'),
             call.update_wsgi_file(),
+            call.add_static_file_mappings(),
+            call.webapp.reload()
         ]
 
 

@@ -23,6 +23,7 @@ import subprocess
 import shutil
 
 from pythonanywhere.django_project import DjangoProject
+from pythonanywhere.snakesay import snakesay
 
 
 def download_repo(repo, domain, nuke):
@@ -47,10 +48,10 @@ def main(repo_url, domain, python_version, nuke):
     project.run_collectstatic()
     project.create_webapp(nuke=nuke)
     project.update_wsgi_file()
-    # add_static_file_mappings(domain, project_path)
-    # reload_webapp(domain)
+    project.add_static_file_mappings()
+    project.webapp.reload()
 
-    # print(snakesay(f'All done!  Your site is now live at https://{domain}'))
+    print(snakesay(f'All done!  Your site is now live at https://{domain}'))
 
 
 
