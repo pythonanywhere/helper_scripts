@@ -5,6 +5,7 @@ from textwrap import dedent
 
 import pythonanywhere.django_project
 from pythonanywhere.django_project import DjangoProject
+from pythonanywhere.api import Webapp
 
 
 
@@ -18,6 +19,11 @@ class TestDjangoProject:
     def test_wsgi_file_path(self, fake_home):
         project = DjangoProject('mydomain.com')
         assert project.wsgi_file_path == '/var/www/mydomain_com_wsgi.py'
+
+    def test_webapp(self, fake_home):
+        project = DjangoProject('mydomain.com')
+        assert project.webapp == Webapp('mydomain.com')
+
 
 
 

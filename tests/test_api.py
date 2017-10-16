@@ -33,6 +33,12 @@ class TestWebapp:
         assert app.domain == 'www.my-domain.com'
 
 
+    def test_compare_equal(self):
+        assert Webapp('www.my-domain.com') == Webapp('www.my-domain.com')
+
+
+    def test_compare_not_equal(self):
+        assert Webapp('www.my-domain.com') != Webapp('www.other-domain.com')
 
 
 

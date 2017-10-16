@@ -44,6 +44,10 @@ class Webapp:
         self.domain = domain
 
 
+    def __eq__(self, other):
+        return self.domain == other.domain
+
+
     def sanity_checks(self, nuke):
         print(snakesay('Running API sanity checks'))
         token = os.environ.get('API_TOKEN')

@@ -3,6 +3,7 @@ import shutil
 import subprocess
 from textwrap import dedent
 
+from pythonanywhere.api import Webapp
 from pythonanywhere.snakesay import snakesay
 from pythonanywhere.virtualenvs import create_virtualenv
 
@@ -13,6 +14,7 @@ class DjangoProject:
         self.domain = domain
         self.project_path = Path('~/').expanduser() / self.domain
         self.wsgi_file_path = '/var/www/' + domain.replace('.', '_') + '_wsgi.py'
+        self.webapp = Webapp(domain)
 
 
     def create_virtualenv(self, django_version, nuke):
