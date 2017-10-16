@@ -15,7 +15,10 @@ def _get_temp_dir():
 
 @pytest.fixture(scope="session")
 def local_pip_cache():
-    return _get_temp_dir()
+    try:
+        return next(Path(tempfile.gettempdir()).glob('*/test-pip-cache'))
+    except StopIteration:
+        return _get_temp_dir() / 'test-pip-cache'
 
 
 @pytest.fixture
