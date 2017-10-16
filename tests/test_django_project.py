@@ -27,10 +27,19 @@ class TestCreateVirtualenv:
         project = DjangoProject('mydomain.com')
         project.python_version = 'python.version'
         with patch('pythonanywhere.django_project.create_virtualenv') as mock_create_virtualenv:
-            project.create_virtualenv()
+            project.create_virtualenv(nuke='nuke option')
         assert mock_create_virtualenv.call_args == call(
-            project.domain, 'python.version', 'django', nuke=False
+            project.domain, 'python.version', 'django', nuke='nuke option'
         )
+
+
+    def test_sets_virtualenv_attribute(self):
+        project = DjangoProject('mydomain.com')
+        project.python_version = 'python.version'
+        with patch('pythonanywhere.django_project.create_virtualenv') as mock_create_virtualenv:
+            project.create_virtualenv(nuke='nuke option')
+        assert project.virtualenv_path == mock_create_virtualenv.return_value
+
 
 
 class TestRunStartproject:

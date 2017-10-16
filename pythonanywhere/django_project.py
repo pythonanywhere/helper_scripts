@@ -15,8 +15,10 @@ class DjangoProject:
         self.wsgi_file_path = '/var/www/' + domain.replace('.', '_') + '_wsgi.py'
 
 
-    def create_virtualenv(self):
-        create_virtualenv(self.domain, self.python_version, 'django', nuke=False)
+    def create_virtualenv(self, nuke):
+        self.virtualenv_path = create_virtualenv(
+            self.domain, self.python_version, 'django', nuke=nuke
+        )
 
 
 
