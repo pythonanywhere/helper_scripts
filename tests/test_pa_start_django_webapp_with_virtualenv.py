@@ -54,6 +54,7 @@ class TestMain:
             call.add_static_file_mappings('www.domain.com', mock_django_project.project_path),
             call.reload_webapp('www.domain.com')
         ]
+        assert mock_django_project.python_version == 'python.version'
         assert mock_django_project.method_calls == [
             call.create_virtualenv('django.version', nuke='nuke option'),
             call.run_startproject(nuke='nuke option'),

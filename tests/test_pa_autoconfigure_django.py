@@ -14,7 +14,6 @@ def mock_main_functions():
     functions = [
         'sanity_checks',
         'download_repo',
-        'create_virtualenv',
         'create_webapp',
         'DjangoProject',
         # 'add_static_file_mappings',
@@ -44,19 +43,18 @@ class TestMain:
         assert mock_main_functions.method_calls == [
             call.sanity_checks('www.domain.com', nuke='nuke option'),
             call.download_repo('https://github.com/pythonanywhere.com/example-django-project.git', 'www.domain.com', nuke='nuke option'),
-            call.create_virtualenv(
-                'www.domain.com', 'python.version', nuke='nuke option'
-            ),
+            call.DjangoProject('www.domain.com'),
             call.create_webapp(
                 'www.domain.com',
                 'python.version',
-                mock_main_functions.create_virtualenv.return_value,
+                mock_django_project.virtualenv_path,
                 mock_main_functions.download_repo.return_value,
                 nuke='nuke option'
             ),
-            call.DjangoProject('www.domain.com'),
         ]
+        assert mock_django_project.python_version == 'python.version'
         assert mock_django_project.method_calls == [
+            call.create_virtualenv('django', nuke='nuke option'),
             call.update_wsgi_file(),
             call.update_settings_file(),
             call.run_collectstatic(),

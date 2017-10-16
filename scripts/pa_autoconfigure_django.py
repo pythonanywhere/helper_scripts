@@ -23,7 +23,6 @@ import subprocess
 import shutil
 
 from pythonanywhere.sanity_checks import sanity_checks
-from pythonanywhere.virtualenvs import create_virtualenv
 from pythonanywhere.api import create_webapp
 from pythonanywhere.django_project import DjangoProject
 
@@ -42,17 +41,18 @@ def main(repo_url, domain, python_version, nuke):
 
     sanity_checks(domain, nuke=nuke)
     project_path = download_repo(repo_url, domain, nuke=nuke)
-    virtualenv = create_virtualenv(domain, python_version, nuke=nuke)
 
 
-    create_webapp(domain, python_version, virtualenv, project_path, nuke=nuke)
 
     project = DjangoProject(domain)
-    project.virtualenv = virtualenv
+    project.python_version = python_version
+    project.create_virtualenv('django', nuke=nuke)
+
+    create_webapp(domain, python_version, project.virtualenv_path, project_path, nuke=nuke)
+
     project.update_wsgi_file()
     project.update_settings_file()
     project.run_collectstatic()
-    # run_collectstatic(virtualenv_path, project_path)
     # add_static_file_mappings(domain, project_path)
     # reload_webapp(domain)
 
