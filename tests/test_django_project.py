@@ -77,6 +77,7 @@ class TestSanityChecks:
         project.sanity_checks(nuke=True)  # should not raise
 
 
+
 class TestCreateVirtualenv:
 
     def test_calls_create_virtualenv(self):
@@ -109,6 +110,7 @@ class TestCreateVirtualenv:
         with patch('pythonanywhere.django_project.create_virtualenv'):
             project.create_virtualenv('python.version', django_version='django.version', nuke='nuke option')
         assert project.python_version == 'python.version'
+
 
 
 class TestRunStartproject:
@@ -221,4 +223,18 @@ class TestUpdateWsgiFile:
         with open(project.wsgi_file_path) as f:
             contents = f.read()
         assert contents == template.format(project_path=project.project_path)
+
+
+class TestCreateWebapp:
+
+    def test_calls_webapp_create(self):
+        project = DjangoProject('mydomain.com')
+        project.webapp.create = Mock()
+        project.python_version = 'python.version'
+
+        project.create_webapp(nuke='nuke option')
+        assert project.webapp.create.call_args == call(
+            'python.version', project.virtualenv_path, project.project_path, nuke='nuke option'
+        )
+
 

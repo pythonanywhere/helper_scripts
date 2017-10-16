@@ -13,10 +13,7 @@ def mock_main_functions():
     patchers = []
     functions = [
         'download_repo',
-        'create_webapp',
         'DjangoProject',
-        # 'add_static_file_mappings',
-        # 'reload_webapp',
     ]
     for function in functions:
         mock = getattr(mocks, function)
@@ -42,13 +39,6 @@ class TestMain:
         assert mock_main_functions.method_calls == [
             call.download_repo('https://github.com/pythonanywhere.com/example-django-project.git', 'www.domain.com', nuke='nuke option'),
             call.DjangoProject('www.domain.com'),
-            call.create_webapp(
-                'www.domain.com',
-                'python.version',
-                mock_django_project.virtualenv_path,
-                mock_main_functions.download_repo.return_value,
-                nuke='nuke option'
-            ),
         ]
         assert mock_django_project.method_calls == [
             call.sanity_checks(nuke='nuke option'),
@@ -56,6 +46,7 @@ class TestMain:
             call.update_wsgi_file(),
             call.update_settings_file(),
             call.run_collectstatic(),
+            call.create_webapp(nuke='nuke option'),
         ]
 
 

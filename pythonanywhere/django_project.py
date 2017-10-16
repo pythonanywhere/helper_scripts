@@ -88,3 +88,7 @@ class DjangoProject:
         with open(self.wsgi_file_path, 'w') as f:
             f.write(template.format(project_path=self.project_path))
 
+
+    def create_webapp(self, nuke):
+        self.webapp.create(self.python_version, self.virtualenv_path, self.project_path, nuke=nuke)
+

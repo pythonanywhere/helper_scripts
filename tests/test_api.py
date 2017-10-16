@@ -11,7 +11,6 @@ from pythonanywhere.api import (
     Webapp,
     add_static_file_mappings,
     call_api,
-    create_webapp,
     reload_webapp,
 )
 from pythonanywhere.exceptions import SanityException
@@ -97,7 +96,7 @@ class TestCreateWebapp:
         api_responses.add(responses.POST, expected_post_url, status=201, body=json.dumps({'status': 'OK'}))
         api_responses.add(responses.PATCH, expected_patch_url, status=200)
 
-        create_webapp('mydomain.com', '2.7', '/virtualenv/path', '/project/path', nuke=False)
+        Webapp('mydomain.com').create('2.7', '/virtualenv/path', '/project/path', nuke=False)
 
         post = api_responses.calls[0]
         assert post.request.url == expected_post_url
@@ -114,7 +113,7 @@ class TestCreateWebapp:
         api_responses.add(responses.POST, expected_post_url, status=201, body=json.dumps({'status': 'OK'}))
         api_responses.add(responses.PATCH, expected_patch_url, status=200)
 
-        create_webapp('mydomain.com', '2.7', '/virtualenv/path', '/project/path', nuke=False)
+        Webapp('mydomain.com').create('2.7', '/virtualenv/path', '/project/path', nuke=False)
 
         patch = api_responses.calls[1]
         assert patch.request.url == expected_patch_url
@@ -129,7 +128,7 @@ class TestCreateWebapp:
         api_responses.add(responses.POST, expected_post_url, status=500, body='an error')
 
         with pytest.raises(Exception) as e:
-            create_webapp('mydomain.com', '2.7', '/virtualenv/path', '/project/path', nuke=False)
+            Webapp('mydomain.com').create('2.7', '/virtualenv/path', '/project/path', nuke=False)
 
         assert 'POST to create webapp via API failed' in str(e.value)
         assert 'an error' in str(e.value)
@@ -142,7 +141,7 @@ class TestCreateWebapp:
         }))
 
         with pytest.raises(Exception) as e:
-            create_webapp('mydomain.com', '2.7', '/virtualenv/path', '/project/path', nuke=False)
+            Webapp('mydomain.com').create('2.7', '/virtualenv/path', '/project/path', nuke=False)
 
         assert 'POST to create webapp via API failed' in str(e.value)
         assert 'bad things happened' in str(e.value)
@@ -155,7 +154,7 @@ class TestCreateWebapp:
         api_responses.add(responses.PATCH, expected_patch_url, status=400, json={'message': 'an error'})
 
         with pytest.raises(Exception) as e:
-            create_webapp('mydomain.com', '2.7', '/virtualenv/path', '/project/path', nuke=False)
+            Webapp('mydomain.com').create('2.7', '/virtualenv/path', '/project/path', nuke=False)
 
         assert 'PATCH to set virtualenv path via API failed' in str(e.value)
         assert 'an error' in str(e.value)
@@ -168,7 +167,7 @@ class TestCreateWebapp:
         api_responses.add(responses.POST, post_url, status=201, body=json.dumps({'status': 'OK'}))
         api_responses.add(responses.PATCH, webapp_url, status=200)
 
-        create_webapp('mydomain.com', '2.7', '/virtualenv/path', '/project/path', nuke=True)
+        Webapp('mydomain.com').create('2.7', '/virtualenv/path', '/project/path', nuke=True)
 
         delete = api_responses.calls[0]
         assert delete.request.method == 'DELETE'
@@ -183,7 +182,7 @@ class TestCreateWebapp:
         api_responses.add(responses.POST, post_url, status=201, body=json.dumps({'status': 'OK'}))
         api_responses.add(responses.PATCH, webapp_url, status=200)
 
-        create_webapp('mydomain.com', '2.7', '/virtualenv/path', '/project/path', nuke=True)
+        Webapp('mydomain.com').create('2.7', '/virtualenv/path', '/project/path', nuke=True)
 
 
 

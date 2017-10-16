@@ -22,7 +22,6 @@ from pathlib import Path
 import subprocess
 import shutil
 
-from pythonanywhere.api import create_webapp
 from pythonanywhere.django_project import DjangoProject
 
 
@@ -39,17 +38,17 @@ def main(repo_url, domain, python_version, nuke):
         username = getpass.getuser().lower()
         domain = f'{username}.pythonanywhere.com'
 
-    project_path = download_repo(repo_url, domain, nuke=nuke)
+    download_repo(repo_url, domain, nuke=nuke)
 
     project = DjangoProject(domain)
     project.sanity_checks(nuke=nuke)
     project.create_virtualenv(python_version, 'django', nuke=nuke)
 
-    create_webapp(domain, python_version, project.virtualenv_path, project_path, nuke=nuke)
 
     project.update_wsgi_file()
     project.update_settings_file()
     project.run_collectstatic()
+    project.create_webapp(nuke=nuke)
     # add_static_file_mappings(domain, project_path)
     # reload_webapp(domain)
 
