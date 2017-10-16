@@ -15,7 +15,6 @@ def mock_main_functions():
     patchers = []
     functions = [
         'DjangoProject',
-        'sanity_checks',
         'create_webapp',
         'add_static_file_mappings',
         'reload_webapp',
@@ -42,7 +41,6 @@ class TestMain:
         main('www.domain.com', 'django.version', 'python.version', nuke='nuke option')
         mock_django_project = mock_main_functions.DjangoProject.return_value
         assert mock_main_functions.method_calls == [
-            call.sanity_checks('www.domain.com', nuke='nuke option'),
             call.DjangoProject('www.domain.com'),
             call.create_webapp(
                 'www.domain.com',
@@ -56,6 +54,7 @@ class TestMain:
         ]
         assert mock_django_project.python_version == 'python.version'
         assert mock_django_project.method_calls == [
+            call.sanity_checks(nuke='nuke option'),
             call.create_virtualenv('django.version', nuke='nuke option'),
             call.run_startproject(nuke='nuke option'),
             call.update_settings_file(),

@@ -23,17 +23,17 @@ from pythonanywhere.api import (
 )
 
 from pythonanywhere.django_project import DjangoProject
-from pythonanywhere.sanity_checks import sanity_checks
 
 
 def main(domain, django_version, python_version, nuke):
     if domain == 'your-username.pythonanywhere.com':
         username = getpass.getuser().lower()
         domain = f'{username}.pythonanywhere.com'
-    sanity_checks(domain, nuke=nuke)
 
     project = DjangoProject(domain)
     project.python_version = python_version
+
+    project.sanity_checks(nuke=nuke)
     project.create_virtualenv(django_version, nuke=nuke)
     project.run_startproject(nuke=nuke)
     project.update_settings_file()

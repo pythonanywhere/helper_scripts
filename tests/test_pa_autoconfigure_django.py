@@ -12,7 +12,6 @@ def mock_main_functions():
     mocks = Mock()
     patchers = []
     functions = [
-        'sanity_checks',
         'download_repo',
         'create_webapp',
         'DjangoProject',
@@ -41,7 +40,6 @@ class TestMain:
         main('https://github.com/pythonanywhere.com/example-django-project.git', 'www.domain.com', 'python.version', nuke='nuke option')
         mock_django_project = mock_main_functions.DjangoProject.return_value
         assert mock_main_functions.method_calls == [
-            call.sanity_checks('www.domain.com', nuke='nuke option'),
             call.download_repo('https://github.com/pythonanywhere.com/example-django-project.git', 'www.domain.com', nuke='nuke option'),
             call.DjangoProject('www.domain.com'),
             call.create_webapp(
@@ -54,6 +52,7 @@ class TestMain:
         ]
         assert mock_django_project.python_version == 'python.version'
         assert mock_django_project.method_calls == [
+            call.sanity_checks(nuke='nuke option'),
             call.create_virtualenv('django', nuke='nuke option'),
             call.update_wsgi_file(),
             call.update_settings_file(),
@@ -64,8 +63,8 @@ class TestMain:
     def test_domain_defaults_to_using_current_username(self, mock_main_functions):
         username = getpass.getuser()
         main('a-repo', 'your-username.pythonanywhere.com', 'python.version', nuke=False)
-        assert mock_main_functions.sanity_checks.call_args == call(
-            username + '.pythonanywhere.com', nuke=False
+        assert mock_main_functions.DjangoProject.call_args == call(
+            username + '.pythonanywhere.com'
         )
 
 
@@ -73,8 +72,8 @@ class TestMain:
         with patch('scripts.pa_autoconfigure_django.getpass') as mock_getpass:
             mock_getpass.getuser.return_value = 'UserName1'
             main('a-url', 'your-username.pythonanywhere.com', 'python.version', 'nukey')
-            assert mock_main_functions.sanity_checks.call_args == call(
-                'username1.pythonanywhere.com', nuke='nukey'
+            assert mock_main_functions.DjangoProject.call_args == call(
+                'username1.pythonanywhere.com',
             )
 
 

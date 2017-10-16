@@ -22,7 +22,6 @@ from pathlib import Path
 import subprocess
 import shutil
 
-from pythonanywhere.sanity_checks import sanity_checks
 from pythonanywhere.api import create_webapp
 from pythonanywhere.django_project import DjangoProject
 
@@ -34,18 +33,18 @@ def download_repo(repo, domain, nuke):
     subprocess.check_call(['git', 'clone', repo, target])
     return target
 
+
 def main(repo_url, domain, python_version, nuke):
     if domain == 'your-username.pythonanywhere.com':
         username = getpass.getuser().lower()
         domain = f'{username}.pythonanywhere.com'
 
-    sanity_checks(domain, nuke=nuke)
     project_path = download_repo(repo_url, domain, nuke=nuke)
-
-
 
     project = DjangoProject(domain)
     project.python_version = python_version
+
+    project.sanity_checks(nuke=nuke)
     project.create_virtualenv('django', nuke=nuke)
 
     create_webapp(domain, python_version, project.virtualenv_path, project_path, nuke=nuke)
