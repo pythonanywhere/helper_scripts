@@ -6,7 +6,7 @@ from pythonanywhere.api import API_ENDPOINT, call_api
 from pythonanywhere.django_project import DjangoProject
 from pythonanywhere.exceptions import SanityException
 from pythonanywhere.snakesay import snakesay
-from pythonanywhere.virtualenvs import _virtualenv_path
+from pythonanywhere.virtualenvs import virtualenv_path
 
 
 
@@ -28,7 +28,7 @@ def sanity_checks(domain, nuke):
     response = call_api(url, 'get')
     if response.status_code == 200:
         raise SanityException(f'You already have a webapp for {domain}.\n\nUse the --nuke option if you want to replace it.')
-    if _virtualenv_path(domain).exists():
+    if virtualenv_path(domain).exists():
         raise SanityException(f'You already have a virtualenv for {domain}.\n\nUse the --nuke option if you want to replace it.')
     project = DjangoProject(domain)  # TODO: make non-django-specific parent class
     if project.project_path.exists():

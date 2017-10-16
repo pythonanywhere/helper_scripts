@@ -5,7 +5,7 @@ import subprocess
 from pythonanywhere.snakesay import snakesay
 
 
-def _virtualenv_path(domain):
+def virtualenv_path(domain):
     return Path(os.environ['WORKON_HOME']) / domain
 
 
@@ -15,5 +15,5 @@ def create_virtualenv(name, python_version, packages, nuke):
     if nuke:
         command = f'rmvirtualenv {name} && {command}'
     subprocess.check_call(['bash', '-c', f'source virtualenvwrapper.sh && {command}'])
-    return _virtualenv_path(name)
+    return virtualenv_path(name)
 
