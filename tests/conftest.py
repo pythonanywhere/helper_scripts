@@ -14,11 +14,14 @@ def _get_temp_dir():
 
 
 @pytest.fixture(scope="session")
-def local_pip_cache():
-    try:
-        return next(Path(tempfile.gettempdir()).glob('*/test-pip-cache'))
-    except StopIteration:
-        return _get_temp_dir() / 'test-pip-cache'
+def local_pip_cache(request):
+    previous_cache = request.config.cache.get('pythonanywhere/pip-cache', None)
+    if previous_cache:
+        return Path(previous_cache)
+    else:
+        new_cache = _get_temp_dir()
+        request.config.cache.set('pythonanywhere/pip-cache', str(new_cache))
+        return new_cache
 
 
 @pytest.fixture
