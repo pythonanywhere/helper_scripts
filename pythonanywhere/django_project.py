@@ -73,25 +73,12 @@ class DjangoProject:
 
     def find_django_files(self):
         try:
-            for subpath in self.project_path.iterdir():
-                if subpath.is_dir():
-                    if 'settings.py' in os.listdir(subpath):
-                        self.settings_path = subpath / 'settings.py'
-                    else:
-                        for subsubpath in subpath.iterdir():
-                            if subsubpath.is_dir():
-                                if 'settings.py' in os.listdir(subsubpath):
-                                    self.settings_path = subsubpath / 'settings.py'
-
-            for subdir in [self.project_path] + [c for c in self.project_path.iterdir() if c.is_dir()]:
-                if 'manage.py' in os.listdir(subdir):
-                    self.manage_py_path = subdir / 'manage.py'
-
-        except FileNotFoundError:
+            self.settings_path = next(self.project_path.glob('**/settings.py'))
+        except StopIteration:
             raise SanityException('Could not find your settings.py')
-        if not hasattr(self, 'settings_path'):
-            raise SanityException('Could not find your settings.py')
-        if not hasattr(self, 'manage_py_path'):
+        try:
+            self.manage_py_path = next(self.project_path.glob('**/manage.py'))
+        except StopIteration:
             raise SanityException('Could not find your manage.py')
 
 
