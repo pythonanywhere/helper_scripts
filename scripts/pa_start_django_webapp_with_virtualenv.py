@@ -22,7 +22,6 @@ from pythonanywhere.api import (
     reload_webapp,
 )
 
-from pythonanywhere.virtualenvs import create_virtualenv
 from pythonanywhere.django_project import DjangoProject
 from pythonanywhere.sanity_checks import sanity_checks
 
@@ -32,16 +31,15 @@ def main(domain, django_version, python_version, nuke):
         username = getpass.getuser().lower()
         domain = f'{username}.pythonanywhere.com'
     sanity_checks(domain, nuke=nuke)
-    packages = 'django' if django_version == 'latest' else f'django=={django_version}'
-    virtualenv = create_virtualenv(domain, python_version, packages, nuke=nuke)
 
     project = DjangoProject(domain)
-    project.virtualenv_path = virtualenv
+    project.python_version = python_version
+    project.create_virtualenv(django_version, nuke=nuke)
     project.run_startproject(nuke=nuke)
     project.update_settings_file()
     project.run_collectstatic()
 
-    create_webapp(domain, python_version, virtualenv, project.project_path, nuke=nuke)
+    create_webapp(domain, python_version, project.virtualenv_path, project.project_path, nuke=nuke)
     add_static_file_mappings(domain, project.project_path)
 
     project.update_wsgi_file()

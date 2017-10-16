@@ -15,9 +15,10 @@ class DjangoProject:
         self.wsgi_file_path = '/var/www/' + domain.replace('.', '_') + '_wsgi.py'
 
 
-    def create_virtualenv(self, nuke):
+    def create_virtualenv(self, django_version, nuke):
+        packages = 'django' if django_version == 'latest' else f'django=={django_version}'
         self.virtualenv_path = create_virtualenv(
-            self.domain, self.python_version, 'django', nuke=nuke
+            self.domain, self.python_version, packages, nuke=nuke
         )
 
 

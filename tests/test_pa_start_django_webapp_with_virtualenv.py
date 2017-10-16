@@ -16,7 +16,6 @@ def mock_main_functions():
     functions = [
         'DjangoProject',
         'sanity_checks',
-        'create_virtualenv',
         'create_webapp',
         'add_static_file_mappings',
         'reload_webapp',
@@ -44,14 +43,11 @@ class TestMain:
         mock_django_project = mock_main_functions.DjangoProject.return_value
         assert mock_main_functions.method_calls == [
             call.sanity_checks('www.domain.com', nuke='nuke option'),
-            call.create_virtualenv(
-                'www.domain.com', 'python.version', 'django==django.version', nuke='nuke option'
-            ),
             call.DjangoProject('www.domain.com'),
             call.create_webapp(
                 'www.domain.com',
                 'python.version',
-                mock_main_functions.create_virtualenv.return_value,
+                mock_django_project.virtualenv_path,
                 mock_django_project.project_path,
                 nuke='nuke option'
             ),
@@ -59,6 +55,7 @@ class TestMain:
             call.reload_webapp('www.domain.com')
         ]
         assert mock_django_project.method_calls == [
+            call.create_virtualenv('django.version', nuke='nuke option'),
             call.run_startproject(nuke='nuke option'),
             call.update_settings_file(),
             call.run_collectstatic(),
@@ -69,8 +66,8 @@ class TestMain:
     def test_domain_defaults_to_using_current_username(self, mock_main_functions):
         username = getpass.getuser()
         main('your-username.pythonanywhere.com', 'django.version', 'python.version', nuke=False)
-        assert mock_main_functions.create_virtualenv.call_args == call(
-            username + '.pythonanywhere.com', 'python.version', 'django==django.version', nuke=False
+        assert mock_main_functions.DjangoProject.call_args == call(
+            username + '.pythonanywhere.com'
         )
         assert mock_main_functions.reload_webapp.call_args == call(
             username + '.pythonanywhere.com',
@@ -81,19 +78,12 @@ class TestMain:
         with patch('scripts.pa_start_django_webapp_with_virtualenv.getpass') as mock_getpass:
             mock_getpass.getuser.return_value = 'UserName1'
             main('your-username.pythonanywhere.com', 'django.version', 'python.version', 'nukey')
-            assert mock_main_functions.create_virtualenv.call_args == call(
-                'username1.pythonanywhere.com', 'python.version', 'django==django.version', nuke='nukey'
+            assert mock_main_functions.DjangoProject.call_args == call(
+                'username1.pythonanywhere.com'
             )
             assert mock_main_functions.reload_webapp.call_args == call(
                 'username1.pythonanywhere.com',
             )
-
-
-    def test_django_latest_is_just_django_for_virtualenv(self, mock_main_functions):
-        main('www.domain.com', 'latest', 'python.version', nuke='nuke option')
-        assert mock_main_functions.create_virtualenv.call_args == call(
-            'www.domain.com', 'python.version', 'django', nuke='nuke option'
-        )
 
 
     @pytest.mark.slowtest
