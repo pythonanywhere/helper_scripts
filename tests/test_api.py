@@ -8,6 +8,7 @@ from pythonanywhere.api import (
     API_ENDPOINT,
     PYTHON_VERSIONS,
     AuthenticationError,
+    Webapp,
     add_static_file_mappings,
     call_api,
     create_webapp,
@@ -22,6 +23,13 @@ class TestCallAPI:
         with pytest.raises(AuthenticationError) as e:
             call_api(url, 'post')
         assert str(e.value) == 'Authentication error 401 calling API: nope'
+
+
+class TestWebapp:
+
+    def test_init(self):
+        app = Webapp('www.my-domain.com')
+        assert app.domain == 'www.my-domain.com'
 
 
 

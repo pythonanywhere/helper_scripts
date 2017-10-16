@@ -21,6 +21,12 @@ class AuthenticationError(Exception):
 
 
 
+class Webapp:
+    def __init__(self, domain):
+        self.domain = domain
+
+
+
 def call_api(url, method, **kwargs):
     token = os.environ['API_TOKEN']
     response = requests.request(
