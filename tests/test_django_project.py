@@ -1,4 +1,4 @@
-from unittest.mock import call
+from unittest.mock import call, patch
 from pathlib import Path
 import tempfile
 from textwrap import dedent
@@ -19,6 +19,17 @@ class TestDjangoProject:
         project = DjangoProject('mydomain.com', '/path/to/virtualenv')
         assert project.wsgi_file_path == '/var/www/mydomain_com_wsgi.py'
 
+
+
+class TestCreateVirtualenv:
+
+    def xtest_calls_create_virtualenv_with_latest_django_by_default(self):
+        project = DjangoProject('mydomain.com', '/path/to/virtualenv')
+        with patch('pythonanywhere.django_project.create_virtualenv') as mock_create_virtualenv:
+            project.create_virtualenv()
+        assert mock_create_virtualenv.call_args == call(
+            project.domain, python_version, 'django', nuke=False
+        )
 
 
 class TestRunStartproject:
