@@ -18,7 +18,6 @@ def mock_main_functions():
         'create_webapp',
         'DjangoProject',
         # 'add_static_file_mappings',
-        # 'update_wsgi_file',
         # 'reload_webapp',
     ]
     for function in functions:
@@ -41,7 +40,7 @@ class TestMain:
 
     def test_calls_all_stuff_in_right_order(self, mock_main_functions):
         main('https://github.com/pythonanywhere.com/example-django-project.git', 'www.domain.com', 'python.version', nuke='nuke option')
-        assert mock_main_functions.method_calls[:6] == [
+        assert mock_main_functions.method_calls == [
             call.sanity_checks('www.domain.com', nuke='nuke option'),
             call.download_repo('https://github.com/pythonanywhere.com/example-django-project.git', 'www.domain.com', nuke='nuke option'),
             call.create_virtualenv(
@@ -59,6 +58,7 @@ class TestMain:
         assert mock_main_functions.DjangoProject.return_value.method_calls == [
             call.update_wsgi_file(),
             call.update_settings_file(),
+            call.run_collectstatic(),
         ]
 
 

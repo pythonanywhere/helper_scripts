@@ -50,6 +50,7 @@ def main(repo_url, domain, python_version, nuke):
     project = DjangoProject(domain, virtualenv)
     project.update_wsgi_file()
     project.update_settings_file()
+    project.run_collectstatic()
     # run_collectstatic(virtualenv_path, project_path)
     # add_static_file_mappings(domain, project_path)
     # reload_webapp(domain)
