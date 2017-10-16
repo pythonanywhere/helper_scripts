@@ -16,10 +16,6 @@ from docopt import docopt
 import getpass
 
 from pythonanywhere.snakesay import snakesay
-from pythonanywhere.api import (
-    reload_webapp,
-)
-
 from pythonanywhere.django_project import DjangoProject
 
 
@@ -39,7 +35,7 @@ def main(domain, django_version, python_version, nuke):
 
     project.update_wsgi_file()
 
-    reload_webapp(domain)
+    project.webapp.reload()
 
     print(snakesay(f'All done!  Your site is now live at https://{domain}'))
 

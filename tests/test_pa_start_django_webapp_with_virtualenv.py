@@ -15,7 +15,6 @@ def mock_main_functions():
     patchers = []
     functions = [
         'DjangoProject',
-        'reload_webapp',
     ]
     for function in functions:
         mock = getattr(mocks, function)
@@ -40,7 +39,6 @@ class TestMain:
         mock_django_project = mock_main_functions.DjangoProject.return_value
         assert mock_main_functions.method_calls == [
             call.DjangoProject('www.domain.com'),
-            call.reload_webapp('www.domain.com')
         ]
         assert mock_django_project.method_calls == [
             call.sanity_checks(nuke='nuke option'),
@@ -51,6 +49,7 @@ class TestMain:
             call.create_webapp(nuke='nuke option'),
             call.add_static_file_mappings(),
             call.update_wsgi_file(),
+            call.webapp.reload(),
         ]
 
 
@@ -60,9 +59,6 @@ class TestMain:
         assert mock_main_functions.DjangoProject.call_args == call(
             username + '.pythonanywhere.com'
         )
-        assert mock_main_functions.reload_webapp.call_args == call(
-            username + '.pythonanywhere.com',
-        )
 
 
     def test_lowercases_username(self, mock_main_functions):
@@ -71,9 +67,6 @@ class TestMain:
             main('your-username.pythonanywhere.com', 'django.version', 'python.version', 'nukey')
             assert mock_main_functions.DjangoProject.call_args == call(
                 'username1.pythonanywhere.com'
-            )
-            assert mock_main_functions.reload_webapp.call_args == call(
-                'username1.pythonanywhere.com',
             )
 
 

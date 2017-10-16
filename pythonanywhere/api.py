@@ -101,10 +101,10 @@ class Webapp:
 
 
 
-def reload_webapp(domain):
-    print(snakesay(f'Reloading {domain} via API'))
-    url = API_ENDPOINT.format(username=getpass.getuser()) + domain + '/reload/'
-    response = call_api(url, 'post')
-    if not response.ok:
-        raise Exception(f'POST to reload webapp via API failed, got {response}:{response.text}')
+    def reload(self):
+        print(snakesay(f'Reloading {self.domain} via API'))
+        url = API_ENDPOINT.format(username=getpass.getuser()) + self.domain + '/reload/'
+        response = call_api(url, 'post')
+        if not response.ok:
+            raise Exception(f'POST to reload webapp via API failed, got {response}:{response.text}')
 

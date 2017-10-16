@@ -10,7 +10,6 @@ from pythonanywhere.api import (
     AuthenticationError,
     Webapp,
     call_api,
-    reload_webapp,
 )
 from pythonanywhere.exceptions import SanityException
 
@@ -217,7 +216,7 @@ class TestReloadWebapp:
         expected_url = API_ENDPOINT.format(username=getpass.getuser()) + 'mydomain.com/reload/'
         api_responses.add(responses.POST, expected_url, status=200)
 
-        reload_webapp('mydomain.com')
+        Webapp('mydomain.com').reload()
 
         post = api_responses.calls[0]
         assert post.request.url == expected_url
@@ -230,10 +229,8 @@ class TestReloadWebapp:
         api_responses.add(responses.POST, expected_url, status=404, body='nope')
 
         with pytest.raises(Exception) as e:
-            reload_webapp('mydomain.com')
+            Webapp('mydomain.com').reload()
 
         assert 'POST to reload webapp via API failed' in str(e.value)
         assert 'nope' in str(e.value)
-
-
 
