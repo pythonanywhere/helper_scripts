@@ -235,6 +235,7 @@ def more_nested_submodule():
 class TestFindDjangoFiles:
 
     def test_non_nested(self, fake_home, non_nested_submodule):
+
         project = DjangoProject('mydomain.com')
         shutil.copytree(non_nested_submodule, project.project_path)
         expected_settings_path = project.project_path / 'myproject/settings.py'
@@ -361,14 +362,49 @@ class TestUpdateWsgiFile:
 
     def test_updates_wsgi_file_from_template(self):
         project = DjangoProject('mydomain.com')
-        project.wsgi_file_path = tempfile.NamedTemporaryFile().name
+        project.wsgi_file_path = Path(tempfile.NamedTemporaryFile().name)
+        project.settings_path = Path('/path/to/settingsfolder/settings.py')
         template = open(Path(pythonanywhere.django_project.__file__).parent / 'wsgi_file_template.py').read()
 
         project.update_wsgi_file()
 
         with open(project.wsgi_file_path) as f:
             contents = f.read()
-        assert contents == template.format(project_path=project.project_path)
+        print(contents)
+        assert contents == template.format(project=project)
+
+
+    @pytest.mark.slowtest
+    def test_actually_produces_wsgi_file_that_can_import_project_non_nested(
+        self, fake_home, non_nested_submodule, virtualenvs_folder
+    ):
+        project = DjangoProject('mydomain.com')
+        shutil.copytree(non_nested_submodule, project.project_path)
+        project.create_virtualenv('3.6')
+        project.find_django_files()
+        project.wsgi_file_path = Path(tempfile.NamedTemporaryFile().name)
+
+        project.update_wsgi_file()
+
+        print(open(project.wsgi_file_path).read())
+        subprocess.check_output([project.virtualenv_path / 'bin/python', project.wsgi_file_path])
+
+
+    @pytest.mark.slowtest
+    def test_actually_produces_wsgi_file_that_can_import_nested_project(
+        self, fake_home, more_nested_submodule, virtualenvs_folder
+    ):
+        project = DjangoProject('mydomain.com')
+        shutil.copytree(more_nested_submodule, project.project_path)
+        project.create_virtualenv('3.6')
+        project.find_django_files()
+        project.wsgi_file_path = Path(tempfile.NamedTemporaryFile().name)
+
+        project.update_wsgi_file()
+
+        print(open(project.wsgi_file_path).read())
+        subprocess.check_output([project.virtualenv_path / 'bin/python', project.wsgi_file_path])
+
 
 
 

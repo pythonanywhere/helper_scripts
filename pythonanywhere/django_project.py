@@ -116,7 +116,7 @@ class DjangoProject:
         print(snakesay(f'Updating wsgi file at {self.wsgi_file_path}'))
         template = open(Path(__file__).parent / 'wsgi_file_template.py').read()
         with open(self.wsgi_file_path, 'w') as f:
-            f.write(template.format(project_path=self.project_path))
+            f.write(template.format(project=self))
 
 
     def create_webapp(self, nuke):

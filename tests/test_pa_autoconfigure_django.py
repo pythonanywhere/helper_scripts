@@ -79,7 +79,6 @@ class TestMain:
 
 
 def xtest_todos():
-    assert not 'correct working dir / sys.path for nested projects'
     assert not 'existing-project sanity checks eg requirements empty'
     assert not 'nuke option shouldnt barf if nothing to nuke'
     assert not 'SECRET_KEY'
