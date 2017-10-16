@@ -20,6 +20,7 @@ class TestMain:
             call.sanity_checks(nuke='nuke option'),
             call.create_virtualenv('python.version', 'django.version', nuke='nuke option'),
             call.run_startproject(nuke='nuke option'),
+            call.find_django_files(),
             call.update_settings_file(),
             call.run_collectstatic(),
             call.create_webapp(nuke='nuke option'),

@@ -32,6 +32,7 @@ def main(repo_url, domain, python_version, nuke):
     project.sanity_checks(nuke=nuke)
     project.download_repo(repo_url, nuke=nuke),
     project.create_virtualenv(python_version, nuke=nuke)
+    project.find_django_files()
     project.update_settings_file()
     project.run_collectstatic()
     project.create_webapp(nuke=nuke)

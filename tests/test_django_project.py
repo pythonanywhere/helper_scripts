@@ -4,6 +4,8 @@ import os
 import tempfile
 from textwrap import dedent
 import pytest
+import shutil
+import subprocess
 
 import pythonanywhere.django_project
 from pythonanywhere.django_project import DjangoProject
@@ -205,14 +207,76 @@ class TestRunStartproject:
         assert not old_file.exists()
 
 
+@pytest.fixture
+def non_nested_submodule():
+    subprocess.check_call(['git', 'submodule', 'update', '--init', '--recursive'])
+    submodule_path = Path(__file__).parents[1] / 'submodules' / 'example-django-project'
+    subprocess.check_call(
+        ['git', 'checkout', 'master'],
+        cwd=submodule_path
+    )
+    yield submodule_path
+    subprocess.check_call(
+        ['git', 'checkout', 'master'],
+        cwd=submodule_path
+    )
+
+
+
+
+class TestFindDjangoFiles:
+
+    def test_non_nested(self, fake_home, non_nested_submodule):
+        project = DjangoProject('mydomain.com')
+        shutil.copytree(non_nested_submodule, project.project_path)
+        expected_settings_path = project.project_path / 'myproject/settings.py'
+        assert expected_settings_path.exists()
+        expected_manage_py = project.project_path / 'manage.py'
+        assert expected_manage_py.exists()
+
+        project.find_django_files()
+
+        assert project.settings_path == expected_settings_path
+        assert project.manage_py_path == expected_manage_py
+
+
+    def test_raises_if_empty_project_folder(self, fake_home):
+        project = DjangoProject('mydomain.com')
+        with pytest.raises(SanityException) as e:
+            project.find_django_files()
+
+        assert 'Could not find your settings.py' in str(e.value)
+
+
+    def test_raises_if_no_settings_in_any_subfolders(self, fake_home):
+        project = DjangoProject('mydomain.com')
+        not_this_folder = project.project_path / 'not_this_folder'
+        not_this_folder.mkdir(parents=True)
+        with pytest.raises(SanityException) as e:
+            project.find_django_files()
+
+        assert 'Could not find your settings.py' in str(e.value)
+
+
+    def test_raises_if_manage_py_not_found(self, fake_home, non_nested_submodule):
+        project = DjangoProject('mydomain.com')
+        shutil.copytree(non_nested_submodule, project.project_path)
+        expected_manage_py = project.project_path / 'manage.py'
+        assert expected_manage_py.exists()
+        expected_manage_py.unlink()
+        with pytest.raises(SanityException) as e:
+            project.find_django_files()
+
+        assert 'Could not find your manage.py' in str(e.value)
+
 
 class TestUpdateSettingsFile:
 
     def test_adds_STATIC_and_MEDIA_config_to_settings(self):
         project = DjangoProject('mydomain.com')
-        project.project_path = Path(tempfile.mkdtemp())
-        (project.project_path / 'mysite').mkdir(parents=True)
-        with open(project.project_path / 'mysite/settings.py', 'w') as f:
+        project.settings_path = Path(tempfile.NamedTemporaryFile().name)
+
+        with open(project.settings_path, 'w') as f:
             f.write(dedent(
                 """
                 # settings file
@@ -223,10 +287,9 @@ class TestUpdateSettingsFile:
 
         project.update_settings_file()
 
-        with open(project.project_path / 'mysite/settings.py') as f:
-            contents = f.read()
+        with open(project.settings_path) as f:
+            lines = f.read().split('\n')
 
-        lines = contents.split('\n')
         assert "STATIC_URL = '/static/'" in lines
         assert "MEDIA_URL = '/media/'" in lines
         assert "STATIC_ROOT = os.path.join(BASE_DIR, 'static')" in lines
@@ -235,9 +298,9 @@ class TestUpdateSettingsFile:
 
     def test_adds_domain_to_ALLOWED_HOSTS(self):
         project = DjangoProject('mydomain.com')
-        project.project_path = Path(tempfile.mkdtemp())
-        (project.project_path / 'mysite').mkdir(parents=True)
-        with open(project.project_path / 'mysite/settings.py', 'w') as f:
+        project.settings_path = Path(tempfile.NamedTemporaryFile().name)
+
+        with open(project.settings_path, 'w') as f:
             f.write(dedent(
                 """
                 # settings file
@@ -248,10 +311,8 @@ class TestUpdateSettingsFile:
 
         project.update_settings_file()
 
-        with open(project.project_path / 'mysite/settings.py') as f:
-            contents = f.read()
-
-        lines = contents.split('\n')
+        with open(project.settings_path) as f:
+            lines = f.read().split('\n')
 
         assert "ALLOWED_HOSTS = ['mydomain.com']" in lines
 
@@ -261,10 +322,14 @@ class TestRunCollectStatic:
 
     def test_runs_manage_py_in_correct_virtualenv(self, mock_subprocess, fake_home):
         project = DjangoProject('mydomain.com')
-        project.virtualenv_path = '/path/to/virtualenv'
+        project.virtualenv_path = Path('/path/to/virtualenv')
+        project.manage_py_path = Path('/path/to/manage.py')
         project.run_collectstatic()
         assert mock_subprocess.check_call.call_args == call([
-            Path(project.virtualenv_path) / 'bin/python', project.project_path / 'manage.py', 'collectstatic', '--noinput'
+            project.virtualenv_path / 'bin/python',
+            project.manage_py_path,
+            'collectstatic',
+            '--noinput'
         ])
 
 

@@ -2,6 +2,7 @@ from pathlib import Path
 import shutil
 import subprocess
 from textwrap import dedent
+import os
 
 from pythonanywhere.api import Webapp
 from pythonanywhere.exceptions import SanityException
@@ -70,10 +71,27 @@ class DjangoProject:
         ])
 
 
+    def find_django_files(self):
+        try:
+            for subfolder in self.project_path.iterdir():
+                if subfolder.is_dir():
+                    if 'settings.py' in os.listdir(subfolder):
+                        self.settings_path = subfolder / 'settings.py'
+            if 'manage.py' in os.listdir(self.project_path):
+                self.manage_py_path = self.project_path / 'manage.py'
+
+        except FileNotFoundError:
+            raise SanityException('Could not find your settings.py')
+        if not hasattr(self, 'settings_path'):
+            raise SanityException('Could not find your settings.py')
+        if not hasattr(self, 'manage_py_path'):
+            raise SanityException('Could not find your manage.py')
+
+
     def update_settings_file(self):
         print(snakesay('Updating settings.py'))
 
-        with open(self.project_path / 'mysite/settings.py') as f:
+        with open(self.settings_path) as f:
             settings = f.read()
         new_settings = settings.replace(
             'ALLOWED_HOSTS = []',
@@ -86,7 +104,7 @@ class DjangoProject:
             MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
             """
         )
-        with open(self.project_path / 'mysite' / 'settings.py', 'w') as f:
+        with open(self.settings_path, 'w') as f:
             f.write(new_settings)
 
 
@@ -94,7 +112,7 @@ class DjangoProject:
         print(snakesay('Running collectstatic'))
         subprocess.check_call([
             Path(self.virtualenv_path) / 'bin/python',
-            self.project_path / 'manage.py',
+            self.manage_py_path,
             'collectstatic',
             '--noinput',
         ])
