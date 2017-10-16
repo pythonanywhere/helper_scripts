@@ -23,12 +23,13 @@ class TestDjangoProject:
 
 class TestCreateVirtualenv:
 
-    def xtest_calls_create_virtualenv_with_latest_django_by_default(self):
+    def test_calls_create_virtualenv_with_latest_django_by_default(self):
         project = DjangoProject('mydomain.com')
+        project.python_version = 'python.version'
         with patch('pythonanywhere.django_project.create_virtualenv') as mock_create_virtualenv:
             project.create_virtualenv()
         assert mock_create_virtualenv.call_args == call(
-            project.domain, python_version, 'django', nuke=False
+            project.domain, 'python.version', 'django', nuke=False
         )
 
 

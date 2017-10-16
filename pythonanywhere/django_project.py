@@ -4,6 +4,7 @@ import subprocess
 from textwrap import dedent
 
 from pythonanywhere.snakesay import snakesay
+from pythonanywhere.virtualenvs import create_virtualenv
 
 
 class DjangoProject:
@@ -12,6 +13,11 @@ class DjangoProject:
         self.domain = domain
         self.project_path = Path('~/').expanduser() / self.domain
         self.wsgi_file_path = '/var/www/' + domain.replace('.', '_') + '_wsgi.py'
+
+
+    def create_virtualenv(self):
+        create_virtualenv(self.domain, self.python_version, 'django', nuke=False)
+
 
 
     def run_startproject(self, nuke):
