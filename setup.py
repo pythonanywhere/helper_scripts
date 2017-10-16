@@ -38,7 +38,7 @@ setup(
     entry_points={},
     scripts=[
         'scripts/pa_start_django_webapp_with_virtualenv.py',
-        'scripts/pa_autoconfigure_webapp.py',
+        'scripts/pa_autoconfigure_django.py',
         'pythonanywhere/snakesay.py',
     ]
 )

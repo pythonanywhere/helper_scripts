@@ -4,7 +4,7 @@ import os
 from pathlib import Path
 import pytest
 
-from scripts.pa_autoconfigure_webapp import main, download_repo
+from scripts.pa_autoconfigure_django import main, download_repo
 
 
 @pytest.fixture
@@ -23,7 +23,7 @@ def mock_main_functions():
     for function in functions:
         mock = getattr(mocks, function)
         patcher = patch(
-            'scripts.pa_autoconfigure_webapp.{}'.format(function),
+            'scripts.pa_autoconfigure_django.{}'.format(function),
             mock
         )
         patchers.append(patcher)
@@ -71,7 +71,7 @@ class TestMain:
 
 
     def test_lowercases_username(self, mock_main_functions):
-        with patch('scripts.pa_autoconfigure_webapp.getpass') as mock_getpass:
+        with patch('scripts.pa_autoconfigure_django.getpass') as mock_getpass:
             mock_getpass.getuser.return_value = 'UserName1'
             main('a-url', 'your-username.pythonanywhere.com', 'python.version', 'nukey')
             assert mock_main_functions.sanity_checks.call_args == call(

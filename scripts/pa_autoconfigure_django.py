@@ -1,14 +1,14 @@
 #!/usr/bin/python3.6
-"""Autoconfigure a web app based on a github URL.
+"""Autoconfigure a Django project from on a github URL.
 
 - downloads the repo
-- detects a requirements.txt and installs it into a virtualenv
-- autodetects django / flask and creates wsgi configuration for them
+- creates a virtualenv and installs django (or detects a requirements.txt if available)
+- creates webapp via api
+- creates django wsgi configuration file
 - adds static files config
-- adds placeholders for any detected environment variables
 
 Usage:
-  pa_autoconfigure_webapp.py <git-repo-url> [--domain=<domain> --python=<python-version>] [--nuke]
+  pa_autoconfigure_django.py <git-repo-url> [--domain=<domain> --python=<python-version>] [--nuke]
 
 Options:
   --domain=<domain>         Domain name, eg www.mydomain.com   [default: your-username.pythonanywhere.com]
