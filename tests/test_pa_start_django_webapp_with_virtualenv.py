@@ -45,25 +45,13 @@ class TestMain:
 
 
     @pytest.mark.slowtest
-    def test_creates_django_project_in_virtualenv_with_hacked_settings_and_static_files(
-        self, fake_home, virtualenvs_folder, api_responses, api_token
+    def test_actually_creates_django_project_in_virtualenv_with_hacked_settings_and_static_files(
+        self, fake_home, virtualenvs_folder, api_token
     ):
 
-        webapps_url = API_ENDPOINT.format(username=getpass.getuser())
-        webapp_url = API_ENDPOINT.format(username=getpass.getuser()) + 'mydomain.com/'
-        reload_url = webapp_url + 'reload/'
-        static_url = API_ENDPOINT.format(username=getpass.getuser()) + 'mydomain.com/static_files/'
-
-        api_responses.add(responses.GET, webapp_url, status=404)
-        api_responses.add(responses.POST, webapps_url, status=201, body=json.dumps({'status': 'OK'}))
-        api_responses.add(responses.PATCH, webapp_url, status=200)
-        api_responses.add(responses.POST, reload_url, status=200, body=json.dumps({'status': 'OK'}))
-        api_responses.add(responses.POST, static_url, status=201)
-        api_responses.add(responses.POST, static_url, status=201)
-
-
         with patch('scripts.pa_start_django_webapp_with_virtualenv.DjangoProject.update_wsgi_file'):
-            main('mydomain.com', '1.9.2', '2.7', nuke=False)
+            with patch('pythonanywhere.api.call_api'):
+                main('mydomain.com', '1.9.2', '2.7', nuke=False)
 
         django_version = subprocess.check_output([
             virtualenvs_folder / 'mydomain.com/bin/python',
@@ -82,27 +70,13 @@ class TestMain:
 
     @pytest.mark.slowtest
     def test_nuke_option_lets_you_run_twice(
-        self, fake_home, virtualenvs_folder, api_responses, api_token
+        self, fake_home, virtualenvs_folder, api_token
     ):
 
-        webapps_url = API_ENDPOINT.format(username=getpass.getuser())
-        webapp_url = API_ENDPOINT.format(username=getpass.getuser()) + 'mydomain.com/'
-        reload_url = webapp_url + 'reload/'
-        static_files_url = webapp_url + 'static_files/'
-
-        api_responses.add(responses.GET, webapp_url, status=404)
-        api_responses.add(responses.POST, webapps_url, status=201, body=json.dumps({'status': 'OK'}))
-        api_responses.add(responses.PATCH, webapp_url, status=200)
-        api_responses.add(responses.POST, reload_url, status=200, body=json.dumps({'status': 'OK'}))
-        api_responses.add(responses.POST, static_files_url, status=201)
-        api_responses.add(responses.POST, static_files_url, status=201)
-
         with patch('scripts.pa_start_django_webapp_with_virtualenv.DjangoProject.update_wsgi_file'):
-            main('mydomain.com', '1.9.2', '2.7', nuke=False)
-
-            api_responses.add(responses.DELETE, webapp_url, status=200)
-
-            main('mydomain.com', '1.11.3', '3.6', nuke=True)
+            with patch('pythonanywhere.api.call_api'):
+                main('mydomain.com', '1.9.2', '2.7', nuke=False)
+                main('mydomain.com', '1.11.3', '3.6', nuke=True)
 
         django_version = subprocess.check_output([
             virtualenvs_folder / 'mydomain.com/bin/python',
