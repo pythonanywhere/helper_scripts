@@ -80,7 +80,10 @@ class TestMain:
 
 def xtest_todos():
     assert not 'existing-project sanity checks eg requirements empty'
+    assert not 'find better-hidden requirements files?'
+    assert not 'what happens if eg collecstatic barfs bc they need to set env vars. shld fail gracefully'
     assert not 'nuke option shouldnt barf if nothing to nuke'
-    assert not 'SECRET_KEY'
+    assert not 'detect use of env vars??'
+    assert not 'SECRET_KEY?'
     assert not 'database stuff?'
 
