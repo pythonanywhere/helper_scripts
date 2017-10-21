@@ -1,6 +1,12 @@
 # PythonAnywhere helper scripts
 
-These scripts are made available in */bin* on [PythonAnywhere](https://www.pythonanywhere.com/)
+These scripts are designed to be run from PythonAnywhere consoles
+
+
+## Installing
+
+
+    pip3.6 install --user pythonanywhere
 
 
 ## Contributing
