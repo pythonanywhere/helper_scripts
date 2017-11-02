@@ -52,10 +52,11 @@ def virtualenvs_folder():
     old_virtualenvs = set(Path(actual_virtualenvs).iterdir())
 
     tempdir = _get_temp_dir()
-    old_workon = os.environ['WORKON_HOME']
+    old_workon = os.environ.get('WORKON_HOME')
     os.environ['WORKON_HOME'] = str(tempdir)
     yield tempdir
-    os.environ['WORKON_HOME'] = old_workon
+    if old_workon:
+        os.environ['WORKON_HOME'] = old_workon
     shutil.rmtree(tempdir)
 
     new_envs = set(actual_virtualenvs.iterdir()) - set(old_virtualenvs)
