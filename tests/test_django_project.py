@@ -102,7 +102,7 @@ class TestDownloadRepo:
         )
 
 
-    def test_nuke_option(self, mock_subprocess, fake_home):
+    def test_nuke_option_deletes_directory_first(self, mock_subprocess, fake_home):
         project = DjangoProject('www.a.domain.com')
         project.project_path.mkdir()
         (project.project_path / 'old-thing.txt').touch()
@@ -111,6 +111,14 @@ class TestDownloadRepo:
         project.download_repo('repo', nuke=True)
         assert 'old-thing.txt' not in project.project_path.iterdir()
 
+
+    def test_nuke_option_ignores_directory_doesnt_exist(self, mock_subprocess, fake_home):
+        project = DjangoProject('www.a.domain.com')
+        mock_subprocess.check_call.side_effect = lambda *_, **__: Path(project.project_path).mkdir()
+
+        project.download_repo('repo', nuke=True)  # should not raise
+
+        assert project.project_path.is_dir()
 
 
 class TestDetectDjangoVersion:
@@ -199,12 +207,18 @@ class TestRunStartproject:
         project.virtualenv_path = '/path/to/virtualenv'
         (fake_home / project.domain).mkdir()
         old_file = fake_home / project.domain / 'old_file.py'
-        with open(old_file, 'w') as f:
-            f.write('old stuff')
+        old_file.write_text('old stuff')
 
-        project.run_startproject(nuke=True)  # should not raise
+        project.run_startproject(nuke=True)
 
         assert not old_file.exists()
+
+
+    def test_nuke_option_handles_directory_not_existing(self, mock_subprocess, fake_home):
+        project = DjangoProject('mydomain.com')
+        project.virtualenv_path = '/path/to/virtualenv'
+        project.run_startproject(nuke=True)  # should not raise
+
 
 
 @pytest.fixture

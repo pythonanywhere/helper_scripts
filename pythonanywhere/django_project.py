@@ -32,7 +32,7 @@ class DjangoProject:
 
 
     def download_repo(self, repo, nuke):
-        if nuke:
+        if nuke and self.project_path.exists():
             shutil.rmtree(self.project_path)
         subprocess.check_call(['git', 'clone', repo, self.project_path])
 
@@ -60,7 +60,7 @@ class DjangoProject:
 
     def run_startproject(self, nuke):
         print(snakesay('Starting Django project'))
-        if nuke:
+        if nuke and self.project_path.exists():
             shutil.rmtree(self.project_path)
         self.project_path.mkdir()
         subprocess.check_call([
