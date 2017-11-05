@@ -67,20 +67,6 @@ def virtualenvs_folder():
 
 
 @pytest.fixture
-def test_virtualenv(virtualenvs_folder):
-    virtualenv_name = Path(tempfile.NamedTemporaryFile().name).name
-    subprocess.check_output([
-        'bash', '-c',
-        'source virtualenvwrapper.sh && mkvirtualenv {} && pip install django==1.8.7'.format(
-            virtualenv_name
-        )
-    ])
-    return virtualenvs_folder / virtualenv_name
-
-
-
-
-@pytest.fixture
 def mock_subprocess():
     mock = Mock()
     with patch('subprocess.check_call') as mock_check_call:
