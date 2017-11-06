@@ -35,6 +35,7 @@ def main(repo_url, domain, python_version, nuke):
     project.find_django_files()
     project.update_settings_file()
     project.run_collectstatic()
+    project.run_migrate()
     project.create_webapp(nuke=nuke)
     project.update_wsgi_file()
     project.add_static_file_mappings()

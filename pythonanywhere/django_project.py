@@ -2,7 +2,6 @@ from pathlib import Path
 import shutil
 import subprocess
 from textwrap import dedent
-import os
 
 from pythonanywhere.api import Webapp
 from pythonanywhere.exceptions import SanityException
@@ -109,6 +108,15 @@ class DjangoProject:
             self.manage_py_path,
             'collectstatic',
             '--noinput',
+        ])
+
+
+    def run_migrate(self):
+        print(snakesay('Running migrate database'))
+        subprocess.check_call([
+            Path(self.virtualenv_path) / 'bin/python',
+            self.manage_py_path,
+            'migrate',
         ])
 
 

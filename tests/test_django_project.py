@@ -371,6 +371,19 @@ class TestRunCollectStatic:
         ])
 
 
+class TestRunMigrate:
+
+    def test_runs_manage_py_in_correct_virtualenv(self, mock_subprocess, fake_home):
+        project = DjangoProject('mydomain.com')
+        project.virtualenv_path = Path('/path/to/virtualenv')
+        project.manage_py_path = Path('/path/to/manage.py')
+        project.run_migrate()
+        assert mock_subprocess.check_call.call_args == call([
+            project.virtualenv_path / 'bin/python',
+            project.manage_py_path,
+            'migrate',
+        ])
+
 
 class TestUpdateWsgiFile:
 

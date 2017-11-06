@@ -4,6 +4,7 @@ import os
 import pytest
 import subprocess
 import requests
+import time
 
 from scripts.pa_autoconfigure_django import main
 
@@ -22,6 +23,7 @@ class TestMain:
             call.find_django_files(),
             call.update_settings_file(),
             call.run_collectstatic(),
+            call.run_migrate(),
             call.create_webapp(nuke='nuke option'),
             call.update_wsgi_file(),
             call.add_static_file_mappings(),
@@ -83,7 +85,7 @@ class TestMain:
             'runserver'
         ])
         process_killer.append(server)
-        import time; time.sleep(2)
+        time.sleep(1)
         response = requests.get('http://localhost:8000/', headers={'HOST': 'mydomain.com'})
         assert 'Hello from an example django project' in response.text
 
