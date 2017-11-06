@@ -3,6 +3,7 @@ import getpass
 import os
 import pytest
 import subprocess
+import requests
 
 from scripts.pa_autoconfigure_django import main
 
@@ -48,7 +49,9 @@ class TestMain:
 
 
     @pytest.mark.slowtest
-    def test_actually_works_against_example_repo(self, fake_home, virtualenvs_folder, api_token):
+    def test_actually_works_against_example_repo(
+        self, fake_home, virtualenvs_folder, api_token, process_killer
+    ):
         repo = 'https://github.com/hjwp/example-django-project.git'
         domain = 'mydomain.com'
         with patch('scripts.pa_autoconfigure_django.DjangoProject.update_wsgi_file'):
@@ -74,6 +77,15 @@ class TestMain:
         assert "ALLOWED_HOSTS = ['mydomain.com']" in lines
 
         assert 'base.css' in os.listdir(fake_home / domain / 'static/admin/css')
+        server = subprocess.Popen([
+            expected_virtualenv / 'bin/python',
+            expected_project_path / 'manage.py',
+            'runserver'
+        ])
+        process_killer.append(server)
+        import time; time.sleep(2)
+        response = requests.get('http://localhost:8000/', headers={'HOST': 'mydomain.com'})
+        assert 'Hello from an example django project' in response.text
 
 
 
