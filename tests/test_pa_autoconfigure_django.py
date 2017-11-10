@@ -18,15 +18,15 @@ class TestMain:
         assert mock_DjangoProject.call_args == call('www.domain.com')
         assert mock_DjangoProject.return_value.method_calls == [
             call.sanity_checks(nuke='nuke option'),
-            call.download_repo('repo.url', nuke='nuke option'),
+            call.create_webapp(nuke='nuke option'),
+            call.add_static_file_mappings(),
             call.create_virtualenv('python.version', nuke='nuke option'),
+            call.download_repo('repo.url', nuke='nuke option'),
             call.find_django_files(),
+            call.update_wsgi_file(),
             call.update_settings_file(),
             call.run_collectstatic(),
             call.run_migrate(),
-            call.create_webapp(nuke='nuke option'),
-            call.update_wsgi_file(),
-            call.add_static_file_mappings(),
             call.webapp.reload()
         ]
 

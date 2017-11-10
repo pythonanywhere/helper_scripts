@@ -30,15 +30,15 @@ def main(repo_url, domain, python_version, nuke):
 
     project = DjangoProject(domain)
     project.sanity_checks(nuke=nuke)
-    project.download_repo(repo_url, nuke=nuke),
+    project.create_webapp(nuke=nuke)
+    project.add_static_file_mappings()
     project.create_virtualenv(python_version, nuke=nuke)
+    project.download_repo(repo_url, nuke=nuke),
     project.find_django_files()
+    project.update_wsgi_file()
     project.update_settings_file()
     project.run_collectstatic()
     project.run_migrate()
-    project.create_webapp(nuke=nuke)
-    project.update_wsgi_file()
-    project.add_static_file_mappings()
     project.webapp.reload()
 
     print(snakesay(f'All done!  Your site is now live at https://{domain}'))
