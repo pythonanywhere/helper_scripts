@@ -3,6 +3,7 @@ from pythonanywhere.api import Webapp
 from pythonanywhere.exceptions import SanityException
 from pythonanywhere.virtualenvs import virtualenv_path
 
+
 class Virtualenv:
     def __init__(self, domain):
         self.domain = domain
@@ -14,8 +15,9 @@ class Virtualenv:
 
 
 class Project:
-    def __init__(self, domain):
+    def __init__(self, domain, python_version):
         self.domain = domain
+        self.python_version = python_version
         self.project_path = Path(f'~/{domain}').expanduser()
         self.virtualenv = Virtualenv(self.domain)
         self.virtualenv_path = virtualenv_path(domain)
@@ -43,5 +45,4 @@ class Project:
 
     def add_static_file_mappings(self):
         self.webapp.add_default_static_files_mappings(self.project_path)
-
 

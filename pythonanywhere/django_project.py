@@ -3,34 +3,13 @@ import shutil
 import subprocess
 from textwrap import dedent
 
-from pythonanywhere.api import Webapp
 from pythonanywhere.exceptions import SanityException
 from pythonanywhere.snakesay import snakesay
-from pythonanywhere.virtualenvs import create_virtualenv, virtualenv_path
+from pythonanywhere.virtualenvs import create_virtualenv
+from .project import Project
 
 
-class DjangoProject:
-
-    def __init__(self, domain, python_version):
-        self.domain = domain
-        self.python_version = python_version
-        self.domain = domain
-        self.project_path = Path('~/').expanduser() / self.domain
-        self.wsgi_file_path = '/var/www/' + domain.replace('.', '_') + '_wsgi.py'
-        self.webapp = Webapp(domain)
-        self.virtualenv_path = virtualenv_path(domain)
-
-
-    def sanity_checks(self, nuke):
-        self.webapp.sanity_checks(nuke=nuke)
-        if nuke:
-            return
-        if self.virtualenv_path.exists():
-            raise SanityException(f'You already have a virtualenv for {self.domain}.\n\nUse the --nuke option if you want to replace it.')
-        if self.project_path.exists():
-            raise SanityException(f'You already have a project folder at {self.project_path}.\n\nUse the --nuke option if you want to replace it.')
-
-
+class DjangoProject(Project):
 
     def download_repo(self, repo, nuke):
         if nuke and self.project_path.exists():
@@ -126,13 +105,4 @@ class DjangoProject:
         template = open(Path(__file__).parent / 'wsgi_file_template.py').read()
         with open(self.wsgi_file_path, 'w') as f:
             f.write(template.format(project=self))
-
-
-    def create_webapp(self, nuke):
-        self.webapp.create(self.python_version, self.virtualenv_path, self.project_path, nuke=nuke)
-
-
-    def add_static_file_mappings(self):
-        self.webapp.add_default_static_files_mappings(self.project_path)
-
 
