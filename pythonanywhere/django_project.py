@@ -11,7 +11,9 @@ from pythonanywhere.virtualenvs import create_virtualenv, virtualenv_path
 
 class DjangoProject:
 
-    def __init__(self, domain):
+    def __init__(self, domain, python_version):
+        self.domain = domain
+        self.python_version = python_version
         self.domain = domain
         self.project_path = Path('~/').expanduser() / self.domain
         self.wsgi_file_path = '/var/www/' + domain.replace('.', '_') + '_wsgi.py'
@@ -36,7 +38,7 @@ class DjangoProject:
         subprocess.check_call(['git', 'clone', repo, self.project_path])
 
 
-    def create_virtualenv(self, python_version, django_version=None, nuke=False):
+    def create_virtualenv(self, django_version=None, nuke=False):
         if django_version is None:
             packages = self.detect_django_version()
         elif django_version == 'latest':
@@ -44,9 +46,8 @@ class DjangoProject:
         else:
             packages = f'django=={django_version}'
         self.virtualenv_path = create_virtualenv(
-            self.domain, python_version, packages, nuke=nuke
+            self.domain, self.python_version, packages, nuke=nuke
         )
-        self.python_version = python_version
 
 
     def detect_django_version(self):

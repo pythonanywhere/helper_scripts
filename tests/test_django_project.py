@@ -18,22 +18,22 @@ from pythonanywhere.virtualenvs import virtualenv_path
 class TestDjangoProject:
 
     def test_project_path(self, fake_home):
-        project = DjangoProject('mydomain.com')
+        project = DjangoProject('mydomain.com', 'python.version')
         assert project.project_path == fake_home / 'mydomain.com'
 
 
     def test_wsgi_file_path(self, fake_home):
-        project = DjangoProject('mydomain.com')
+        project = DjangoProject('mydomain.com', 'python.version')
         assert project.wsgi_file_path == '/var/www/mydomain_com_wsgi.py'
 
 
     def test_webapp(self, fake_home):
-        project = DjangoProject('mydomain.com')
+        project = DjangoProject('mydomain.com', 'python.version')
         assert project.webapp == Webapp('mydomain.com')
 
 
     def test_virtualenv_path(self, fake_home):
-        project = DjangoProject('mydomain.com')
+        project = DjangoProject('mydomain.com', 'python.version')
         assert project.virtualenv_path == virtualenv_path('mydomain.com')
 
 
@@ -41,14 +41,14 @@ class TestDjangoProject:
 class TestSanityChecks:
 
     def test_calls_webapp_sanity_checks(self, fake_home):
-        project = DjangoProject('mydomain.com')
+        project = DjangoProject('mydomain.com', 'python.version')
         project.webapp.sanity_checks = Mock()
         project.sanity_checks(nuke='nuke.option')
         assert project.webapp.sanity_checks.call_args == call(nuke='nuke.option')
 
 
     def test_raises_if_virtualenv_exists(self, fake_home, virtualenvs_folder):
-        project = DjangoProject('mydomain.com')
+        project = DjangoProject('mydomain.com', 'python.version')
         project.webapp.sanity_checks = Mock()
         project.virtualenv_path.mkdir()
 
@@ -60,7 +60,7 @@ class TestSanityChecks:
 
 
     def test_raises_if_project_path_exists(self, fake_home, virtualenvs_folder):
-        project = DjangoProject('mydomain.com')
+        project = DjangoProject('mydomain.com', 'python.version')
         project.webapp.sanity_checks = Mock()
         project.project_path.mkdir()
 
@@ -73,7 +73,7 @@ class TestSanityChecks:
 
 
     def test_nuke_option_overrides_directory_checks(self, fake_home, virtualenvs_folder):
-        project = DjangoProject('mydomain.com')
+        project = DjangoProject('mydomain.com', 'python.version')
         project.webapp.sanity_checks = Mock()
         project.project_path.mkdir()
         project.virtualenv_path.mkdir()
@@ -87,7 +87,7 @@ class TestDownloadRepo:
     @pytest.mark.slowtest
     def test_actually_downloads_repo(self, fake_home):
         repo = 'https://gist.github.com/hjwp/4173bcface139beb7632ec93726f91ea'
-        project = DjangoProject('www.a.domain.com')
+        project = DjangoProject('www.a.domain.com', 'py.version')
         project.download_repo(repo, nuke=False)
         assert project.project_path.is_dir()
         assert 'file1.py' in os.listdir(project.project_path)
@@ -95,7 +95,7 @@ class TestDownloadRepo:
 
 
     def test_calls_git_subprocess(self, mock_subprocess, fake_home):
-        project = DjangoProject('www.a.domain.com')
+        project = DjangoProject('www.a.domain.com', 'py.version')
         project.download_repo('repo', nuke=False)
         assert mock_subprocess.check_call.call_args == call(
             ['git', 'clone', 'repo', project.project_path]
@@ -103,7 +103,7 @@ class TestDownloadRepo:
 
 
     def test_nuke_option_deletes_directory_first(self, mock_subprocess, fake_home):
-        project = DjangoProject('www.a.domain.com')
+        project = DjangoProject('www.a.domain.com', 'py.version')
         project.project_path.mkdir()
         (project.project_path / 'old-thing.txt').touch()
         mock_subprocess.check_call.side_effect = lambda *_, **__: Path(project.project_path).mkdir()
@@ -113,7 +113,7 @@ class TestDownloadRepo:
 
 
     def test_nuke_option_ignores_directory_doesnt_exist(self, mock_subprocess, fake_home):
-        project = DjangoProject('www.a.domain.com')
+        project = DjangoProject('www.a.domain.com', 'py.version')
         mock_subprocess.check_call.side_effect = lambda *_, **__: Path(project.project_path).mkdir()
 
         project.download_repo('repo', nuke=True)  # should not raise
@@ -124,12 +124,12 @@ class TestDownloadRepo:
 class TestDetectDjangoVersion:
 
     def test_is_django_by_default(self, fake_home):
-        project = DjangoProject('mydomain.com')
+        project = DjangoProject('mydomain.com', 'python.version')
         assert project.detect_django_version() == 'django'
 
 
     def test_if_requirements_txt_exists(self, fake_home):
-        project = DjangoProject('mydomain.com')
+        project = DjangoProject('mydomain.com', 'python.version')
         project.project_path.mkdir()
         requirements_txt = project.project_path / 'requirements.txt'
         requirements_txt.touch()
@@ -139,59 +139,53 @@ class TestDetectDjangoVersion:
 class TestCreateVirtualenv:
 
     def test_calls_create_virtualenv(self):
-        project = DjangoProject('mydomain.com')
+        project = DjangoProject('mydomain.com', 'python.version')
         with patch('pythonanywhere.django_project.create_virtualenv') as mock_create_virtualenv:
-            project.create_virtualenv('python.version', 'django.version', nuke='nuke option')
+            project.create_virtualenv('django.version', nuke='nuke option')
         assert mock_create_virtualenv.call_args == call(
-            project.domain, 'python.version', 'django==django.version', nuke='nuke option'
+            project.domain, project.python_version, 'django==django.version', nuke='nuke option'
         )
 
 
     def test_special_cases_latest_django_version(self):
-        project = DjangoProject('mydomain.com')
+        project = DjangoProject('mydomain.com', 'python.version')
         with patch('pythonanywhere.django_project.create_virtualenv') as mock_create_virtualenv:
-            project.create_virtualenv('python.version', django_version='latest', nuke='nuke option')
+            project.create_virtualenv(django_version='latest', nuke='nuke option')
         assert mock_create_virtualenv.call_args == call(
-            project.domain, 'python.version', 'django', nuke='nuke option'
+            project.domain, project.python_version, 'django', nuke='nuke option'
         )
 
 
     def test_uses_detect_if_django_version_not_specified(self):
-        project = DjangoProject('mydomain.com')
+        project = DjangoProject('mydomain.com', 'python.version')
         project.detect_django_version = Mock()
         with patch('pythonanywhere.django_project.create_virtualenv') as mock_create_virtualenv:
-            project.create_virtualenv('python.version', nuke='nuke option')
+            project.create_virtualenv(nuke='nuke option')
         assert mock_create_virtualenv.call_args == call(
-            project.domain, 'python.version', project.detect_django_version.return_value, nuke='nuke option'
+            project.domain, project.python_version, project.detect_django_version.return_value, nuke='nuke option'
         )
 
 
     def test_sets_virtualenv_attribute(self):
-        project = DjangoProject('mydomain.com')
+        project = DjangoProject('mydomain.com', 'python.version')
         with patch('pythonanywhere.django_project.create_virtualenv') as mock_create_virtualenv:
-            project.create_virtualenv('python.version', django_version='django.version', nuke='nuke option')
+            project.create_virtualenv(django_version='django.version', nuke='nuke option')
         assert project.virtualenv_path == mock_create_virtualenv.return_value
 
-
-    def test_sets_python_version_attribute(self):
-        project = DjangoProject('mydomain.com')
-        with patch('pythonanywhere.django_project.create_virtualenv'):
-            project.create_virtualenv('python.version', django_version='django.version', nuke='nuke option')
-        assert project.python_version == 'python.version'
 
 
 
 class TestRunStartproject:
 
     def test_creates_folder(self, mock_subprocess, fake_home):
-        project = DjangoProject('mydomain.com')
+        project = DjangoProject('mydomain.com', 'python.version')
         project.virtualenv_path = '/path/to/virtualenv'
         project.run_startproject(nuke=False)
         assert (fake_home / 'mydomain.com').is_dir()
 
 
     def test_calls_startproject(self, mock_subprocess, fake_home):
-        project = DjangoProject('mydomain.com')
+        project = DjangoProject('mydomain.com', 'python.version')
         project.virtualenv_path = '/path/to/virtualenv'
         project.run_startproject(nuke=False)
         assert mock_subprocess.check_call.call_args == call([
@@ -203,7 +197,7 @@ class TestRunStartproject:
 
 
     def test_nuke_option_deletes_directory_first(self, mock_subprocess, fake_home):
-        project = DjangoProject('mydomain.com')
+        project = DjangoProject('mydomain.com', 'python.version')
         project.virtualenv_path = '/path/to/virtualenv'
         (fake_home / project.domain).mkdir()
         old_file = fake_home / project.domain / 'old_file.py'
@@ -215,7 +209,7 @@ class TestRunStartproject:
 
 
     def test_nuke_option_handles_directory_not_existing(self, mock_subprocess, fake_home):
-        project = DjangoProject('mydomain.com')
+        project = DjangoProject('mydomain.com', 'python.version')
         project.virtualenv_path = '/path/to/virtualenv'
         project.run_startproject(nuke=True)  # should not raise
 
@@ -250,7 +244,7 @@ class TestFindDjangoFiles:
 
     def test_non_nested(self, fake_home, non_nested_submodule):
 
-        project = DjangoProject('mydomain.com')
+        project = DjangoProject('mydomain.com', 'python.version')
         shutil.copytree(non_nested_submodule, project.project_path)
         expected_settings_path = project.project_path / 'myproject/settings.py'
         assert expected_settings_path.exists()
@@ -264,7 +258,7 @@ class TestFindDjangoFiles:
 
 
     def test_nested(self, fake_home, more_nested_submodule):
-        project = DjangoProject('mydomain.com')
+        project = DjangoProject('mydomain.com', 'python.version')
         shutil.copytree(more_nested_submodule, project.project_path)
         expected_settings_path = project.project_path / 'mysite/mysite/settings.py'
         assert expected_settings_path.exists()
@@ -278,7 +272,7 @@ class TestFindDjangoFiles:
 
 
     def test_raises_if_empty_project_folder(self, fake_home):
-        project = DjangoProject('mydomain.com')
+        project = DjangoProject('mydomain.com', 'python.version')
         with pytest.raises(SanityException) as e:
             project.find_django_files()
 
@@ -286,7 +280,7 @@ class TestFindDjangoFiles:
 
 
     def test_raises_if_no_settings_in_any_subfolders(self, fake_home):
-        project = DjangoProject('mydomain.com')
+        project = DjangoProject('mydomain.com', 'python.version')
         not_this_folder = project.project_path / 'not_this_folder'
         not_this_folder.mkdir(parents=True)
         with pytest.raises(SanityException) as e:
@@ -296,7 +290,7 @@ class TestFindDjangoFiles:
 
 
     def test_raises_if_manage_py_not_found(self, fake_home, non_nested_submodule):
-        project = DjangoProject('mydomain.com')
+        project = DjangoProject('mydomain.com', 'python.version')
         shutil.copytree(non_nested_submodule, project.project_path)
         expected_manage_py = project.project_path / 'manage.py'
         assert expected_manage_py.exists()
@@ -311,7 +305,7 @@ class TestFindDjangoFiles:
 class TestUpdateSettingsFile:
 
     def test_adds_STATIC_and_MEDIA_config_to_settings(self):
-        project = DjangoProject('mydomain.com')
+        project = DjangoProject('mydomain.com', 'python.version')
         project.settings_path = Path(tempfile.NamedTemporaryFile().name)
 
         with open(project.settings_path, 'w') as f:
@@ -335,7 +329,7 @@ class TestUpdateSettingsFile:
 
 
     def test_adds_domain_to_ALLOWED_HOSTS(self):
-        project = DjangoProject('mydomain.com')
+        project = DjangoProject('mydomain.com', 'python.version')
         project.settings_path = Path(tempfile.NamedTemporaryFile().name)
 
         with open(project.settings_path, 'w') as f:
@@ -359,7 +353,7 @@ class TestUpdateSettingsFile:
 class TestRunCollectStatic:
 
     def test_runs_manage_py_in_correct_virtualenv(self, mock_subprocess, fake_home):
-        project = DjangoProject('mydomain.com')
+        project = DjangoProject('mydomain.com', 'python.version')
         project.virtualenv_path = Path('/path/to/virtualenv')
         project.manage_py_path = Path('/path/to/manage.py')
         project.run_collectstatic()
@@ -374,7 +368,7 @@ class TestRunCollectStatic:
 class TestRunMigrate:
 
     def test_runs_manage_py_in_correct_virtualenv(self, mock_subprocess, fake_home):
-        project = DjangoProject('mydomain.com')
+        project = DjangoProject('mydomain.com', 'python.version')
         project.virtualenv_path = Path('/path/to/virtualenv')
         project.manage_py_path = Path('/path/to/manage.py')
         project.run_migrate()
@@ -388,7 +382,7 @@ class TestRunMigrate:
 class TestUpdateWsgiFile:
 
     def test_updates_wsgi_file_from_template(self):
-        project = DjangoProject('mydomain.com')
+        project = DjangoProject('mydomain.com', 'python.version')
         project.wsgi_file_path = Path(tempfile.NamedTemporaryFile().name)
         project.settings_path = Path('/path/to/settingsfolder/settings.py')
         template = open(Path(pythonanywhere.django_project.__file__).parent / 'wsgi_file_template.py').read()
@@ -405,9 +399,9 @@ class TestUpdateWsgiFile:
     def test_actually_produces_wsgi_file_that_can_import_project_non_nested(
         self, fake_home, non_nested_submodule, virtualenvs_folder
     ):
-        project = DjangoProject('mydomain.com')
+        project = DjangoProject('mydomain.com', '3.6')
         shutil.copytree(non_nested_submodule, project.project_path)
-        project.create_virtualenv('3.6')
+        project.create_virtualenv()
         project.find_django_files()
         project.wsgi_file_path = Path(tempfile.NamedTemporaryFile().name)
 
@@ -421,9 +415,9 @@ class TestUpdateWsgiFile:
     def test_actually_produces_wsgi_file_that_can_import_nested_project(
         self, fake_home, more_nested_submodule, virtualenvs_folder
     ):
-        project = DjangoProject('mydomain.com')
+        project = DjangoProject('mydomain.com', '3.6')
         shutil.copytree(more_nested_submodule, project.project_path)
-        project.create_virtualenv('3.6')
+        project.create_virtualenv()
         project.find_django_files()
         project.wsgi_file_path = Path(tempfile.NamedTemporaryFile().name)
 
@@ -438,13 +432,12 @@ class TestUpdateWsgiFile:
 class TestCreateWebapp:
 
     def test_calls_webapp_create(self):
-        project = DjangoProject('mydomain.com')
+        project = DjangoProject('mydomain.com', 'python.version')
         project.webapp.create = Mock()
-        project.python_version = 'python.version'
 
         project.create_webapp(nuke='nuke option')
         assert project.webapp.create.call_args == call(
-            'python.version', project.virtualenv_path, project.project_path, nuke='nuke option'
+            project.python_version, project.virtualenv_path, project.project_path, nuke='nuke option'
         )
 
 
@@ -452,7 +445,7 @@ class TestCreateWebapp:
 class TestAddStaticFilesMappings:
 
     def test_calls_webapp_add_default_static_files_mappings(self):
-        project = DjangoProject('mydomain.com')
+        project = DjangoProject('mydomain.com', 'python.version')
         project.webapp.add_default_static_files_mappings = Mock()
         project.add_static_file_mappings()
         assert project.webapp.add_default_static_files_mappings.call_args == call(

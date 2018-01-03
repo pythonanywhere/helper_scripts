@@ -28,11 +28,11 @@ def main(repo_url, domain, python_version, nuke):
         username = getpass.getuser().lower()
         domain = f'{username}.pythonanywhere.com'
 
-    project = DjangoProject(domain)
+    project = DjangoProject(domain, python_version)
     project.sanity_checks(nuke=nuke)
     project.create_webapp(nuke=nuke)
     project.add_static_file_mappings()
-    project.create_virtualenv(python_version, nuke=nuke)
+    project.create_virtualenv(nuke=nuke)
     project.download_repo(repo_url, nuke=nuke),
     project.find_django_files()
     project.update_wsgi_file()

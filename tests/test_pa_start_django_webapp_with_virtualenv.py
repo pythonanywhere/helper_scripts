@@ -15,10 +15,10 @@ class TestMain:
     def test_calls_all_stuff_in_right_order(self):
         with patch('scripts.pa_start_django_webapp_with_virtualenv.DjangoProject') as mock_DjangoProject:
             main('www.domain.com', 'django.version', 'python.version', nuke='nuke option')
-        assert mock_DjangoProject.call_args == call('www.domain.com')
+        assert mock_DjangoProject.call_args == call('www.domain.com', 'python.version')
         assert mock_DjangoProject.return_value.method_calls == [
             call.sanity_checks(nuke='nuke option'),
-            call.create_virtualenv('python.version', 'django.version', nuke='nuke option'),
+            call.create_virtualenv('django.version', nuke='nuke option'),
             call.run_startproject(nuke='nuke option'),
             call.find_django_files(),
             call.update_settings_file(),
@@ -34,7 +34,7 @@ class TestMain:
         username = getpass.getuser()
         with patch('scripts.pa_start_django_webapp_with_virtualenv.DjangoProject') as mock_DjangoProject:
             main('your-username.pythonanywhere.com', 'django.version', 'python.version', nuke=False)
-        assert mock_DjangoProject.call_args == call(username + '.pythonanywhere.com')
+        assert mock_DjangoProject.call_args == call(username + '.pythonanywhere.com', 'python.version')
 
 
     def test_lowercases_username(self):
@@ -42,7 +42,7 @@ class TestMain:
             mock_getpass.getuser.return_value = 'UserName1'
             with patch('scripts.pa_start_django_webapp_with_virtualenv.DjangoProject') as mock_DjangoProject:
                 main('your-username.pythonanywhere.com', 'django.version', 'python.version', 'nukey')
-            assert mock_DjangoProject.call_args == call('username1.pythonanywhere.com')
+            assert mock_DjangoProject.call_args == call('username1.pythonanywhere.com', 'python.version')
 
 
     @pytest.mark.slowtest

@@ -15,12 +15,12 @@ class TestMain:
     def test_calls_all_stuff_in_right_order(self):
         with patch('scripts.pa_autoconfigure_django.DjangoProject') as mock_DjangoProject:
             main('repo.url', 'www.domain.com', 'python.version', nuke='nuke option')
-        assert mock_DjangoProject.call_args == call('www.domain.com')
+        assert mock_DjangoProject.call_args == call('www.domain.com', 'python.version')
         assert mock_DjangoProject.return_value.method_calls == [
             call.sanity_checks(nuke='nuke option'),
             call.create_webapp(nuke='nuke option'),
             call.add_static_file_mappings(),
-            call.create_virtualenv('python.version', nuke='nuke option'),
+            call.create_virtualenv(nuke='nuke option'),
             call.download_repo('repo.url', nuke='nuke option'),
             call.find_django_files(),
             call.update_wsgi_file(),
@@ -36,7 +36,7 @@ class TestMain:
         with patch('scripts.pa_autoconfigure_django.DjangoProject') as mock_DjangoProject:
             main('a-repo', 'your-username.pythonanywhere.com', 'python.version', nuke=False)
         assert mock_DjangoProject.call_args == call(
-            username + '.pythonanywhere.com'
+            username + '.pythonanywhere.com', 'python.version'
         )
 
 
@@ -46,7 +46,7 @@ class TestMain:
             with patch('scripts.pa_autoconfigure_django.DjangoProject') as mock_DjangoProject:
                 main('a-url', 'your-username.pythonanywhere.com', 'python.version', 'nukey')
             assert mock_DjangoProject.call_args == call(
-                'username1.pythonanywhere.com',
+                'username1.pythonanywhere.com', 'python.version'
             )
 
 

@@ -24,9 +24,9 @@ def main(domain, django_version, python_version, nuke):
         username = getpass.getuser().lower()
         domain = f'{username}.pythonanywhere.com'
 
-    project = DjangoProject(domain)
+    project = DjangoProject(domain, python_version)
     project.sanity_checks(nuke=nuke)
-    project.create_virtualenv(python_version, django_version, nuke=nuke)
+    project.create_virtualenv(django_version, nuke=nuke)
     project.run_startproject(nuke=nuke)
     project.find_django_files()
     project.update_settings_file()
