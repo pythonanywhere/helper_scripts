@@ -77,7 +77,7 @@ def mock_subprocess():
 
 
 @pytest.fixture
-def api_responses():
+def api_responses(monkeypatch):
     with responses.RequestsMock() as r:
         yield r
 

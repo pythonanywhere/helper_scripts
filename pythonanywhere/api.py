@@ -8,7 +8,6 @@ from pythonanywhere.exceptions import SanityException
 from pythonanywhere.snakesay import snakesay
 
 
-API_ENDPOINT = 'https://www.pythonanywhere.com/api/v0/user/{username}/webapps/'
 PYTHON_VERSIONS = {
     '2.7': 'python27',
     '3.4': 'python34',
@@ -21,6 +20,10 @@ PYTHON_VERSIONS = {
 class AuthenticationError(Exception):
     pass
 
+
+def get_api_endpoint():
+    domain = os.environ.get('PYTHONANYWHERE_DOMAIN', 'pythonanywhere.com')
+    return f'https://www.{domain}/api/v0/user/{{username}}/webapps/'
 
 
 def call_api(url, method, **kwargs):
@@ -63,7 +66,7 @@ class Webapp:
         if nuke:
             return
 
-        url = API_ENDPOINT.format(username=getpass.getuser()) + self.domain + '/'
+        url = get_api_endpoint().format(username=getpass.getuser()) + self.domain + '/'
         response = call_api(url, 'get')
         if response.status_code == 200:
             raise SanityException(f'You already have a webapp for {self.domain}.\n\nUse the --nuke option if you want to replace it.')
@@ -73,9 +76,9 @@ class Webapp:
     def create(self, python_version, virtualenv_path, project_path, nuke):
         print(snakesay('Creating web app via API'))
         if nuke:
-            webapp_url = API_ENDPOINT.format(username=getpass.getuser()) + self.domain + '/'
+            webapp_url = get_api_endpoint().format(username=getpass.getuser()) + self.domain + '/'
             call_api(webapp_url, 'delete')
-        post_url = API_ENDPOINT.format(username=getpass.getuser())
+        post_url = get_api_endpoint().format(username=getpass.getuser())
         patch_url = post_url + self.domain + '/'
         response = call_api(post_url, 'post', data={
             'domain_name': self.domain, 'python_version': PYTHON_VERSIONS[python_version]},
@@ -91,7 +94,7 @@ class Webapp:
     def add_default_static_files_mappings(self, project_path):
         print(snakesay('Adding static files mappings for /static/ and /media/'))
 
-        url = API_ENDPOINT.format(username=getpass.getuser()) + self.domain + '/static_files/'
+        url = get_api_endpoint().format(username=getpass.getuser()) + self.domain + '/static_files/'
         call_api(url, 'post', json=dict(
             url='/static/', path=str(Path(project_path) / 'static'),
         ))
@@ -103,7 +106,7 @@ class Webapp:
 
     def reload(self):
         print(snakesay(f'Reloading {self.domain} via API'))
-        url = API_ENDPOINT.format(username=getpass.getuser()) + self.domain + '/reload/'
+        url = get_api_endpoint().format(username=getpass.getuser()) + self.domain + '/reload/'
         response = call_api(url, 'post')
         if not response.ok:
             raise Exception(f'POST to reload webapp via API failed, got {response}:{response.text}')

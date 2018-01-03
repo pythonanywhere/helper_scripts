@@ -1,12 +1,9 @@
-from unittest.mock import call, patch, Mock
+from unittest.mock import call, patch
 import getpass
-import json
 import os
 import pytest
-import responses
 import subprocess
 
-from pythonanywhere.api import API_ENDPOINT
 from scripts.pa_start_django_webapp_with_virtualenv import main
 
 
