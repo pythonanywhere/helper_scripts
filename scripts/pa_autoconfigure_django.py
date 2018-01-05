@@ -32,8 +32,8 @@ def main(repo_url, domain, python_version, nuke):
     project.sanity_checks(nuke=nuke)
     project.create_webapp(nuke=nuke)
     project.add_static_file_mappings()
-    project.create_virtualenv(nuke=nuke)
     project.download_repo(repo_url, nuke=nuke),
+    project.create_virtualenv(nuke=nuke)
     project.find_django_files()
     project.update_wsgi_file()
     project.update_settings_file()
