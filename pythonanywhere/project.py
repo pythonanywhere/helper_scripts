@@ -24,10 +24,6 @@ class Project:
             raise SanityException(f'You already have a project folder at {self.project_path}.\n\nUse the --nuke option if you want to replace it.')
 
 
-    def create_virtualenv(self, nuke):
-        self.virtualenv.create(nuke=nuke)
-
-
     def create_webapp(self, nuke):
         self.webapp.create(self.python_version, self.virtualenv.path, self.project_path, nuke=nuke)
 

@@ -28,9 +28,9 @@ def main(repo_url, domain, python_version, nuke):
         username = getpass.getuser().lower()
         domain = f'{username}.pythonanywhere.com'
 
-    project = Project(domain)
+    project = Project(domain, python_version)
     project.sanity_checks(nuke=nuke)
-    project.create_virtualenv(python_version, nuke=nuke)
+    project.virtualenv.create(nuke=nuke)
     project.create_webapp(nuke=nuke)
     project.add_static_file_mappings()
     project.webapp.reload()

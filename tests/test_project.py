@@ -1,4 +1,4 @@
-from unittest.mock import call, patch, Mock
+from unittest.mock import call, Mock
 import pytest
 from pathlib import Path
 
@@ -78,18 +78,6 @@ class TestSanityChecks:
         project.virtualenv.path.mkdir()
 
         project.sanity_checks(nuke=True)  # should not raise
-
-
-
-class TestCreateVirtualenv:
-
-    def test_calls_virtualenv_create(self):
-        with patch('pythonanywhere.project.Virtualenv') as mock_Virtualenv:
-            project = Project('mydomain.com', 'python.version')
-            project.create_virtualenv(nuke='nuke option')
-        assert mock_Virtualenv.return_value.create.call_args == call(
-            nuke='nuke option'
-        )
 
 
 
