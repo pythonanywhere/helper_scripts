@@ -9,7 +9,7 @@ class Project:
         self.domain = domain
         self.python_version = python_version
         self.project_path = Path(f'~/{domain}').expanduser()
-        self.virtualenv = Virtualenv(self.domain)
+        self.virtualenv = Virtualenv(self.domain, self.python_version)
         self.virtualenv_path = virtualenv_path(domain)
         self.wsgi_file_path = Path(f'/var/www/{domain.replace(".", "_")}_wsgi.py')
         self.webapp = Webapp(domain)
@@ -26,7 +26,7 @@ class Project:
 
 
     def create_virtualenv(self, nuke):
-        self.virtualenv.create(self.python_version, nuke=nuke)
+        self.virtualenv.create(nuke=nuke)
 
 
     def create_webapp(self, nuke):

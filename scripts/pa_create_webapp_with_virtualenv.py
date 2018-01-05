@@ -19,6 +19,7 @@ from docopt import docopt
 import getpass
 from textwrap import dedent
 
+from pythonanywhere.project import Project
 from pythonanywhere.snakesay import snakesay
 
 

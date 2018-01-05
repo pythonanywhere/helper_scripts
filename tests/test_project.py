@@ -87,9 +87,8 @@ class TestCreateVirtualenv:
         with patch('pythonanywhere.project.Virtualenv') as mock_Virtualenv:
             project = Project('mydomain.com', 'python.version')
             project.create_virtualenv(nuke='nuke option')
-        assert mock_Virtualenv.call_args == call(project.domain)
         assert mock_Virtualenv.return_value.create.call_args == call(
-            'python.version', nuke='nuke option'
+            nuke='nuke option'
         )
 
 

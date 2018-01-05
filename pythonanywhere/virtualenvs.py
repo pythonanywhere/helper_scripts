@@ -6,12 +6,14 @@ from pythonanywhere.snakesay import snakesay
 
 
 class Virtualenv:
-    def __init__(self, domain):
+
+    def __init__(self, domain, python_version):
         self.domain = domain
+        self.python_version = python_version
         self.path = Path(os.environ['WORKON_HOME']) / domain
 
 
-    def create(self, python_version, nuke):
+    def create(self, nuke):
         pass
 
 
