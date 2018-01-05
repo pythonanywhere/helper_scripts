@@ -332,6 +332,7 @@ class TestUpdateWsgiFile:
     ):
         project = DjangoProject('mydomain.com', '3.6')
         shutil.copytree(non_nested_submodule, project.project_path)
+        print(subprocess.check_call(['tree', project.project_path]))
         project.create_virtualenv()
         project.find_django_files()
         project.wsgi_file_path = Path(tempfile.NamedTemporaryFile().name)

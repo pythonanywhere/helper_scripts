@@ -24,11 +24,8 @@ class Virtualenv:
 
 
     def pip_install(self, packages):
-        subprocess.check_call([
-            str(self.path / 'bin/pip'),
-            'install',
-            packages
-        ])
+        commands = [str(self.path / 'bin/pip'), 'install'] + packages.split()
+        subprocess.check_call(commands)
 
 
 

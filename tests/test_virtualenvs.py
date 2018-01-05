@@ -39,15 +39,14 @@ class TestVirtualenv:
         assert command_list[2].startswith('source virtualenvwrapper.sh && rmvirtualenv domain.com')
 
 
-    def test_install_pip_installs_packages(self, mock_subprocess, virtualenvs_folder):
-        packages = 'package1 package2==1.1.2'
+    def test_install_pip_installs_each_package(self, mock_subprocess, virtualenvs_folder):
         v = Virtualenv('domain.com', '2.7')
         v.create(nuke=False)
-        v.pip_install(packages)
+        v.pip_install('package1 package2==1.1.2')
         args, kwargs = mock_subprocess.check_call.call_args_list[-1]
         command_list = args[0]
         pip_path = str(v.path / 'bin/pip')
-        assert command_list == [pip_path, 'install', packages]
+        assert command_list == [pip_path, 'install', 'package1', 'package2==1.1.2']
 
 
     @pytest.mark.slowtest

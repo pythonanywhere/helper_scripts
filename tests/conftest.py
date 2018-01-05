@@ -2,6 +2,7 @@ import os
 from getpass import getuser
 import pytest
 from pathlib import Path
+import psutil
 import shutil
 import responses
 import tempfile
@@ -109,15 +110,12 @@ def no_api_token():
         os.environ['API_TOKEN'] = old_token
 
 
-import subprocess
-import psutil
 
 
 @pytest.fixture
 def process_killer():
     to_kill = []
     yield to_kill
-    print(subprocess.check_output(['ps', 'auxf']).decode())
     for p in to_kill:
         for child in psutil.Process(p.pid).children():
             child.kill()
