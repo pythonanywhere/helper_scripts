@@ -175,7 +175,6 @@ def more_nested_submodule():
 class TestFindDjangoFiles:
 
     def test_non_nested(self, fake_home, non_nested_submodule):
-
         project = DjangoProject('mydomain.com', 'python.version')
         shutil.copytree(non_nested_submodule, project.project_path)
         expected_settings_path = project.project_path / 'myproject/settings.py'

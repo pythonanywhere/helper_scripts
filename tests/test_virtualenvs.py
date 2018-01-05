@@ -1,4 +1,7 @@
+import pytest
 from pathlib import Path
+import subprocess
+
 from pythonanywhere.virtualenvs import Virtualenv
 
 
@@ -9,7 +12,7 @@ class TestVirtualenv:
         assert v.path == Path(virtualenvs_folder) / 'domain.com'
 
 
-    def test_create_uses_bash_and_sources_virtualenvwrapper(self, mock_subprocess):
+    def test_create_uses_bash_and_sources_virtualenvwrapper(self, mock_subprocess, virtualenvs_folder):
         v = Virtualenv('domain.com', '2.7')
         v.create(nuke=False)
         args, kwargs = mock_subprocess.check_call.call_args
@@ -18,7 +21,7 @@ class TestVirtualenv:
         assert command_list[2].startswith('source virtualenvwrapper.sh && mkvirtualenv')
 
 
-    def test_create_calls_mkvirtualenv_with_python_version_and_domain(self, mock_subprocess):
+    def test_create_calls_mkvirtualenv_with_python_version_and_domain(self, mock_subprocess, virtualenvs_folder):
         v = Virtualenv('domain.com', '2.7')
         v.create(nuke=False)
         args, kwargs = mock_subprocess.check_call.call_args
@@ -36,7 +39,7 @@ class TestVirtualenv:
         assert command_list[2].startswith('source virtualenvwrapper.sh && rmvirtualenv domain.com')
 
 
-    def test_install_pip_installs_packages(self, mock_subprocess):
+    def test_install_pip_installs_packages(self, mock_subprocess, virtualenvs_folder):
         packages = 'package1 package2==1.1.2'
         v = Virtualenv('domain.com', '2.7')
         v.create(nuke=False)
@@ -46,4 +49,16 @@ class TestVirtualenv:
         pip_path = str(v.path / 'bin/pip')
         assert command_list == [pip_path, 'install', packages]
 
+
+    @pytest.mark.slowtest
+    def test_actually_installing_a_real_package(self, fake_home, virtualenvs_folder):
+        v = Virtualenv('www.adomain.com', '2.7')
+        v.create(nuke=False)
+        v.pip_install('aafigure')
+
+        subprocess.check_call([
+            v.path / 'bin/python',
+            '-c'
+            'import aafigure'
+        ])
 
