@@ -1,17 +1,7 @@
 from pathlib import Path
 from pythonanywhere.api import Webapp
 from pythonanywhere.exceptions import SanityException
-from pythonanywhere.virtualenvs import virtualenv_path
-
-
-class Virtualenv:
-    def __init__(self, domain):
-        self.domain = domain
-
-
-    def create(self, python_version, nuke):
-        pass
-
+from pythonanywhere.virtualenvs import Virtualenv, virtualenv_path
 
 
 class Project:

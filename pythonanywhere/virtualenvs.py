@@ -5,6 +5,17 @@ import subprocess
 from pythonanywhere.snakesay import snakesay
 
 
+class Virtualenv:
+    def __init__(self, domain):
+        self.domain = domain
+        self.path = Path(os.environ['WORKON_HOME']) / domain
+
+
+    def create(self, python_version, nuke):
+        pass
+
+
+
 def virtualenv_path(domain):
     return Path(os.environ['WORKON_HOME']) / domain
 

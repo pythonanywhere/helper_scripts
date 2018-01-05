@@ -83,7 +83,7 @@ class TestSanityChecks:
 
 class TestCreateVirtualenv:
 
-    def test_calls_create_virtualenv(self):
+    def test_calls_virtualenv_create(self):
         with patch('pythonanywhere.project.Virtualenv') as mock_Virtualenv:
             project = Project('mydomain.com', 'python.version')
             project.create_virtualenv(nuke='nuke option')
@@ -91,15 +91,6 @@ class TestCreateVirtualenv:
         assert mock_Virtualenv.return_value.create.call_args == call(
             'python.version', nuke='nuke option'
         )
-
-
-    def test_sets_virtualenv_attribute(self):
-        with patch('pythonanywhere.project.Virtualenv') as mock_Virtualenv:
-            project = Project('mydomain.com', 'python.version')
-            project.create_virtualenv(nuke='nuke option')
-        assert project.virtualenv == mock_Virtualenv.return_value
-
-
 
 
 
