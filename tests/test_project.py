@@ -49,7 +49,7 @@ class TestSanityChecks:
     def test_raises_if_virtualenv_exists(self, fake_home, virtualenvs_folder):
         project = Project('mydomain.com', 'python.version')
         project.webapp.sanity_checks = Mock()
-        project.virtualenv_path.mkdir()
+        project.virtualenv.path.mkdir()
 
         with pytest.raises(SanityException) as e:
             project.sanity_checks(nuke=False)
@@ -75,7 +75,7 @@ class TestSanityChecks:
         project = Project('mydomain.com', 'python.version')
         project.webapp.sanity_checks = Mock()
         project.project_path.mkdir()
-        project.virtualenv_path.mkdir()
+        project.virtualenv.path.mkdir()
 
         project.sanity_checks(nuke=True)  # should not raise
 
@@ -102,7 +102,7 @@ class TestCreateWebapp:
 
         project.create_webapp(nuke='nuke option')
         assert project.webapp.create.call_args == call(
-            'python.version', project.virtualenv_path, project.project_path, nuke='nuke option'
+            'python.version', project.virtualenv.path, project.project_path, nuke='nuke option'
         )
 
 
