@@ -21,6 +21,7 @@ class Virtualenv:
         if nuke:
             command = f'rmvirtualenv {self.domain} && {command}'
         subprocess.check_call(['bash', '-c', f'source virtualenvwrapper.sh && {command}'])
+        return self
 
 
     def pip_install(self, packages):
@@ -31,8 +32,7 @@ class Virtualenv:
 
 def create_virtualenv(name, python_version, packages, nuke):
     print(snakesay(f'Creating virtualenv with Python{python_version} and installing {packages}'))
-    v = Virtualenv(name, python_version)
-    v.create(nuke=nuke)
+    v = Virtualenv(name, python_version).create(nuke=nuke)
     v.pip_install(packages)
     return v.path
 
