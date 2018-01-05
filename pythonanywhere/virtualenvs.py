@@ -17,6 +17,7 @@ class Virtualenv:
 
 
     def create(self, nuke):
+        print(snakesay(f'Creating virtualenv with Python{self.python_version}'))
         command = f'mkvirtualenv --python=/usr/bin/python{self.python_version} {self.domain}'
         if nuke:
             command = f'rmvirtualenv {self.domain} && {command}'
@@ -25,14 +26,7 @@ class Virtualenv:
 
 
     def pip_install(self, packages):
+        print(snakesay(f'Pip installing {packages}'))
         commands = [str(self.path / 'bin/pip'), 'install'] + packages.split()
         subprocess.check_call(commands)
-
-
-
-def create_virtualenv(name, python_version, packages, nuke):
-    print(snakesay(f'Creating virtualenv with Python{python_version} and installing {packages}'))
-    v = Virtualenv(name, python_version).create(nuke=nuke)
-    v.pip_install(packages)
-    return v.path
 

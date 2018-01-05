@@ -1,4 +1,4 @@
-from unittest.mock import call, patch, Mock
+from unittest.mock import call, Mock
 from pathlib import Path
 import os
 import tempfile
@@ -67,42 +67,41 @@ class TestDetectDjangoVersion:
         assert project.detect_requirements() == f'-r {requirements_txt.resolve()}'
 
 
+@pytest.fixture
+def project_with_mock_virtualenv():
+    project = DjangoProject('mydomain.com', 'python.version')
+    project.virtualenv.create = Mock()
+    project.virtualenv.pip_install = Mock()
+    yield project
+
 
 class TestCreateVirtualenv:
 
-    def test_calls_create_virtualenv(self):
-        project = DjangoProject('mydomain.com', 'python.version')
-        with patch('pythonanywhere.django_project.create_virtualenv') as mock_create_virtualenv:
-            project.create_virtualenv('django.version', nuke='nuke option')
-        assert mock_create_virtualenv.call_args == call(
-            project.domain, project.python_version, 'django==django.version', nuke='nuke option'
+    def test_calls_virtualenv_create(self, project_with_mock_virtualenv):
+        project_with_mock_virtualenv.create_virtualenv('django.version', nuke='nuke option')
+        assert project_with_mock_virtualenv.virtualenv.create.call_args == call(nuke='nuke option')
+
+
+    def test_calls_pip_install_with_django_version_if_specified(self, project_with_mock_virtualenv):
+        project_with_mock_virtualenv.create_virtualenv('django.version', nuke='nuke option')
+        assert project_with_mock_virtualenv.virtualenv.pip_install.call_args == call(
+            'django==django.version'
         )
 
 
-    def test_special_cases_latest_django_version(self):
-        project = DjangoProject('mydomain.com', 'python.version')
-        with patch('pythonanywhere.django_project.create_virtualenv') as mock_create_virtualenv:
-            project.create_virtualenv(django_version='latest', nuke='nuke option')
-        assert mock_create_virtualenv.call_args == call(
-            project.domain, project.python_version, 'django', nuke='nuke option'
+    def test_special_cases_latest_django_version(self, project_with_mock_virtualenv):
+        project_with_mock_virtualenv.create_virtualenv('latest', nuke='nuke option')
+        assert project_with_mock_virtualenv.virtualenv.pip_install.call_args == call(
+            'django'
         )
 
 
-    def test_uses_detect_if_django_version_not_specified(self):
-        project = DjangoProject('mydomain.com', 'python.version')
-        project.detect_requirements = Mock()
-        with patch('pythonanywhere.django_project.create_virtualenv') as mock_create_virtualenv:
-            project.create_virtualenv(nuke='nuke option')
-        assert mock_create_virtualenv.call_args == call(
-            project.domain, project.python_version, project.detect_requirements.return_value, nuke='nuke option'
+    def test_uses_detect_if_django_version_not_specified(self, project_with_mock_virtualenv):
+        project_with_mock_virtualenv.detect_requirements = Mock()
+        project_with_mock_virtualenv.create_virtualenv(nuke='nuke option')
+        assert project_with_mock_virtualenv.virtualenv.pip_install.call_args == call(
+            project_with_mock_virtualenv.detect_requirements.return_value
         )
-
-
-    def test_sets_virtualenv_attribute(self):
-        project = DjangoProject('mydomain.com', 'python.version')
-        with patch('pythonanywhere.django_project.create_virtualenv') as mock_create_virtualenv:
-            project.create_virtualenv(django_version='django.version', nuke='nuke option')
-        assert project.virtualenv_path == mock_create_virtualenv.return_value
 
 
 
@@ -111,17 +110,15 @@ class TestRunStartproject:
 
     def test_creates_folder(self, mock_subprocess, fake_home):
         project = DjangoProject('mydomain.com', 'python.version')
-        project.virtualenv_path = '/path/to/virtualenv'
         project.run_startproject(nuke=False)
         assert (fake_home / 'mydomain.com').is_dir()
 
 
     def test_calls_startproject(self, mock_subprocess, fake_home):
         project = DjangoProject('mydomain.com', 'python.version')
-        project.virtualenv_path = '/path/to/virtualenv'
         project.run_startproject(nuke=False)
         assert mock_subprocess.check_call.call_args == call([
-            Path('/path/to/virtualenv/bin/django-admin.py'),
+            Path(project.virtualenv.path / 'bin/django-admin.py'),
             'startproject',
             'mysite',
             fake_home / 'mydomain.com',
@@ -130,7 +127,6 @@ class TestRunStartproject:
 
     def test_nuke_option_deletes_directory_first(self, mock_subprocess, fake_home):
         project = DjangoProject('mydomain.com', 'python.version')
-        project.virtualenv_path = '/path/to/virtualenv'
         (fake_home / project.domain).mkdir()
         old_file = fake_home / project.domain / 'old_file.py'
         old_file.write_text('old stuff')
@@ -142,7 +138,6 @@ class TestRunStartproject:
 
     def test_nuke_option_handles_directory_not_existing(self, mock_subprocess, fake_home):
         project = DjangoProject('mydomain.com', 'python.version')
-        project.virtualenv_path = '/path/to/virtualenv'
         project.run_startproject(nuke=True)  # should not raise
 
 
@@ -285,11 +280,10 @@ class TestRunCollectStatic:
 
     def test_runs_manage_py_in_correct_virtualenv(self, mock_subprocess, fake_home):
         project = DjangoProject('mydomain.com', 'python.version')
-        project.virtualenv_path = Path('/path/to/virtualenv')
         project.manage_py_path = Path('/path/to/manage.py')
         project.run_collectstatic()
         assert mock_subprocess.check_call.call_args == call([
-            project.virtualenv_path / 'bin/python',
+            project.virtualenv.path / 'bin/python',
             project.manage_py_path,
             'collectstatic',
             '--noinput'
@@ -300,11 +294,10 @@ class TestRunMigrate:
 
     def test_runs_manage_py_in_correct_virtualenv(self, mock_subprocess, fake_home):
         project = DjangoProject('mydomain.com', 'python.version')
-        project.virtualenv_path = Path('/path/to/virtualenv')
         project.manage_py_path = Path('/path/to/manage.py')
         project.run_migrate()
         assert mock_subprocess.check_call.call_args == call([
-            project.virtualenv_path / 'bin/python',
+            project.virtualenv.path / 'bin/python',
             project.manage_py_path,
             'migrate',
         ])
@@ -340,7 +333,7 @@ class TestUpdateWsgiFile:
         project.update_wsgi_file()
 
         print(open(project.wsgi_file_path).read())
-        subprocess.check_output([project.virtualenv_path / 'bin/python', project.wsgi_file_path])
+        subprocess.check_output([project.virtualenv.path / 'bin/python', project.wsgi_file_path])
 
 
     @pytest.mark.slowtest
@@ -356,5 +349,5 @@ class TestUpdateWsgiFile:
         project.update_wsgi_file()
 
         print(open(project.wsgi_file_path).read())
-        subprocess.check_output([project.virtualenv_path / 'bin/python', project.wsgi_file_path])
+        subprocess.check_output([project.virtualenv.path / 'bin/python', project.wsgi_file_path])
 
