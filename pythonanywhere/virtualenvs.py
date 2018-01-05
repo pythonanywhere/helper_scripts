@@ -15,20 +15,27 @@ class Virtualenv:
     def __eq__(self, other):
         return self.domain == other.domain and self.python_version == other.python_version
 
+
     def create(self, nuke):
-        pass
+        command = f'mkvirtualenv --python=/usr/bin/python{self.python_version} {self.domain}'
+        if nuke:
+            command = f'rmvirtualenv {self.domain} && {command}'
+        subprocess.check_call(['bash', '-c', f'source virtualenvwrapper.sh && {command}'])
 
 
+    def pip_install(self, packages):
+        subprocess.check_call([
+            str(self.path / 'bin/pip'),
+            'install',
+            packages
+        ])
 
-def virtualenv_path(domain):
-    return Path(os.environ['WORKON_HOME']) / domain
 
 
 def create_virtualenv(name, python_version, packages, nuke):
     print(snakesay(f'Creating virtualenv with Python{python_version} and installing {packages}'))
-    command = f'mkvirtualenv --python=/usr/bin/python{python_version} {name} && pip install {packages}'
-    if nuke:
-        command = f'rmvirtualenv {name} && {command}'
-    subprocess.check_call(['bash', '-c', f'source virtualenvwrapper.sh && {command}'])
-    return virtualenv_path(name)
+    v = Virtualenv(name, python_version)
+    v.create(nuke=nuke)
+    v.pip_install(packages)
+    return v.path
 
