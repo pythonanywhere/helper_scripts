@@ -32,11 +32,6 @@ class TestVirtualenv:
         assert command_list[2].endswith('pip install package1 package2==1.1.2')
 
 
-    def test_create_returns_virtualenv_path(self, mock_subprocess, virtualenvs_folder):
-        response = create_virtualenv('domain.com', '2.7', 'django', nuke=False)
-        assert response == virtualenvs_folder / 'domain.com'
-
-
     def test_create_nuke_option_deletes_virtualenv_first(self, mock_subprocess, virtualenvs_folder):
         create_virtualenv('domain.com', '2.7', 'django', nuke=True)
         args, kwargs = mock_subprocess.check_call.call_args

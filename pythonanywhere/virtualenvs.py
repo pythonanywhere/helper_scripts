@@ -12,6 +12,8 @@ class Virtualenv:
         self.python_version = python_version
         self.path = Path(os.environ['WORKON_HOME']) / domain
 
+    def __eq__(self, other):
+        return self.domain == other.domain and self.python_version == other.python_version
 
     def create(self, nuke):
         pass

@@ -5,7 +5,7 @@ from pathlib import Path
 from pythonanywhere.project import Project
 from pythonanywhere.exceptions import SanityException
 from pythonanywhere.api import Webapp
-from pythonanywhere.virtualenvs import virtualenv_path
+from pythonanywhere.virtualenvs import Virtualenv
 
 
 
@@ -31,9 +31,9 @@ class TestProject:
         assert project.webapp == Webapp('mydomain.com')
 
 
-    def test_virtualenv_path(self, fake_home):
+    def test_virtualenv(self, fake_home):
         project = Project('mydomain.com', 'python.version')
-        assert project.virtualenv_path == virtualenv_path('mydomain.com')
+        assert project.virtualenv == Virtualenv('mydomain.com', 'python.version')
 
 
 
