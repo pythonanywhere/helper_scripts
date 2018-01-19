@@ -54,17 +54,19 @@ class TestDownloadRepo:
 
 class TestDetectDjangoVersion:
 
-    def test_is_django_by_default(self, fake_home):
-        project = DjangoProject('mydomain.com', 'python.version')
-        assert project.detect_requirements() == 'django'
-
-
     def test_if_requirements_txt_exists(self, fake_home):
         project = DjangoProject('mydomain.com', 'python.version')
         project.project_path.mkdir()
         requirements_txt = project.project_path / 'requirements.txt'
         requirements_txt.touch()
         assert project.detect_requirements() == f'-r {requirements_txt.resolve()}'
+
+
+    def test_returns_None_if_no_requirements(self, fake_home):
+        project = DjangoProject('mydomain.com', 'python.version')
+        assert project.detect_requirements() is None
+
+
 
 
 @pytest.fixture
@@ -78,11 +80,21 @@ def project_with_mock_virtualenv():
 class TestCreateVirtualenv:
 
     def test_calls_virtualenv_create(self, project_with_mock_virtualenv):
-        project_with_mock_virtualenv.create_virtualenv('django.version', nuke='nuke option')
+        project_with_mock_virtualenv.detect_requirements = Mock()
+        project_with_mock_virtualenv.create_virtualenv('latest', nuke='nuke option')
         assert project_with_mock_virtualenv.virtualenv.create.call_args == call(nuke='nuke option')
 
 
-    def test_calls_pip_install_with_django_version_if_specified(self, project_with_mock_virtualenv):
+    def test_calls_pip_install_with_detected_requirements(self, project_with_mock_virtualenv):
+        project_with_mock_virtualenv.detect_requirements = Mock()
+        project_with_mock_virtualenv.create_virtualenv('latest', nuke='nuke option')
+        assert project_with_mock_virtualenv.virtualenv.pip_install.call_args == call(
+            project_with_mock_virtualenv.detect_requirements.return_value
+        )
+
+
+    def test_uses_specified_django_version_if_requirements_not_detected(self, project_with_mock_virtualenv):
+        project_with_mock_virtualenv.detect_requirements = Mock(return_value=None)
         project_with_mock_virtualenv.create_virtualenv('django.version', nuke='nuke option')
         assert project_with_mock_virtualenv.virtualenv.pip_install.call_args == call(
             'django==django.version'
@@ -90,19 +102,26 @@ class TestCreateVirtualenv:
 
 
     def test_special_cases_latest_django_version(self, project_with_mock_virtualenv):
+        project_with_mock_virtualenv.detect_requirements = Mock(return_value=None)
         project_with_mock_virtualenv.create_virtualenv('latest', nuke='nuke option')
         assert project_with_mock_virtualenv.virtualenv.pip_install.call_args == call(
             'django'
         )
 
 
-    def test_uses_detect_if_django_version_not_specified(self, project_with_mock_virtualenv):
+    def test_errors_if_requirements_detected_but_django_version_specified(self, project_with_mock_virtualenv):
         project_with_mock_virtualenv.detect_requirements = Mock()
-        project_with_mock_virtualenv.create_virtualenv(nuke='nuke option')
+        with pytest.raises(SanityException) as e:
+            project_with_mock_virtualenv.create_virtualenv('django.version', nuke='nuke option')
+        assert 'Django version specified but requirements.txt was detected' in str(e.value)
+
+
+    def test_does_not_error_for_default_django_latest(self, project_with_mock_virtualenv):
+        project_with_mock_virtualenv.detect_requirements = Mock()
+        project_with_mock_virtualenv.create_virtualenv('latest', nuke='nuke option')
         assert project_with_mock_virtualenv.virtualenv.pip_install.call_args == call(
             project_with_mock_virtualenv.detect_requirements.return_value
         )
-
 
 
 
@@ -326,7 +345,7 @@ class TestUpdateWsgiFile:
         project = DjangoProject('mydomain.com', '3.6')
         shutil.copytree(non_nested_submodule, project.project_path)
         print(subprocess.check_call(['tree', project.project_path]))
-        project.create_virtualenv()
+        project.create_virtualenv('latest')
         project.find_django_files()
         project.wsgi_file_path = Path(tempfile.NamedTemporaryFile().name)
 
@@ -342,7 +361,7 @@ class TestUpdateWsgiFile:
     ):
         project = DjangoProject('mydomain.com', '3.6')
         shutil.copytree(more_nested_submodule, project.project_path)
-        project.create_virtualenv()
+        project.create_virtualenv('latest')
         project.find_django_files()
         project.wsgi_file_path = Path(tempfile.NamedTemporaryFile().name)
 

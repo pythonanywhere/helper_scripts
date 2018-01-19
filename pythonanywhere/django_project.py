@@ -16,22 +16,25 @@ class DjangoProject(Project):
         subprocess.check_call(['git', 'clone', repo, self.project_path])
 
 
-    def create_virtualenv(self, django_version=None, nuke=False):
+    def create_virtualenv(self, django_version, nuke=False):
         self.virtualenv.create(nuke=nuke)
-        if django_version is None:
-            packages = self.detect_requirements()
+        requirements = self.detect_requirements()
+        if requirements is not None:
+            if django_version != 'latest':
+                raise SanityException('Django version specified but requirements.txt was detected')
+            self.virtualenv.pip_install(requirements)
+
         elif django_version == 'latest':
-            packages = 'django'
+            self.virtualenv.pip_install('django')
+
         else:
-            packages = f'django=={django_version}'
-        self.virtualenv.pip_install(packages)
+            self.virtualenv.pip_install(f'django=={django_version}')
 
 
     def detect_requirements(self):
         requirements_txt = self.project_path / 'requirements.txt'
         if requirements_txt.exists():
             return f'-r {requirements_txt.resolve()}'
-        return 'django'
 
 
     def run_startproject(self, nuke):
