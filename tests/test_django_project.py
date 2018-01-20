@@ -54,9 +54,10 @@ class TestDownloadRepo:
 
 class TestDetectDjangoVersion:
 
-    def test_is_django_by_default(self, fake_home):
+    def test_is_django_1_x_by_default(self, fake_home):
+        # this is a temporary hack for djangogirls.
         project = DjangoProject('mydomain.com', 'python.version')
-        assert project.detect_requirements() == 'django'
+        assert project.detect_requirements() == 'django<2'
 
 
     def test_if_requirements_txt_exists(self, fake_home):
@@ -94,7 +95,6 @@ class TestCreateVirtualenv:
         assert project_with_mock_virtualenv.virtualenv.pip_install.call_args == call(
             'django'
         )
-
 
     def test_uses_detect_if_django_version_not_specified(self, project_with_mock_virtualenv):
         project_with_mock_virtualenv.detect_requirements = Mock()

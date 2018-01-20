@@ -2,7 +2,7 @@
 """Autoconfigure a Django project from on a github URL.
 
 - downloads the repo
-- creates a virtualenv and installs django (or detects a requirements.txt if available)
+- creates a virtualenv and installs django 1.x (or detects a requirements.txt if available)
 - creates webapp via api
 - creates django wsgi configuration file
 - adds static files config

@@ -31,7 +31,7 @@ class DjangoProject(Project):
         requirements_txt = self.project_path / 'requirements.txt'
         if requirements_txt.exists():
             return f'-r {requirements_txt.resolve()}'
-        return 'django'
+        return 'django<2'  # FIXME: this is a hack for djangogirls while they update to 2.x
 
 
     def run_startproject(self, nuke):
