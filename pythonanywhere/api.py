@@ -87,7 +87,7 @@ class Webapp:
         )
         if not response.ok or response.json().get('status') == 'ERROR':
             raise Exception(f'POST to create webapp via API failed, got {response}:{response.text}')
-        response = call_api(patch_url, 'patch', data={'virtualenv_path': virtualenv_path})
+        response = call_api(patch_url, 'patch', data={'virtualenv_path': virtualenv_path, 'source_directory': project_path})
         if not response.ok:
             raise Exception(f'PATCH to set virtualenv path via API failed, got {response}:{response.text}')
 

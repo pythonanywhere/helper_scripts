@@ -130,7 +130,7 @@ class TestCreateWebapp:
         assert post.request.headers['Authorization'] == f'Token {api_token}'
 
 
-    def test_does_patch_to_update_virtualenv_path(self, api_responses, api_token):
+    def test_does_patch_to_update_virtualenv_path_and_source_directory(self, api_responses, api_token):
         expected_post_url = get_api_endpoint().format(username=getpass.getuser())
         expected_patch_url = get_api_endpoint().format(username=getpass.getuser()) + 'mydomain.com/'
         api_responses.add(responses.POST, expected_post_url, status=201, body=json.dumps({'status': 'OK'}))
@@ -141,7 +141,8 @@ class TestCreateWebapp:
         patch = api_responses.calls[1]
         assert patch.request.url == expected_patch_url
         assert patch.request.body == urlencode({
-            'virtualenv_path': '/virtualenv/path'
+            'virtualenv_path': '/virtualenv/path',
+            'source_directory': '/project/path'
         })
         assert patch.request.headers['Authorization'] == f'Token {api_token}'
 
