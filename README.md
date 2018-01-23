@@ -22,5 +22,5 @@ Pull requests are welcome!  You'll find tests in the [tests](tests) folder...
     pytest
 
     # to just run the fast tests:
-    pytest -m 'not slowtest' --tb=short -v 
+    pytest -m 'not slowtest' -v
 
