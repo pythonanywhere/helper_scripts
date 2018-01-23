@@ -26,7 +26,7 @@ class Virtualenv:
 
 
     def pip_install(self, packages):
-        print(snakesay(f'Pip installing {packages}'))
+        print(snakesay(f'Pip installing {packages} (this may take a couple of minutes)'))
         commands = [str(self.path / 'bin/pip'), 'install'] + packages.split()
         subprocess.check_call(commands)
 
