@@ -11,8 +11,8 @@ class TestMain:
 
     def test_calls_all_stuff_in_right_order(self):
         with patch('scripts.pa_start_django_webapp_with_virtualenv.DjangoProject') as mock_DjangoProject:
-            main('www.domain.com', 'django.version', 'python.version', nuke='nuke option')
-        assert mock_DjangoProject.call_args == call('www.domain.com', 'python.version')
+            main('www.domain.com', 'django.version', 'python.version', nuke='nuke option', noverify="noverify option")
+        assert mock_DjangoProject.call_args == call('www.domain.com', 'python.version', noverify="noverify option")
         assert mock_DjangoProject.return_value.method_calls == [
             call.sanity_checks(nuke='nuke option'),
             call.create_virtualenv('django.version', nuke='nuke option'),
@@ -30,16 +30,16 @@ class TestMain:
     def test_domain_defaults_to_using_current_username(self):
         username = getpass.getuser()
         with patch('scripts.pa_start_django_webapp_with_virtualenv.DjangoProject') as mock_DjangoProject:
-            main('your-username.pythonanywhere.com', 'django.version', 'python.version', nuke=False)
-        assert mock_DjangoProject.call_args == call(username + '.pythonanywhere.com', 'python.version')
+            main('your-username.pythonanywhere.com', 'django.version', 'python.version', nuke=False, noverify="noverify option")
+        assert mock_DjangoProject.call_args == call(username + '.pythonanywhere.com', 'python.version', noverify="noverify option")
 
 
     def test_lowercases_username(self):
         with patch('scripts.pa_start_django_webapp_with_virtualenv.getpass') as mock_getpass:
             mock_getpass.getuser.return_value = 'UserName1'
             with patch('scripts.pa_start_django_webapp_with_virtualenv.DjangoProject') as mock_DjangoProject:
-                main('your-username.pythonanywhere.com', 'django.version', 'python.version', 'nukey')
-            assert mock_DjangoProject.call_args == call('username1.pythonanywhere.com', 'python.version')
+                main('your-username.pythonanywhere.com', 'django.version', 'python.version', 'nukey', noverify="noverify option")
+            assert mock_DjangoProject.call_args == call('username1.pythonanywhere.com', 'python.version', noverify="noverify option")
 
 
     @pytest.mark.slowtest
@@ -49,7 +49,7 @@ class TestMain:
 
         with patch('scripts.pa_start_django_webapp_with_virtualenv.DjangoProject.update_wsgi_file'):
             with patch('pythonanywhere.api.call_api'):
-                main('mydomain.com', '1.9.2', '2.7', nuke=False)
+                main('mydomain.com', '1.9.2', '2.7', nuke=False, noverify="noverify option")
 
         django_version = subprocess.check_output([
             virtualenvs_folder / 'mydomain.com/bin/python',
