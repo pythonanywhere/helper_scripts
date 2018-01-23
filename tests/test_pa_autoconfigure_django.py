@@ -18,10 +18,10 @@ class TestMain:
         assert mock_DjangoProject.call_args == call('www.domain.com', 'python.version')
         assert mock_DjangoProject.return_value.method_calls == [
             call.sanity_checks(nuke='nuke option'),
-            call.create_webapp(nuke='nuke option'),
-            call.add_static_file_mappings(),
             call.download_repo('repo.url', nuke='nuke option'),
             call.create_virtualenv(nuke='nuke option'),
+            call.create_webapp(nuke='nuke option'),
+            call.add_static_file_mappings(),
             call.find_django_files(),
             call.update_wsgi_file(),
             call.update_settings_file(),
