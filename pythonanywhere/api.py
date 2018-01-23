@@ -28,10 +28,12 @@ def get_api_endpoint():
 
 def call_api(url, method, **kwargs):
     token = os.environ['API_TOKEN']
+    insecure = os.environ.get('PYTHONANYWHERE_INSECURE_API') == 'true'
     response = requests.request(
         method=method,
         url=url,
         headers={'Authorization': f'Token {token}'},
+        verify=not insecure,
         **kwargs
     )
     if response.status_code == 401:

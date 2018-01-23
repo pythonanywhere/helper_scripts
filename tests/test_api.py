@@ -2,6 +2,7 @@ import getpass
 import json
 import pytest
 import responses
+from unittest.mock import patch
 from urllib.parse import urlencode
 
 from pythonanywhere.api import (
@@ -30,6 +31,21 @@ class TestCallAPI:
         with pytest.raises(AuthenticationError) as e:
             call_api(url, 'post')
         assert str(e.value) == 'Authentication error 401 calling API: nope'
+
+
+    def test_passes_verify_from_environment(self, api_token, monkeypatch):
+        monkeypatch.setenv('PYTHONANYWHERE_INSECURE_API', 'true')
+        with patch('pythonanywhere.api.requests') as mock_requests:
+            call_api('url', 'post', foo='bar')
+        args, kwargs = mock_requests.request.call_args
+        assert kwargs["verify"] is False
+
+
+    def test_verify_is_true_if_env_not_set(self, api_token):
+        with patch('pythonanywhere.api.requests') as mock_requests:
+            call_api('url', 'post', foo='bar')
+        args, kwargs = mock_requests.request.call_args
+        assert kwargs["verify"] is True
 
 
 class TestWebapp:
