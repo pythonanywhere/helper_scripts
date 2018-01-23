@@ -14,8 +14,8 @@ class TestMain:
 
     def test_calls_all_stuff_in_right_order(self):
         with patch('scripts.pa_autoconfigure_django.DjangoProject') as mock_DjangoProject:
-            main('repo.url', 'www.domain.com', 'python.version', nuke='nuke option')
-        assert mock_DjangoProject.call_args == call('www.domain.com', 'python.version')
+            main('repo.url', 'www.domain.com', 'python.version', nuke='nuke option', noverify="verify option")
+        assert mock_DjangoProject.call_args == call('www.domain.com', 'python.version', noverify="verify option")
         assert mock_DjangoProject.return_value.method_calls == [
             call.sanity_checks(nuke='nuke option'),
             call.download_repo('repo.url', nuke='nuke option'),
@@ -34,9 +34,9 @@ class TestMain:
     def test_domain_defaults_to_using_current_username(self):
         username = getpass.getuser()
         with patch('scripts.pa_autoconfigure_django.DjangoProject') as mock_DjangoProject:
-            main('a-repo', 'your-username.pythonanywhere.com', 'python.version', nuke=False)
+            main('a-repo', 'your-username.pythonanywhere.com', 'python.version', nuke=False, noverify=False)
         assert mock_DjangoProject.call_args == call(
-            username + '.pythonanywhere.com', 'python.version'
+            username + '.pythonanywhere.com', 'python.version', noverify=False
         )
 
 
@@ -44,9 +44,9 @@ class TestMain:
         with patch('scripts.pa_autoconfigure_django.getpass') as mock_getpass:
             mock_getpass.getuser.return_value = 'UserName1'
             with patch('scripts.pa_autoconfigure_django.DjangoProject') as mock_DjangoProject:
-                main('a-url', 'your-username.pythonanywhere.com', 'python.version', 'nukey')
+                main('a-url', 'your-username.pythonanywhere.com', 'python.version', 'nukey', noverify=False)
             assert mock_DjangoProject.call_args == call(
-                'username1.pythonanywhere.com', 'python.version'
+                'username1.pythonanywhere.com', 'python.version', noverify=False
             )
 
 
@@ -58,7 +58,7 @@ class TestMain:
         domain = 'mydomain.com'
         with patch('scripts.pa_autoconfigure_django.DjangoProject.update_wsgi_file'):
             with patch('pythonanywhere.api.call_api'):
-                main(repo, domain, '2.7', nuke=False)
+                main(repo, domain, '2.7', nuke=False, noverify=False)
 
         expected_django_version = '1.11.1'
         expected_virtualenv = virtualenvs_folder / domain
