@@ -31,12 +31,13 @@ class TestMain:
         ]
 
 
-    def test_domain_defaults_to_using_current_username(self):
+    def test_domain_defaults_to_using_current_username_and_domain_from_env(self, monkeypatch):
         username = getpass.getuser()
+        monkeypatch.setenv('PYTHONANYWHERE_DOMAIN', 'pythonanywhere.domain')
         with patch('scripts.pa_autoconfigure_django.DjangoProject') as mock_DjangoProject:
             main('a-repo', 'your-username.pythonanywhere.com', 'python.version', nuke=False)
         assert mock_DjangoProject.call_args == call(
-            username + '.pythonanywhere.com', 'python.version'
+            username + '.pythonanywhere.domain', 'python.version'
         )
 
 

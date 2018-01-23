@@ -27,11 +27,12 @@ class TestMain:
         ]
 
 
-    def test_domain_defaults_to_using_current_username(self):
+    def test_domain_defaults_to_using_current_username_and_domain_from_env(self, monkeypatch):
         username = getpass.getuser()
+        monkeypatch.setenv('PYTHONANYWHERE_DOMAIN', 'pythonanywhere.domain')
         with patch('scripts.pa_start_django_webapp_with_virtualenv.DjangoProject') as mock_DjangoProject:
             main('your-username.pythonanywhere.com', 'django.version', 'python.version', nuke=False)
-        assert mock_DjangoProject.call_args == call(username + '.pythonanywhere.com', 'python.version')
+        assert mock_DjangoProject.call_args == call(username + '.pythonanywhere.domain', 'python.version')
 
 
     def test_lowercases_username(self):

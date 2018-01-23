@@ -14,6 +14,7 @@ Options:
 
 from docopt import docopt
 import getpass
+import os
 
 from pythonanywhere.snakesay import snakesay
 from pythonanywhere.django_project import DjangoProject
@@ -22,7 +23,8 @@ from pythonanywhere.django_project import DjangoProject
 def main(domain, django_version, python_version, nuke):
     if domain == 'your-username.pythonanywhere.com':
         username = getpass.getuser().lower()
-        domain = f'{username}.pythonanywhere.com'
+        pa_domain = os.environ.get('PYTHONANYWHERE_DOMAIN', 'pythonanywhere.com')
+        domain = f'{username}.{pa_domain}'
 
     project = DjangoProject(domain, python_version)
     project.sanity_checks(nuke=nuke)

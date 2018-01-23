@@ -35,7 +35,6 @@ def main(repo_url, domain, python_version, nuke):
     project.add_static_file_mappings()
     project.webapp.reload()
 
-
     print(snakesay(dedent(
         f'''
         All done!
