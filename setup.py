@@ -9,7 +9,7 @@ with open(here / 'README.md', encoding='utf-8') as f:
 
 setup(
     name='pythonanywhere',
-    version='0.0.9',
+    version='0.0.10',
     description='PythonAnywhere helper tools for users',
     long_description=long_description,
     url='https://github.com/pythonanywhere/helper_scripts/',
