@@ -27,9 +27,8 @@ class TestProject:
 
 
     def test_webapp(self, fake_home):
-        project = Project('mydomain.com', 'python.version', noverify=True)
-        assert project.webapp.domain == 'mydomain.com'
-        assert project.webapp.noverify is True
+        project = Project('mydomain.com', 'python.version')
+        assert project.webapp == Webapp('mydomain.com')
 
 
     def test_virtualenv(self, fake_home):

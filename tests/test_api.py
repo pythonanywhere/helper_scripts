@@ -2,7 +2,6 @@ import getpass
 import json
 import pytest
 import responses
-from unittest.mock import call, patch
 from urllib.parse import urlencode
 
 from pythonanywhere.api import (
@@ -36,19 +35,16 @@ class TestCallAPI:
 class TestWebapp:
 
     def test_init(self):
-        app = Webapp('www.my-domain.com', noverify='nottobeverifying')
+        app = Webapp('www.my-domain.com')
         assert app.domain == 'www.my-domain.com'
-        assert app.noverify == 'nottobeverifying'
 
 
-class TestWebappCallAPI:
+    def test_compare_equal(self):
+        assert Webapp('www.my-domain.com') == Webapp('www.my-domain.com')
 
-    def test_call_api_inverts_noverify(self):
-        app = Webapp('www.my-domain.com', noverify=True)
-        with patch('pythonanywhere.api.call_api') as mock_call_api:
-            return_value = app.call_api("here", "post", akwarg="kwarg")
-        assert mock_call_api.call_args == call("here", "post", verify=False, akwarg="kwarg")
-        assert return_value == mock_call_api.return_value
+
+    def test_compare_not_equal(self):
+        assert Webapp('www.my-domain.com') != Webapp('www.other-domain.com')
 
 
 

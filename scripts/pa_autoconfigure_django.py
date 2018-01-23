@@ -8,13 +8,12 @@
 - adds static files config
 
 Usage:
-  pa_autoconfigure_django.py <git-repo-url> [--domain=<domain> --python=<python-version>] [--nuke] [--noverify]
+  pa_autoconfigure_django.py <git-repo-url> [--domain=<domain> --python=<python-version>] [--nuke]
 
 Options:
   --domain=<domain>         Domain name, eg www.mydomain.com   [default: your-username.pythonanywhere.com]
   --python=<python-version> Python version, eg "2.7"    [default: 3.6]
   --nuke                    *Irrevocably* delete any existing web app config on this domain. Irrevocably.
-  --noverify                Don't check TLS certificates for API calls - *For testing purposes only*
 """
 
 from docopt import docopt
@@ -24,12 +23,12 @@ from pythonanywhere.django_project import DjangoProject
 from pythonanywhere.snakesay import snakesay
 
 
-def main(repo_url, domain, python_version, nuke, noverify):
+def main(repo_url, domain, python_version, nuke):
     if domain == 'your-username.pythonanywhere.com':
         username = getpass.getuser().lower()
         domain = f'{username}.pythonanywhere.com'
 
-    project = DjangoProject(domain, python_version, noverify=noverify)
+    project = DjangoProject(domain, python_version)
     project.sanity_checks(nuke=nuke)
     project.download_repo(repo_url, nuke=nuke),
     project.create_virtualenv(nuke=nuke)
@@ -50,5 +49,5 @@ def main(repo_url, domain, python_version, nuke, noverify):
 
 if __name__ == '__main__':
     arguments = docopt(__doc__)
-    main(arguments['<git-repo-url>'], arguments['--domain'], arguments['--python'], nuke=arguments.get('--nuke', False), noverify=arguments.get('--noverify', False))
+    main(arguments['<git-repo-url>'], arguments['--domain'], arguments['--python'], nuke=arguments.get('--nuke'))
 

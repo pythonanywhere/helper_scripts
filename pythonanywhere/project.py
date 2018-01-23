@@ -5,13 +5,13 @@ from pythonanywhere.virtualenvs import Virtualenv
 
 
 class Project:
-    def __init__(self, domain, python_version, noverify=False):
+    def __init__(self, domain, python_version):
         self.domain = domain
         self.python_version = python_version
         self.project_path = Path(f'~/{domain}').expanduser()
         self.virtualenv = Virtualenv(self.domain, self.python_version)
         self.wsgi_file_path = Path(f'/var/www/{domain.replace(".", "_")}_wsgi.py')
-        self.webapp = Webapp(domain, noverify=noverify)
+        self.webapp = Webapp(domain)
 
 
     def sanity_checks(self, nuke):
