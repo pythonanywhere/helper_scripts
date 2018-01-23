@@ -180,7 +180,7 @@ class TestCreateWebapp:
         with pytest.raises(Exception) as e:
             Webapp('mydomain.com').create('2.7', '/virtualenv/path', '/project/path', nuke=False)
 
-        assert 'PATCH to set virtualenv path via API failed' in str(e.value)
+        assert 'PATCH to set virtualenv path and source directory via API failed' in str(e.value)
         assert 'an error' in str(e.value)
 
 
