@@ -108,10 +108,10 @@ class TestAddStaticFilesMappings:
 
 class TestStartBash:
 
-    def test_calls_execve(self):
+    def test_calls_execv(self):
         project = Project('mydomain.com', 'python.version')
-        with patch('pythonanywhere.project.os.execve') as mock_execve:
+        with patch('pythonanywhere.project.os.execv') as mock_execv:
             project.start_bash()
-        assert mock_execve.call_args == call('/bin/bash')
+        assert mock_execv.call_args == call('/bin/bash')
 
 

@@ -34,5 +34,5 @@ class Project:
 
 
     def start_bash(self):
-        os.execve('/bin/bash')
+        os.execv('/bin/bash')
 
