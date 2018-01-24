@@ -1,5 +1,5 @@
-import tempfile
 from pathlib import Path
+import uuid
 
 from pythonanywhere.api import Webapp
 from pythonanywhere.exceptions import SanityException
@@ -36,6 +36,6 @@ class Project:
 
 
     def start_bash(self):
-        unique_id = tempfile.NamedTemporaryFile().name
+        unique_id = str(uuid.uuid4())
         launch_bash_in_virtualenv(self.virtualenv.path, unique_id, self.project_path)
 

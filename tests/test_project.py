@@ -108,12 +108,20 @@ class TestAddStaticFilesMappings:
 
 class TestStartBash:
 
-    def test_calls_launch_bash_in_virtualenv(self, fake_home, virtualenvs_folder):
+    def test_calls_launch_bash_in_virtualenv_with_virtualenv_and_project_path(self, fake_home, virtualenvs_folder):
         project = Project('mydomain.com', 'python.version')
         with patch('pythonanywhere.project.launch_bash_in_virtualenv') as mock_launch_bash_in_virtualenv:
-            with patch('pythonanywhere.project.tempfile') as mock_tempfile:
+            project.start_bash()
+        args, kwargs = mock_launch_bash_in_virtualenv.call_args
+        assert args[0] == project.virtualenv.path
+        assert args[2] == project.project_path
+
+
+    def test_calls_launch_bash_in_virtualenv_with_unique_id(self, fake_home, virtualenvs_folder):
+        project = Project('mydomain.com', 'python.version')
+        with patch('pythonanywhere.project.launch_bash_in_virtualenv') as mock_launch_bash_in_virtualenv:
+            for _ in range(100):
                 project.start_bash()
-        assert mock_launch_bash_in_virtualenv.call_args == call(
-            project.virtualenv.path, mock_tempfile.NamedTemporaryFile.return_value.name, project.project_path
-        )
+        unique_ids = [args[1] for args, kwargs in mock_launch_bash_in_virtualenv.call_args_list]
+        assert len(set(unique_ids)) == len(unique_ids)
 
