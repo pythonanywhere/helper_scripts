@@ -5,6 +5,7 @@ from pythonanywhere.api import Webapp
 from pythonanywhere.exceptions import SanityException
 from pythonanywhere.virtualenvs import Virtualenv
 from pythonanywhere.launch_bash_in_virtualenv import launch_bash_in_virtualenv
+from pythonanywhere.snakesay import snakesay
 
 
 class Project:
@@ -36,6 +37,7 @@ class Project:
 
 
     def start_bash(self):
+        print(snakesay(f'Starting Bash shell with activated virtualenv in project directory.  Press Ctrl+D to exit.'))
         unique_id = str(uuid.uuid4())
         launch_bash_in_virtualenv(self.virtualenv.path, unique_id, self.project_path)
 

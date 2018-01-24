@@ -42,9 +42,10 @@ def main(repo_url, domain, python_version, nuke):
     project.run_collectstatic()
     project.run_migrate()
     project.webapp.reload()
+    print(snakesay(f'All done!  Your site is now live at https://{domain}'))
+    print()
     project.start_bash()
 
-    print(snakesay(f'All done!  Your site is now live at https://{domain}'))
 
 
 
