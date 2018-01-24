@@ -1,4 +1,4 @@
-from unittest.mock import call, Mock
+from unittest.mock import call, patch, Mock
 import pytest
 from pathlib import Path
 
@@ -104,4 +104,14 @@ class TestAddStaticFilesMappings:
         assert project.webapp.add_default_static_files_mappings.call_args == call(
             project.project_path,
         )
+
+
+class TestStartBash:
+
+    def test_calls_execve(self):
+        project = Project('mydomain.com', 'python.version')
+        with patch('pythonanywhere.project.os.execve') as mock_execve:
+            project.start_bash()
+        assert mock_execve.call_args == call('/bin/bash')
+
 

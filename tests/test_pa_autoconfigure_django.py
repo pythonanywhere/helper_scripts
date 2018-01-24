@@ -27,7 +27,8 @@ class TestMain:
             call.update_settings_file(),
             call.run_collectstatic(),
             call.run_migrate(),
-            call.webapp.reload()
+            call.webapp.reload(),
+            call.start_bash(),
         ]
 
 
@@ -58,8 +59,9 @@ class TestMain:
         repo = 'https://github.com/hjwp/example-django-project.git'
         domain = 'mydomain.com'
         with patch('scripts.pa_autoconfigure_django.DjangoProject.update_wsgi_file'):
-            with patch('pythonanywhere.api.call_api'):
-                main(repo, domain, '2.7', nuke=False)
+            with patch('scripts.pa_autoconfigure_django.DjangoProject.start_bash'):
+                with patch('pythonanywhere.api.call_api'):
+                    main(repo, domain, '2.7', nuke=False)
 
         expected_django_version = '1.11.1'
         expected_virtualenv = virtualenvs_folder / domain

@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 from pythonanywhere.api import Webapp
 from pythonanywhere.exceptions import SanityException
@@ -30,4 +31,8 @@ class Project:
 
     def add_static_file_mappings(self):
         self.webapp.add_default_static_files_mappings(self.project_path)
+
+
+    def start_bash(self):
+        os.execve('/bin/bash')
 
