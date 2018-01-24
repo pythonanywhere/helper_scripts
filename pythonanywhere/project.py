@@ -1,8 +1,10 @@
-import os
+import tempfile
 from pathlib import Path
+
 from pythonanywhere.api import Webapp
 from pythonanywhere.exceptions import SanityException
 from pythonanywhere.virtualenvs import Virtualenv
+from pythonanywhere.launch_bash_in_virtualenv import launch_bash_in_virtualenv
 
 
 class Project:
@@ -34,5 +36,6 @@ class Project:
 
 
     def start_bash(self):
-        os.execv('/bin/bash')
+        unique_id = tempfile.NamedTemporaryFile().name
+        launch_bash_in_virtualenv(self.virtualenv.path, unique_id, self.project_path)
 

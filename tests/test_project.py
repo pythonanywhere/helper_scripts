@@ -108,10 +108,12 @@ class TestAddStaticFilesMappings:
 
 class TestStartBash:
 
-    def test_calls_execv(self):
+    def test_calls_launch_bash_in_virtualenv(self, fake_home, virtualenvs_folder):
         project = Project('mydomain.com', 'python.version')
-        with patch('pythonanywhere.project.os.execv') as mock_execv:
-            project.start_bash()
-        assert mock_execv.call_args == call('/bin/bash')
-
+        with patch('pythonanywhere.project.launch_bash_in_virtualenv') as mock_launch_bash_in_virtualenv:
+            with patch('pythonanywhere.project.tempfile') as mock_tempfile:
+                project.start_bash()
+        assert mock_launch_bash_in_virtualenv.call_args == call(
+            project.virtualenv.path, mock_tempfile.NamedTemporaryFile.return_value.name, project.project_path
+        )
 
