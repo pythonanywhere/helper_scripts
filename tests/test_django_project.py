@@ -311,12 +311,36 @@ class TestUpdateWsgiFile:
         project.settings_path = Path('/path/to/settingsfolder/settings.py')
         template = open(Path(pythonanywhere.django_project.__file__).parent / 'wsgi_file_template.py').read()
 
-        project.update_wsgi_file()
+        project.update_wsgi_file(staticfileshandler=False)
 
         with open(project.wsgi_file_path) as f:
             contents = f.read()
         print(contents)
-        assert contents == template.format(project=project)
+        expected_contents = template.format(
+            project=project,
+            staticfileshandler_import='',
+            application='get_wsgi_application()'
+        )
+        assert contents == expected_contents
+
+
+    def test_can_use_staticfileshandler(self):
+        project = DjangoProject('mydomain.com', 'python.version')
+        project.wsgi_file_path = Path(tempfile.NamedTemporaryFile().name)
+        project.settings_path = Path('/path/to/settingsfolder/settings.py')
+        template = open(Path(pythonanywhere.django_project.__file__).parent / 'wsgi_file_template.py').read()
+
+        project.update_wsgi_file(staticfileshandler=True)
+
+        with open(project.wsgi_file_path) as f:
+            contents = f.read()
+        expected_contents = template.format(
+            project=project,
+            staticfileshandler_import='from django.contrib.staticfiles.handlers import StaticFilesHandler',
+            application='application = StaticFilesHandler(get_wsgi_application())'
+        )
+        assert contents == expected_contents
+        assert 'application = get_wsgi_application()' not in contents
 
 
     @pytest.mark.slowtest
@@ -330,7 +354,7 @@ class TestUpdateWsgiFile:
         project.find_django_files()
         project.wsgi_file_path = Path(tempfile.NamedTemporaryFile().name)
 
-        project.update_wsgi_file()
+        project.update_wsgi_file(staticfileshandler=True)
 
         print(open(project.wsgi_file_path).read())
         subprocess.check_output([project.virtualenv.path / 'bin/python', project.wsgi_file_path])
@@ -346,7 +370,7 @@ class TestUpdateWsgiFile:
         project.find_django_files()
         project.wsgi_file_path = Path(tempfile.NamedTemporaryFile().name)
 
-        project.update_wsgi_file()
+        project.update_wsgi_file(staticfileshandler=False)
 
         print(open(project.wsgi_file_path).read())
         subprocess.check_output([project.virtualenv.path / 'bin/python', project.wsgi_file_path])

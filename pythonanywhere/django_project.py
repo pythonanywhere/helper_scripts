@@ -97,9 +97,19 @@ class DjangoProject(Project):
         ])
 
 
-    def update_wsgi_file(self):
+    def update_wsgi_file(self, staticfileshandler):
         print(snakesay(f'Updating wsgi file at {self.wsgi_file_path}'))
         template = open(Path(__file__).parent / 'wsgi_file_template.py').read()
+        if staticfileshandler:
+            staticfileshandler_import = 'from django.contrib.staticfiles.handlers import StaticFilesHandler'
+            application = 'application = StaticFilesHandler(get_wsgi_application())'
+        else:
+            staticfileshandler_import = ''
+            application = 'get_wsgi_application()'
         with open(self.wsgi_file_path, 'w') as f:
-            f.write(template.format(project=self))
+            f.write(template.format(
+                project=self,
+                staticfileshandler_import=staticfileshandler_import,
+                application=application,
+            ))
 

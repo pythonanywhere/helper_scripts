@@ -14,7 +14,7 @@ class TestMain:
 
     def test_calls_all_stuff_in_right_order(self):
         with patch('scripts.pa_autoconfigure_django.DjangoProject') as mock_DjangoProject:
-            main('repo.url', 'www.domain.com', 'python.version', nuke='nuke option')
+            main('repo.url', 'www.domain.com', 'python.version', staticfileshandler=False, nuke='nuke option')
         assert mock_DjangoProject.call_args == call('www.domain.com', 'python.version')
         assert mock_DjangoProject.return_value.method_calls == [
             call.sanity_checks(nuke='nuke option'),
@@ -23,7 +23,7 @@ class TestMain:
             call.create_webapp(nuke='nuke option'),
             call.add_static_file_mappings(),
             call.find_django_files(),
-            call.update_wsgi_file(),
+            call.update_wsgi_file(staticfileshandler=False),
             call.update_settings_file(),
             call.run_collectstatic(),
             call.run_migrate(),
@@ -36,7 +36,7 @@ class TestMain:
         username = getpass.getuser()
         monkeypatch.setenv('PYTHONANYWHERE_DOMAIN', 'pythonanywhere.domain')
         with patch('scripts.pa_autoconfigure_django.DjangoProject') as mock_DjangoProject:
-            main('a-repo', 'your-username.pythonanywhere.com', 'python.version', nuke=False)
+            main('a-repo', 'your-username.pythonanywhere.com', 'python.version', staticfileshandler=False, nuke=False)
         assert mock_DjangoProject.call_args == call(
             username + '.pythonanywhere.domain', 'python.version'
         )
@@ -46,10 +46,20 @@ class TestMain:
         with patch('scripts.pa_autoconfigure_django.getpass') as mock_getpass:
             mock_getpass.getuser.return_value = 'UserName1'
             with patch('scripts.pa_autoconfigure_django.DjangoProject') as mock_DjangoProject:
-                main('a-url', 'your-username.pythonanywhere.com', 'python.version', 'nukey')
+                main('a-url', 'your-username.pythonanywhere.com', 'python.version', False, 'nukey')
             assert mock_DjangoProject.call_args == call(
                 'username1.pythonanywhere.com', 'python.version'
             )
+
+
+    def test_staticfileshandler_option(self):
+        with patch('scripts.pa_autoconfigure_django.DjangoProject') as mock_DjangoProject:
+            main('repo.url', 'www.domain.com', 'python.version', staticfileshandler=True, nuke='nuke option')
+        mock_project = mock_DjangoProject.return_value
+
+        assert mock_project.update_wsgi_file.call_args == call(staticfileshandler=True)
+        assert call.add_static_file_mappings() not in mock_project.method_calls
+        assert call.run_collectstatic() not in mock_project.method_calls
 
 
     @pytest.mark.slowtest
@@ -61,7 +71,7 @@ class TestMain:
         with patch('scripts.pa_autoconfigure_django.DjangoProject.update_wsgi_file'):
             with patch('scripts.pa_autoconfigure_django.DjangoProject.start_bash'):
                 with patch('pythonanywhere.api.call_api'):
-                    main(repo, domain, '2.7', nuke=False)
+                    main(repo, domain, '2.7', staticfileshandler=False, nuke=False)
 
         expected_django_version = '1.11.1'
         expected_virtualenv = virtualenvs_folder / domain

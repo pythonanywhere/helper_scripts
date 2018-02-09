@@ -12,4 +12,5 @@ os.environ['DJANGO_SETTINGS_MODULE'] = '{project.settings_path.parent.name}.sett
 
 # Set the 'application' variable to the Django wsgi app
 from django.core.wsgi import get_wsgi_application
-application = get_wsgi_application()
+{staticfileshandler_import}
+application = {application}
