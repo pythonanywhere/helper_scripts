@@ -236,7 +236,7 @@ class TestFindDjangoFiles:
     def test_cookiecutter(self, fake_home, cookicutter_submodule):
         project = DjangoProject('mydomain.com', 'python.version')
         shutil.copytree(cookicutter_submodule, project.project_path)
-        expected_settings_path = project.project_path / 'config/settings/local.py'
+        expected_settings_path = project.project_path / 'config/settings/production.py'
         assert expected_settings_path.exists()
         expected_manage_py = project.project_path / 'manage.py'
         assert expected_manage_py.exists()
@@ -245,6 +245,23 @@ class TestFindDjangoFiles:
 
         assert project.settings_path == expected_settings_path
         assert project.manage_py_path == expected_manage_py
+
+
+    @pytest.mark.parametrize('path', [
+        'settings/local.py',
+        'subfolder/settings/production.py',
+        'production_settings.py',
+    ])
+    def test_other_settings_paths(self, fake_home, path):
+        project = DjangoProject('mydomain.com', 'python.version')
+        settings_file = project.project_path / path
+        settings_file.parent.mkdir(parents=True)
+        settings_file.touch()
+        (project.project_path / 'manage.py').touch()
+
+        project.find_django_files()
+
+        assert project.settings_path == settings_file
 
 
     def test_raises_if_empty_project_folder(self, fake_home):

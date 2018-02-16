@@ -53,18 +53,31 @@ class DjangoProject(Project):
         ])
 
 
-    def find_django_files(self):
-        try:
-            self.settings_path = next(self.project_path.glob('**/settings.py'))
-        except StopIteration:
+    def _find_settings_path(self):
+        for glob in [
+            '**/settings.py',
+            '**/production_settings.py',
+            '**/settings_production.py',
+            '**/settings/production.py',
+            '**/settings/local.py',
+        ]:
             try:
-                self.settings_path = next(self.project_path.glob('**/settings/local.py'))
+                return next(self.project_path.glob(glob))
             except StopIteration:
-                raise SanityException('Could not find your settings.py')
+                pass
+        raise SanityException('Could not find your settings.py')
+
+
+    def _find_manage_py_path(self):
         try:
-            self.manage_py_path = next(self.project_path.glob('**/manage.py'))
+            return next(self.project_path.glob('**/manage.py'))
         except StopIteration:
             raise SanityException('Could not find your manage.py')
+
+
+    def find_django_files(self):
+        self.settings_path = self._find_settings_path()
+        self.manage_py_path = self._find_manage_py_path()
 
 
     def update_settings_file(self):
