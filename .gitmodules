@@ -1,3 +1,6 @@
 [submodule "submodules/example-django-project"]
 	path = submodules/example-django-project
 	url = https://github.com/hjwp/example-django-project.git
+[submodule "submodules/cookiecutter-example-project"]
+	path = submodules/cookiecutter-example-project
+	url = https://github.com/hjwp/cookiecutter-example-project
