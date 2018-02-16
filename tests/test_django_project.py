@@ -68,6 +68,20 @@ class TestDetectDjangoVersion:
         assert project.detect_requirements() == f'-r {requirements_txt.resolve()}'
 
 
+    def test_requirements_folder_uses_production_if_available(self, fake_home):
+        project = DjangoProject('mydomain.com', 'python.version')
+        project.project_path.mkdir()
+        requirements_dir = project.project_path / 'requirements'
+        requirements_dir.mkdir()
+        (requirements_dir / 'base.txt').touch()
+        (requirements_dir / 'local.txt').touch()
+        (requirements_dir / 'devel.txt').touch()
+        production_requirements_txt = requirements_dir / 'production.txt'
+        production_requirements_txt.touch()
+        assert project.detect_requirements() == f'-r {production_requirements_txt.resolve()}'
+
+
+
 @pytest.fixture
 def project_with_mock_virtualenv():
     project = DjangoProject('mydomain.com', 'python.version')
