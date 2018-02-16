@@ -75,11 +75,22 @@ class TestDetectDjangoVersion:
         requirements_dir = project.project_path / 'requirements'
         requirements_dir.mkdir()
         (requirements_dir / 'base.txt').touch()
-        (requirements_dir / 'production.txt').touch()
         (requirements_dir / 'devel.txt').touch()
         local_requirements_txt = requirements_dir / 'local.txt'
         local_requirements_txt.touch()
         assert project.detect_requirements() == f'-r {local_requirements_txt.resolve()}'
+
+
+    def test_requirements_folder_will_return_both_local_and_production_if_found(self, fake_home):
+        project = DjangoProject('mydomain.com', 'python.version')
+        project.project_path.mkdir()
+        requirements_dir = project.project_path / 'requirements'
+        requirements_dir.mkdir()
+        production_requirements_txt = requirements_dir / 'production.txt'
+        production_requirements_txt.touch()
+        local_requirements_txt = requirements_dir / 'local.txt'
+        local_requirements_txt.touch()
+        assert project.detect_requirements() == f'-r {local_requirements_txt.resolve()} -r {production_requirements_txt.resolve()}'
 
 
     def test_requirements_folder_various_other_options(self, fake_home):
@@ -89,14 +100,6 @@ class TestDetectDjangoVersion:
         requirements_dir.mkdir()
         base_requirements_txt = requirements_dir / 'base.txt'
         base_requirements_txt.touch()
-        production_requirements_txt = requirements_dir / 'production.txt'
-        production_requirements_txt.touch()
-        local_requirements_txt = requirements_dir / 'local.txt'
-        local_requirements_txt.touch()
-        assert project.detect_requirements() == f'-r {local_requirements_txt.resolve()}'
-        local_requirements_txt.unlink()
-        assert project.detect_requirements() == f'-r {production_requirements_txt.resolve()}'
-        production_requirements_txt.unlink()
         assert project.detect_requirements() == f'-r {base_requirements_txt.resolve()}'
 
 

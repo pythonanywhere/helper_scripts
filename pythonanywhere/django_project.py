@@ -29,10 +29,19 @@ class DjangoProject(Project):
 
 
     def detect_requirements(self):
+        basic_requirements = self.project_path / 'requirements.txt'
+        if basic_requirements.exists():
+            return f'-r {basic_requirements.resolve()}'
+
+        local_requirements = self.project_path / 'requirements/local.txt'
+        production_requirements = self.project_path / 'requirements/production.txt'
+        if local_requirements.exists() and production_requirements.exists():
+            return f'-r {local_requirements.resolve()} -r {production_requirements.resolve()}'
+
         for possible_path in [
-            'requirements.txt',
             'requirements/local.txt',
             'requirements/production.txt',
+            'requirements/dev.txt',
             'requirements/base.txt',
         ]:
             path = self.project_path / possible_path
@@ -86,7 +95,6 @@ class DjangoProject(Project):
             except AttributeError:
                 pass
         return sorted(vars)
-
 
 
     def find_django_files(self):
