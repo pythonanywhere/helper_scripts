@@ -127,6 +127,8 @@ class TestMain:
         ]).decode()
         assert 'System check identified no issues' in local_check_result
 
+        self.fail('TODO: print a warning on noticing env vars and/or when migrate fails¸ set up .env file and dotenv library')
+
         env = {'DJANGO_SETTINGS_MODULE': 'config.settings.production'}
         env.update(os.environ)
         production_check_result = subprocess.check_output([
