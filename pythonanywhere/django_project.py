@@ -28,12 +28,15 @@ class DjangoProject(Project):
 
 
     def detect_requirements(self):
-        requirements_txt = self.project_path / 'requirements.txt'
-        if requirements_txt.exists():
-            return f'-r {requirements_txt.resolve()}'
-        alternative_requirements = self.project_path / 'requirements/production.txt'
-        if alternative_requirements.exists():
-            return f'-r {alternative_requirements.resolve()}'
+        for possible_path in [
+            'requirements.txt',
+            'requirements/production.txt',
+            'requirements/local.txt',
+            'requirements/base.txt',
+        ]:
+            path = self.project_path / possible_path
+            if path.exists():
+                return f'-r {path.resolve()}'
         return 'django<2'  # FIXME: this is a hack for djangogirls while they update to 2.x
 
 

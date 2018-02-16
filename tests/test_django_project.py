@@ -53,11 +53,12 @@ class TestDownloadRepo:
 
 
 class TestDetectDjangoVersion:
+    default = 'django<2' # this is a (theoretically) temporary, for djangogirls.
 
     def test_is_django_1_x_by_default(self, fake_home):
-        # this is a temporary hack for djangogirls.
+
         project = DjangoProject('mydomain.com', 'python.version')
-        assert project.detect_requirements() == 'django<2'
+        assert project.detect_requirements() == self.default
 
 
     def test_if_requirements_txt_exists(self, fake_home):
@@ -79,6 +80,20 @@ class TestDetectDjangoVersion:
         production_requirements_txt = requirements_dir / 'production.txt'
         production_requirements_txt.touch()
         assert project.detect_requirements() == f'-r {production_requirements_txt.resolve()}'
+
+
+    def test_requirements_folder_various_other_options(self, fake_home):
+        project = DjangoProject('mydomain.com', 'python.version')
+        project.project_path.mkdir()
+        requirements_dir = project.project_path / 'requirements'
+        requirements_dir.mkdir()
+        base_requirements_txt = requirements_dir / 'base.txt'
+        base_requirements_txt.touch()
+        local_requirements_txt = requirements_dir / 'local.txt'
+        local_requirements_txt.touch()
+        assert project.detect_requirements() == f'-r {local_requirements_txt.resolve()}'
+        local_requirements_txt.unlink()
+        assert project.detect_requirements() == f'-r {base_requirements_txt.resolve()}'
 
 
 
