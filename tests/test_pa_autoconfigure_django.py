@@ -110,7 +110,7 @@ class TestMain:
                     with patch('pythonanywhere.api.call_api'):
                         main(repo, domain, '2.7', nuke=False)
 
-        expected_django_version = '1.11.1'
+        expected_django_version = '1.9.4'
         expected_virtualenv = virtualenvs_folder / domain
 
         django_version = subprocess.check_output([
@@ -120,17 +120,27 @@ class TestMain:
         ]).decode().strip()
         assert django_version == expected_django_version
 
-        expected_settings_path = expected_project_path / 'config/settings/local.py'
-        lines = expected_settings_path.read_text().split('\n')
-        assert "MEDIA_ROOT = os.path.join(BASE_DIR, 'media')" in lines
-        assert f"ALLOWED_HOSTS = ['{domain}']" in lines
-
-        stuff = subprocess.check_output([
+        local_check_result = subprocess.check_output([
             expected_virtualenv / 'bin/python',
             expected_project_path / 'manage.py',
             'check'
-        ])
-        assert stuff == 'weee'
+        ]).decode()
+        assert 'System check identified no issues' in local_check_result
+
+        env = {'DJANGO_SETTINGS_MODULE': 'config.settings.production'}
+        env.update(os.environ)
+        production_check_result = subprocess.check_output([
+            expected_virtualenv / 'bin/python',
+            expected_project_path / 'manage.py',
+            'check'
+        ], env=env).decode()
+        assert 'System check identified no issues' in production_check_result
+
+        expected_settings_path = expected_project_path / 'config/settings/production.py'
+        lines = expected_settings_path.read_text().split('\n')
+        print('\n'.join(lines))
+        assert "MEDIA_ROOT = os.path.join(BASE_DIR, 'media')" in lines
+        assert f"ALLOWED_HOSTS = ['{domain}']" in lines
 
 
 
