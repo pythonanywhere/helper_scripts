@@ -390,6 +390,46 @@ class TestUpdateSettingsFile:
         assert "ALLOWED_HOSTS = ['mydomain.com']" in lines
 
 
+    def test_adds_import_os_at_top(self):
+        project = DjangoProject('mydomain.com', 'python.version')
+        project.settings_path = Path(tempfile.NamedTemporaryFile().name)
+
+        with open(project.settings_path, 'w') as f:
+            f.write(dedent(
+                """
+                # settings file
+                """
+            ))
+
+        project.update_settings_file()
+
+        with open(project.settings_path) as f:
+            lines = f.read().split('\n')
+
+        assert "import os" in lines
+        assert "import os" == lines[0]
+
+
+    def test_does_not_dupe_import_os(self):
+        project = DjangoProject('mydomain.com', 'python.version')
+        project.settings_path = Path(tempfile.NamedTemporaryFile().name)
+
+        with open(project.settings_path, 'w') as f:
+            f.write(dedent(
+                """
+                import os
+                # more settings file
+                """
+            ))
+
+        project.update_settings_file()
+
+        with open(project.settings_path) as f:
+            lines = f.read().split('\n')
+
+        assert lines.count('import os') == 1
+
+
 
 class TestRunCollectStatic:
 

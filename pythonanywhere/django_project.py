@@ -100,7 +100,10 @@ class DjangoProject(Project):
 
         with open(self.settings_path) as f:
             settings = f.read()
-        new_settings = settings.replace(
+        new_settings = ''
+        if 'import os' not in settings:
+            new_settings += 'import os\n\n'
+        new_settings += settings.replace(
             'ALLOWED_HOSTS = []',
             f'ALLOWED_HOSTS = [{self.domain!r}]'
         )
