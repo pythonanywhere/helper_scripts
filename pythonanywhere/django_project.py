@@ -31,8 +31,8 @@ class DjangoProject(Project):
     def detect_requirements(self):
         for possible_path in [
             'requirements.txt',
-            'requirements/production.txt',
             'requirements/local.txt',
+            'requirements/production.txt',
             'requirements/base.txt',
         ]:
             path = self.project_path / possible_path
