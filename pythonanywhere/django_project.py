@@ -57,7 +57,10 @@ class DjangoProject(Project):
         try:
             self.settings_path = next(self.project_path.glob('**/settings.py'))
         except StopIteration:
-            raise SanityException('Could not find your settings.py')
+            try:
+                self.settings_path = next(self.project_path.glob('**/settings/local.py'))
+            except StopIteration:
+                raise SanityException('Could not find your settings.py')
         try:
             self.manage_py_path = next(self.project_path.glob('**/manage.py'))
         except StopIteration:

@@ -195,6 +195,13 @@ def more_nested_submodule():
     subprocess.check_call(['git', 'submodule', 'update', '--init', '--recursive'])
 
 
+@pytest.fixture
+def cookicutter_submodule():
+    subprocess.check_call(['git', 'submodule', 'update', '--init', '--recursive'])
+    submodule_path = Path(__file__).parents[1] / 'submodules' / 'cookiecutter-example-project'
+    yield submodule_path
+
+
 
 class TestFindDjangoFiles:
 
@@ -218,6 +225,20 @@ class TestFindDjangoFiles:
         expected_settings_path = project.project_path / 'mysite/mysite/settings.py'
         assert expected_settings_path.exists()
         expected_manage_py = project.project_path / 'mysite/manage.py'
+        assert expected_manage_py.exists()
+
+        project.find_django_files()
+
+        assert project.settings_path == expected_settings_path
+        assert project.manage_py_path == expected_manage_py
+
+
+    def test_cookiecutter(self, fake_home, cookicutter_submodule):
+        project = DjangoProject('mydomain.com', 'python.version')
+        shutil.copytree(cookicutter_submodule, project.project_path)
+        expected_settings_path = project.project_path / 'config/settings/local.py'
+        assert expected_settings_path.exists()
+        expected_manage_py = project.project_path / 'manage.py'
         assert expected_manage_py.exists()
 
         project.find_django_files()
