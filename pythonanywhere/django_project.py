@@ -100,14 +100,21 @@ class DjangoProject(Project):
 
         with open(self.settings_path) as f:
             settings = f.read()
-        new_settings = ''
         if 'import os' not in settings:
-            new_settings += 'import os\n\n'
-        new_settings += settings.replace(
-            'ALLOWED_HOSTS = []',
-            f'ALLOWED_HOSTS = [{self.domain!r}]'
-        )
-        new_settings += dedent(
+            if 'from __future__' in settings:
+                settings_lines = settings.split('\n')
+                last_future_import = max(i for i, l in enumerate(settings_lines) if '__future__' in l)
+                settings_lines.insert(last_future_import + 1, 'import os')
+                settings = '\n'.join(settings_lines)
+            else:
+                settings = 'import os\n\n' + settings
+        allowed_hosts = f'ALLOWED_HOSTS = [{self.domain!r}]'
+        if 'ALLOWED_HOSTS = []' in settings:
+            settings = settings.replace('ALLOWED_HOSTS = []', allowed_hosts)
+        else:
+            settings += '\n\n' + allowed_hosts
+
+        settings += dedent(
             """
             MEDIA_URL = '/media/'
             STATIC_ROOT = os.path.join(BASE_DIR, 'static')
@@ -115,7 +122,7 @@ class DjangoProject(Project):
             """
         )
         with open(self.settings_path, 'w') as f:
-            f.write(new_settings)
+            f.write(settings)
 
 
     def run_collectstatic(self):

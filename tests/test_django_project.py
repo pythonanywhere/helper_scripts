@@ -348,21 +348,17 @@ class TestUpdateSettingsFile:
     def test_adds_STATIC_and_MEDIA_config_to_settings(self):
         project = DjangoProject('mydomain.com', 'python.version')
         project.settings_path = Path(tempfile.NamedTemporaryFile().name)
-
-        with open(project.settings_path, 'w') as f:
-            f.write(dedent(
-                """
-                # settings file
-                STATIC_URL = '/static/'
-                ALLOWED_HOSTS = []
-                """
-            ))
+        project.settings_path.write_text(dedent(
+            """
+            # settings file
+            STATIC_URL = '/static/'
+            ALLOWED_HOSTS = []
+            """
+        ))
 
         project.update_settings_file()
 
-        with open(project.settings_path) as f:
-            lines = f.read().split('\n')
-
+        lines = project.settings_path.read_text().split('\n')
         assert "STATIC_URL = '/static/'" in lines
         assert "MEDIA_URL = '/media/'" in lines
         assert "STATIC_ROOT = os.path.join(BASE_DIR, 'static')" in lines
@@ -373,39 +369,47 @@ class TestUpdateSettingsFile:
         project = DjangoProject('mydomain.com', 'python.version')
         project.settings_path = Path(tempfile.NamedTemporaryFile().name)
 
-        with open(project.settings_path, 'w') as f:
-            f.write(dedent(
-                """
-                # settings file
-                STATIC_URL = '/static/'
-                ALLOWED_HOSTS = []
-                """
-            ))
+        project.settings_path.write_text(dedent(
+            """
+            # settings file
+            STATIC_URL = '/static/'
+            ALLOWED_HOSTS = []
+            """
+        ))
 
         project.update_settings_file()
 
-        with open(project.settings_path) as f:
-            lines = f.read().split('\n')
+        lines = project.settings_path.read_text().split('\n')
+        assert "ALLOWED_HOSTS = ['mydomain.com']" in lines
 
+
+    def test_adds_ALLOWED_HOSTS_if_necessary(self):
+        project = DjangoProject('mydomain.com', 'python.version')
+        project.settings_path = Path(tempfile.NamedTemporaryFile().name)
+        project.settings_path.write_text(dedent(
+            """
+            # settings file with no existing allowed hostss
+            """
+        ))
+
+        project.update_settings_file()
+
+        lines = project.settings_path.read_text().split('\n')
         assert "ALLOWED_HOSTS = ['mydomain.com']" in lines
 
 
     def test_adds_import_os_at_top(self):
         project = DjangoProject('mydomain.com', 'python.version')
         project.settings_path = Path(tempfile.NamedTemporaryFile().name)
-
-        with open(project.settings_path, 'w') as f:
-            f.write(dedent(
-                """
-                # settings file
-                """
-            ))
+        project.settings_path.write_text(dedent(
+            """
+            # settings file
+            """
+        ))
 
         project.update_settings_file()
 
-        with open(project.settings_path) as f:
-            lines = f.read().split('\n')
-
+        lines = project.settings_path.read_text().split('\n')
         assert "import os" in lines
         assert "import os" == lines[0]
 
@@ -414,20 +418,37 @@ class TestUpdateSettingsFile:
         project = DjangoProject('mydomain.com', 'python.version')
         project.settings_path = Path(tempfile.NamedTemporaryFile().name)
 
-        with open(project.settings_path, 'w') as f:
-            f.write(dedent(
-                """
-                import os
-                # more settings file
-                """
-            ))
+        project.settings_path.write_text(dedent(
+            """
+            import os
+            # more settings file
+            """
+        ))
 
         project.update_settings_file()
 
-        with open(project.settings_path) as f:
-            lines = f.read().split('\n')
-
+        lines = project.settings_path.read_text().split('\n')
         assert lines.count('import os') == 1
+
+
+    def test_inserts_import_os_after_any__future__imports(self):
+        project = DjangoProject('mydomain.com', 'python.version')
+        project.settings_path = Path(tempfile.NamedTemporaryFile().name)
+
+        project.settings_path.write_text(dedent(
+            """
+            from __future__ import unicode_literals
+            from __future__ import print_function
+            # more settings file
+            """
+        ))
+
+        project.update_settings_file()
+
+        lines = project.settings_path.read_text().split('\n')
+        assert 'import os' in lines
+        assert lines.index('import os') > 1
+        assert lines[3] == 'import os'
 
 
 
