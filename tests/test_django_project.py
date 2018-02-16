@@ -245,6 +245,25 @@ class TestFindDjangoFiles:
 
         assert project.settings_path == expected_settings_path
         assert project.manage_py_path == expected_manage_py
+        assert project.environment_variables == sorted([
+            'DJANGO_AWS_STORAGE_BUCKET_NAME',
+            'DJANGO_SECRET_KEY',
+            'DJANGO_EMAIL_BACKEND',
+            'DJANGO_AWS_SECRET_ACCESS_KEY',
+            'DJANGO_ADMIN_URL',
+            'DATABASE_URL',
+            'DJANGO_MAILGUN_API_KEY',
+            'DJANGO_DEBUG',
+            'DJANGO_MAILGUN_SERVER_NAME',
+            'DJANGO_SECURE_SSL_REDIRECT',
+            'DJANGO_DEFAULT_FROM_EMAIL',
+            'DJANGO_ACCOUNT_ALLOW_REGISTRATION',
+            'DJANGO_AWS_ACCESS_KEY_ID',
+            'DJANGO_EMAIL_SUBJECT_PREFIX',
+            'REDIS_URL',
+            'DJANGO_ALLOWED_HOSTS',
+            'DJANGO_SERVER_EMAIL',
+        ])
 
 
     @pytest.mark.parametrize('path', [
@@ -292,6 +311,31 @@ class TestFindDjangoFiles:
             project.find_django_files()
 
         assert 'Could not find your manage.py' in str(e.value)
+
+
+    def test_find_environment_variables(self, fake_home):
+        project = DjangoProject('mydomain.com', 'python.version')
+        project.project_path.mkdir()
+        (project.project_path / 'manage.py').touch()
+        settings_file = project.project_path / 'settings.py'
+        settings_file.write_text(dedent(
+            '''
+            BLA_SETTING = os.environ.get('SETTING1')
+            OTHER_ONE = os.environ['SETTING2']
+            PLUGIN = env.thing('SETTING3')
+            MULTILINE = env.thing('SETTING4',
+                config=True
+            )
+            ignored = env('lowercarse')
+            ignored = env('_')
+            '''
+        ))
+        other_file = project.project_path / 'other.py'
+        other_file.write_text('THING = os.environ["SETTING5"]')
+        project.settings_path = settings_file
+        assert project._find_environment_variables() == [
+            'SETTING1', 'SETTING2', 'SETTING3', 'SETTING4', 'SETTING5',
+        ]
 
 
 

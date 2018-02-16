@@ -1,3 +1,4 @@
+import re
 from pathlib import Path
 import shutil
 import subprocess
@@ -75,9 +76,23 @@ class DjangoProject(Project):
             raise SanityException('Could not find your manage.py')
 
 
+    def _find_environment_variables(self):
+        vars = set()
+        for path in self.settings_path.parent.iterdir():
+            try:
+                settings = path.read_text()
+                vars |= set(re.findall(r"env.*\(.([A-Z\d_]{2,100})", settings))
+                vars |= set(re.findall(r"environ\[.([A-Z\d_]{2,100}).\]", settings))
+            except AttributeError:
+                pass
+        return sorted(vars)
+
+
+
     def find_django_files(self):
         self.settings_path = self._find_settings_path()
         self.manage_py_path = self._find_manage_py_path()
+        self.environment_variables = self._find_environment_variables()
 
 
     def update_settings_file(self):
