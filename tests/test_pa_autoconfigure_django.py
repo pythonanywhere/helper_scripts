@@ -5,6 +5,8 @@ import pytest
 import subprocess
 import requests
 import time
+from pathlib import Path
+import shutil
 
 from scripts.pa_autoconfigure_django import main
 
@@ -92,6 +94,43 @@ class TestMain:
         response = requests.get('http://localhost:8000/', headers={'HOST': 'mydomain.com'})
         assert 'Hello from an example django project' in response.text
 
+
+    @pytest.mark.slowtest
+    def test_cookiecutter(
+        self, fake_home, virtualenvs_folder, api_token,
+    ):
+        submodule_path = Path(__file__).parents[1] / 'submodules' / 'cookiecutter-example-project'
+        repo = 'https://github.com/hjwp/example-django-project.git'
+        domain = 'www.domainy.com'
+        expected_project_path = fake_home / domain
+        with patch('scripts.pa_autoconfigure_django.DjangoProject.download_repo') as mock_download_repo:
+            mock_download_repo.side_effect = lambda *a, **kw: shutil.copytree(submodule_path, expected_project_path)
+            with patch('scripts.pa_autoconfigure_django.DjangoProject.update_wsgi_file'):
+                with patch('scripts.pa_autoconfigure_django.DjangoProject.start_bash'):
+                    with patch('pythonanywhere.api.call_api'):
+                        main(repo, domain, '2.7', nuke=False)
+
+        expected_django_version = '1.11.1'
+        expected_virtualenv = virtualenvs_folder / domain
+
+        django_version = subprocess.check_output([
+            expected_virtualenv / 'bin/python',
+            '-c'
+            'import django; print(django.get_version())'
+        ]).decode().strip()
+        assert django_version == expected_django_version
+
+        expected_settings_path = expected_project_path / 'config/settings/local.py'
+        lines = expected_settings_path.read_text().split('\n')
+        assert "MEDIA_ROOT = os.path.join(BASE_DIR, 'media')" in lines
+        assert f"ALLOWED_HOSTS = ['{domain}']" in lines
+
+        stuff = subprocess.check_output([
+            expected_virtualenv / 'bin/python',
+            expected_project_path / 'manage.py',
+            'check'
+        ])
+        assert stuff == 'weee'
 
 
 
