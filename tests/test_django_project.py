@@ -54,10 +54,9 @@ class TestDownloadRepo:
 
 class TestDetectDjangoVersion:
 
-    def test_is_django_1_x_by_default(self, fake_home):
-        # this is a temporary hack for djangogirls.
+    def test_is_versionless_django_by_default(self, fake_home):
         project = DjangoProject('mydomain.com', 'python.version')
-        assert project.detect_requirements() == 'django<2'
+        assert project.detect_requirements() == 'django'
 
 
     def test_if_requirements_txt_exists(self, fake_home):
