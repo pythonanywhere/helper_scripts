@@ -22,7 +22,7 @@ from pythonanywhere.api import Webapp
 from pythonanywhere.snakesay import snakesay
 
 
-def main(domain, suppress_reload):
+def main(domain_name, suppress_reload):
     homedir = expanduser("~")
     possible_paths = (
         os.path.join(homedir, 'letsencrypt', domain_name),

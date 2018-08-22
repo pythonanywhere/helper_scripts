@@ -24,7 +24,7 @@ from pythonanywhere.api import Webapp
 from pythonanywhere.snakesay import snakesay
 
 
-def main(domain, certificate_file, private_key_file, suppress_reload):
+def main(domain_name, certificate_file, private_key_file, suppress_reload):
     if not os.path.exists(certificate_file):
         print(f"Could not find certificate file {certificate_file}")
         sys.exit(1)
@@ -37,7 +37,7 @@ def main(domain, certificate_file, private_key_file, suppress_reload):
     with open(private_key_file, "r") as f:
         private_key = f.read()
 
-    webapp = Webapp(domain)
+    webapp = Webapp(domain_name)
     webapp.set_ssl(certificate, private_key)
     if not suppress_reload:
         webapp.reload()
