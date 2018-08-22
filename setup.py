@@ -4,7 +4,7 @@ from setuptools import setup
 here = Path(__file__).parent
 
 # Get the long description from the README file
-with open(here / 'README.md', encoding='utf-8') as f:
+with (here / 'README.md').open(encoding='utf-8') as f:
     long_description = f.read()
 
 setup(
@@ -21,7 +21,9 @@ setup(
         'Intended Audience :: Developers',
         'Topic :: Software Development :: Libraries',
         'License :: OSI Approved :: MIT License',
+        'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.5',
     ],
 
     keywords='pythonanywhere api cloud web hosting',
