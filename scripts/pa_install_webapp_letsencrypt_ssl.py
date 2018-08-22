@@ -37,7 +37,7 @@ def main(domain_name, suppress_reload):
             with open(private_key_file, "r") as f:
                 private_key = f.read()
 
-            webapp = Webapp(domain)
+            webapp = Webapp(domain_name)
             webapp.set_ssl(certificate, private_key)
             if not suppress_reload:
                 webapp.reload()
