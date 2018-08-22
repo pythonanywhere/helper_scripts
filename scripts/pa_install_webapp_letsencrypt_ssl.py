@@ -4,7 +4,7 @@ script that gets them from Let's Encrypt, and that they're in the standard place
 be run on PythonAnywhere.
 
 Usage:
-  pa_install_webapp_letsencrypt_ssl.py <domain> [--supress-reload]
+  pa_install_webapp_letsencrypt_ssl.py <domain> [--suppress-reload]
 
 Options:
   <domain>              Domain name, eg www.mydomain.com
@@ -53,5 +53,5 @@ if __name__ == '__main__':
     arguments = docopt(__doc__)
     main(
         arguments['<domain>'],
-        supress_reload=arguments.get('--supress-reload')
+        suppress_reload=arguments.get('--suppress-reload')
     )

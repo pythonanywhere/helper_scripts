@@ -2,7 +2,7 @@
 """Set the HTTPS certificate and private key for a website to the contents of two files, and reload the site.
 
 Usage:
-  pa_set_webapp_ssl.py <domain> <certificate-file> <private-key-file> [--supress-reload]
+  pa_set_webapp_ssl.py <domain> <certificate-file> <private-key-file> [--suppress-reload]
 
 Options:
   <domain>              Domain name, eg www.mydomain.com
@@ -47,5 +47,5 @@ if __name__ == '__main__':
     main(
         arguments['<domain>'],
         arguments['<certificate-file>'], arguments['<private-key-file>'],
-        supress_reload=arguments.get('--supress-reload')
+        suppress_reload=arguments.get('--suppress-reload')
     )
