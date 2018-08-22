@@ -17,6 +17,7 @@ Options:
 
 from docopt import docopt
 import getpass
+import os
 from textwrap import dedent
 
 from pythonanywhere.api import Webapp

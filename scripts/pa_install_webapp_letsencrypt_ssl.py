@@ -15,6 +15,7 @@ Options:
 from docopt import docopt
 from os.path import expanduser
 import getpass
+import os
 from textwrap import dedent
 
 from pythonanywhere.api import Webapp
