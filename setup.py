@@ -34,7 +34,7 @@ setup(
         'requests',
     ],
     extras_require={},
-    python_requires='>=3.6',
+    python_requires='>=3.5',
     package_data={},
     data_files=[],
     entry_points={},
