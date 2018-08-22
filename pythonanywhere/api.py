@@ -113,3 +113,13 @@ class Webapp:
         if not response.ok:
             raise Exception(f'POST to reload webapp via API failed, got {response}:{response.text}')
 
+
+    def set_ssl(self, certificate, private_key):
+        print(snakesay(f'Setting up SSL for {self.domain} via API'))
+        url = get_api_endpoint().format(username=getpass.getuser()) + self.domain + '/ssl/'
+        response = call_api(
+            url, 'post',
+            json={'cert': certificate, 'private_key': private_key}
+        )
+        if not response.ok:
+            raise Exception(f'POST to set SSL details via API failed, got {response}:{response.text}')

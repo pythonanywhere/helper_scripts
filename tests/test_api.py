@@ -260,3 +260,31 @@ class TestReloadWebapp:
         assert 'POST to reload webapp via API failed' in str(e.value)
         assert 'nope' in str(e.value)
 
+
+class TestSetWebappSSL:
+
+    def test_does_post_to_ssl_url(self, api_responses, api_token):
+        expected_url = get_api_endpoint().format(username=getpass.getuser()) + 'mydomain.com/ssl/'
+        api_responses.add(responses.POST, expected_url, status=200)
+        certificate = "certificate data"
+        private_key = "private key data"
+
+        Webapp('mydomain.com').set_ssl(certificate, private_key)
+
+        post = api_responses.calls[0]
+        assert post.request.url == expected_url
+        assert json.loads(post.request.body.decode('utf8')) == {
+            'private_key': 'private key data', 'cert': 'certificate data'
+        }
+        assert post.request.headers['Authorization'] == f'Token {api_token}'
+
+
+    def test_raises_if_post_does_not_20x(self, api_responses, api_token):
+        expected_url = get_api_endpoint().format(username=getpass.getuser()) + 'mydomain.com/ssl/'
+        api_responses.add(responses.POST, expected_url, status=404, body='nope')
+
+        with pytest.raises(Exception) as e:
+            Webapp('mydomain.com').set_ssl("foo", "bar")
+
+        assert 'POST to set SSL details via API failed' in str(e.value)
+        assert 'nope' in str(e.value)
