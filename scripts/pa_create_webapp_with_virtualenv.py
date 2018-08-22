@@ -23,7 +23,7 @@ from pythonanywhere.project import Project
 from pythonanywhere.snakesay import snakesay
 
 
-def main(repo_url, domain, python_version, nuke):
+def main(domain, python_version, nuke):
     if domain == 'your-username.pythonanywhere.com':
         username = getpass.getuser().lower()
         domain = f'{username}.pythonanywhere.com'
@@ -48,5 +48,5 @@ def main(repo_url, domain, python_version, nuke):
 
 if __name__ == '__main__':
     arguments = docopt(__doc__)
-    main(arguments['<git-repo-url>'], arguments['--domain'], arguments['--python'], nuke=arguments.get('--nuke'))
+    main(arguments['--domain'], arguments['--python'], nuke=arguments.get('--nuke'))
 
