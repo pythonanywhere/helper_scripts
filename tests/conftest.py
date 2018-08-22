@@ -37,7 +37,7 @@ def fake_home(local_pip_cache):
     os.environ['HOME'] = str(tempdir)
     yield tempdir
     os.environ['HOME'] = old_home
-    shutil.rmtree(tempdir)
+    shutil.rmtree(str(tempdir))
 
     new_stuff = set(Path(old_home).iterdir()) - old_home_contents
     if new_stuff:
@@ -48,7 +48,7 @@ def fake_home(local_pip_cache):
 
 @pytest.fixture
 def virtualenvs_folder():
-    actual_virtualenvs = Path(f'/home/{getuser()}/.virtualenvs')
+    actual_virtualenvs = Path('/home/{user}/.virtualenvs'.format(user=getuser()))
     old_virtualenvs = set(Path(actual_virtualenvs).iterdir())
 
     tempdir = _get_temp_dir()
@@ -57,7 +57,7 @@ def virtualenvs_folder():
     yield tempdir
     if old_workon:
         os.environ['WORKON_HOME'] = old_workon
-    shutil.rmtree(tempdir)
+    shutil.rmtree(str(tempdir))
 
     new_envs = set(actual_virtualenvs.iterdir()) - set(old_virtualenvs)
     if new_envs:
@@ -120,4 +120,3 @@ def process_killer():
         for child in psutil.Process(p.pid).children():
             child.kill()
         p.kill()
-

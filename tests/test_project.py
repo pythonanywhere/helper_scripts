@@ -66,7 +66,7 @@ class TestSanityChecks:
         with pytest.raises(SanityException) as e:
             project.sanity_checks(nuke=False)
 
-        expected_msg = f"You already have a project folder at {fake_home}/mydomain.com"
+        expected_msg = "You already have a project folder at {fake_home}/mydomain.com".format(fake_home=fake_home)
         assert expected_msg in str(e.value)
         assert "nuke" in str(e.value)
 
@@ -124,4 +124,3 @@ class TestStartBash:
                 project.start_bash()
         unique_ids = [args[1] for args, kwargs in mock_launch_bash_in_virtualenv.call_args_list]
         assert len(set(unique_ids)) == len(unique_ids)
-

@@ -24,7 +24,7 @@ class AuthenticationError(Exception):
 
 def get_api_endpoint():
     domain = os.environ.get('PYTHONANYWHERE_DOMAIN', 'pythonanywhere.com')
-    return f'https://www.{domain}/api/v0/user/{{username}}/webapps/'
+    return 'https://www.{domain}/api/v0/user/{{username}}/webapps/'.format(domain=domain)
 
 
 def call_api(url, method, **kwargs):
@@ -33,13 +33,18 @@ def call_api(url, method, **kwargs):
     response = requests.request(
         method=method,
         url=url,
-        headers={'Authorization': f'Token {token}'},
+        headers={'Authorization': 'Token {token}'.format(token=token)},
         verify=not insecure,
         **kwargs
     )
     if response.status_code == 401:
         print(response, response.text)
-        raise AuthenticationError(f'Authentication error {response.status_code} calling API: {response.text}')
+        raise AuthenticationError(
+            'Authentication error {status_code} calling API: {response_text}'.format(
+                status_code=response.status_code,
+                response_text=response.text,
+            )
+        )
     return response
 
 
@@ -72,7 +77,11 @@ class Webapp:
         url = get_api_endpoint().format(username=getpass.getuser()) + self.domain + '/'
         response = call_api(url, 'get')
         if response.status_code == 200:
-            raise SanityException(f'You already have a webapp for {self.domain}.\n\nUse the --nuke option if you want to replace it.')
+            raise SanityException(
+                'You already have a webapp for {domain}.\n\nUse the --nuke option if you want to replace it.'.format(
+                    domain=self.domain
+                )
+            )
 
 
 
@@ -87,10 +96,24 @@ class Webapp:
             'domain_name': self.domain, 'python_version': PYTHON_VERSIONS[python_version]},
         )
         if not response.ok or response.json().get('status') == 'ERROR':
-            raise Exception(f'POST to create webapp via API failed, got {response}:{response.text}')
-        response = call_api(patch_url, 'patch', data={'virtualenv_path': virtualenv_path, 'source_directory': project_path})
+            raise Exception(
+                'POST to create webapp via API failed, got {response}:{response_text}'.format(
+                    response=response,
+                    response_text=response.text,
+                )
+            )
+        response = call_api(
+            patch_url, 'patch',
+            data={'virtualenv_path': virtualenv_path, 'source_directory': project_path}
+        )
         if not response.ok:
-            raise Exception(f'PATCH to set virtualenv path and source directory via API failed, got {response}:{response.text}')
+            raise Exception(
+                "PATCH to set virtualenv path and source directory via API failed,"
+                "got {response}:{response_text}".format(
+                    response=response,
+                    response_text=response.text,
+                )
+            )
 
 
 
@@ -108,19 +131,29 @@ class Webapp:
 
 
     def reload(self):
-        print(snakesay(f'Reloading {self.domain} via API'))
+        print(snakesay('Reloading {domain} via API'.format(domain=self.domain)))
         url = get_api_endpoint().format(username=getpass.getuser()) + self.domain + '/reload/'
         response = call_api(url, 'post')
         if not response.ok:
-            raise Exception(f'POST to reload webapp via API failed, got {response}:{response.text}')
+            raise Exception(
+                'POST to reload webapp via API failed, got {response}:{response_text}'.format(
+                    response=response,
+                    response_text=response.text,
+                )
+            )
 
 
     def set_ssl(self, certificate, private_key):
-        print(snakesay(f'Setting up SSL for {self.domain} via API'))
+        print(snakesay('Setting up SSL for {domain} via API'.format(domain=self.domain)))
         url = get_api_endpoint().format(username=getpass.getuser()) + self.domain + '/ssl/'
         response = call_api(
             url, 'post',
             json={'cert': certificate, 'private_key': private_key}
         )
         if not response.ok:
-            raise Exception(f'POST to set SSL details via API failed, got {response}:{response.text}')
+            raise Exception(
+                'POST to set SSL details via API failed, got {response}:{response_text}'.format(
+                    response=response,
+                    response_text=response.text,
+                )
+            )

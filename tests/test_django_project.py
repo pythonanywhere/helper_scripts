@@ -21,15 +21,15 @@ class TestDownloadRepo:
         project = DjangoProject('www.a.domain.com', 'py.version')
         project.download_repo(repo, nuke=False)
         assert project.project_path.is_dir()
-        assert 'file1.py' in os.listdir(project.project_path)
-        assert 'file2.py' in os.listdir(project.project_path)
+        assert 'file1.py' in os.listdir(str(project.project_path))
+        assert 'file2.py' in os.listdir(str(project.project_path))
 
 
     def test_calls_git_subprocess(self, mock_subprocess, fake_home):
         project = DjangoProject('www.a.domain.com', 'py.version')
         project.download_repo('repo', nuke=False)
         assert mock_subprocess.check_call.call_args == call(
-            ['git', 'clone', 'repo', project.project_path]
+            ['git', 'clone', 'repo', str(project.project_path)]
         )
 
 
@@ -64,7 +64,9 @@ class TestDetectDjangoVersion:
         project.project_path.mkdir()
         requirements_txt = project.project_path / 'requirements.txt'
         requirements_txt.touch()
-        assert project.detect_requirements() == f'-r {requirements_txt.resolve()}'
+        assert project.detect_requirements() == '-r {requirements_txt}'.format(
+            requirements_txt=requirements_txt.resolve()
+        )
 
 
 @pytest.fixture
@@ -117,10 +119,10 @@ class TestRunStartproject:
         project = DjangoProject('mydomain.com', 'python.version')
         project.run_startproject(nuke=False)
         assert mock_subprocess.check_call.call_args == call([
-            Path(project.virtualenv.path / 'bin/django-admin.py'),
+            str(Path(project.virtualenv.path / 'bin/django-admin.py')),
             'startproject',
             'mysite',
-            fake_home / 'mydomain.com',
+            str(fake_home / 'mydomain.com'),
         ])
 
 
@@ -147,7 +149,7 @@ def non_nested_submodule():
     submodule_path = Path(__file__).parents[1] / 'submodules' / 'example-django-project'
     subprocess.check_call(
         ['git', 'checkout', 'master'],
-        cwd=submodule_path
+        cwd=str(submodule_path)
     )
     yield submodule_path
     subprocess.check_call(['git', 'submodule', 'update', '--init', '--recursive'])
@@ -159,7 +161,7 @@ def more_nested_submodule():
     submodule_path = Path(__file__).parents[1] / 'submodules' / 'example-django-project'
     subprocess.check_call(
         ['git', 'checkout', 'morenested'],
-        cwd=submodule_path
+        cwd=str(submodule_path)
     )
     yield submodule_path
     subprocess.check_call(['git', 'submodule', 'update', '--init', '--recursive'])
@@ -170,7 +172,7 @@ class TestFindDjangoFiles:
 
     def test_non_nested(self, fake_home, non_nested_submodule):
         project = DjangoProject('mydomain.com', 'python.version')
-        shutil.copytree(non_nested_submodule, project.project_path)
+        shutil.copytree(str(non_nested_submodule), str(project.project_path))
         expected_settings_path = project.project_path / 'myproject/settings.py'
         assert expected_settings_path.exists()
         expected_manage_py = project.project_path / 'manage.py'
@@ -184,7 +186,7 @@ class TestFindDjangoFiles:
 
     def test_nested(self, fake_home, more_nested_submodule):
         project = DjangoProject('mydomain.com', 'python.version')
-        shutil.copytree(more_nested_submodule, project.project_path)
+        shutil.copytree(str(more_nested_submodule), str(project.project_path))
         expected_settings_path = project.project_path / 'mysite/mysite/settings.py'
         assert expected_settings_path.exists()
         expected_manage_py = project.project_path / 'mysite/manage.py'
@@ -216,7 +218,7 @@ class TestFindDjangoFiles:
 
     def test_raises_if_manage_py_not_found(self, fake_home, non_nested_submodule):
         project = DjangoProject('mydomain.com', 'python.version')
-        shutil.copytree(non_nested_submodule, project.project_path)
+        shutil.copytree(str(non_nested_submodule), str(project.project_path))
         expected_manage_py = project.project_path / 'manage.py'
         assert expected_manage_py.exists()
         expected_manage_py.unlink()
@@ -233,7 +235,7 @@ class TestUpdateSettingsFile:
         project = DjangoProject('mydomain.com', 'python.version')
         project.settings_path = Path(tempfile.NamedTemporaryFile().name)
 
-        with open(project.settings_path, 'w') as f:
+        with project.settings_path.open('w') as f:
             f.write(dedent(
                 """
                 # settings file
@@ -244,7 +246,7 @@ class TestUpdateSettingsFile:
 
         project.update_settings_file()
 
-        with open(project.settings_path) as f:
+        with project.settings_path.open() as f:
             lines = f.read().split('\n')
 
         assert "STATIC_URL = '/static/'" in lines
@@ -257,7 +259,7 @@ class TestUpdateSettingsFile:
         project = DjangoProject('mydomain.com', 'python.version')
         project.settings_path = Path(tempfile.NamedTemporaryFile().name)
 
-        with open(project.settings_path, 'w') as f:
+        with project.settings_path.open('w') as f:
             f.write(dedent(
                 """
                 # settings file
@@ -268,7 +270,7 @@ class TestUpdateSettingsFile:
 
         project.update_settings_file()
 
-        with open(project.settings_path) as f:
+        with project.settings_path.open() as f:
             lines = f.read().split('\n')
 
         assert "ALLOWED_HOSTS = ['mydomain.com']" in lines
@@ -282,8 +284,8 @@ class TestRunCollectStatic:
         project.manage_py_path = Path('/path/to/manage.py')
         project.run_collectstatic()
         assert mock_subprocess.check_call.call_args == call([
-            project.virtualenv.path / 'bin/python',
-            project.manage_py_path,
+            str(project.virtualenv.path / 'bin/python'),
+            str(project.manage_py_path),
             'collectstatic',
             '--noinput'
         ])
@@ -296,8 +298,8 @@ class TestRunMigrate:
         project.manage_py_path = Path('/path/to/manage.py')
         project.run_migrate()
         assert mock_subprocess.check_call.call_args == call([
-            project.virtualenv.path / 'bin/python',
-            project.manage_py_path,
+            str(project.virtualenv.path / 'bin/python'),
+            str(project.manage_py_path),
             'migrate',
         ])
 
@@ -308,11 +310,11 @@ class TestUpdateWsgiFile:
         project = DjangoProject('mydomain.com', 'python.version')
         project.wsgi_file_path = Path(tempfile.NamedTemporaryFile().name)
         project.settings_path = Path('/path/to/settingsfolder/settings.py')
-        template = open(Path(pythonanywhere.django_project.__file__).parent / 'wsgi_file_template.py').read()
+        template = (Path(pythonanywhere.django_project.__file__).parent / 'wsgi_file_template.py').open().read()
 
         project.update_wsgi_file()
 
-        with open(project.wsgi_file_path) as f:
+        with project.wsgi_file_path.open() as f:
             contents = f.read()
         print(contents)
         assert contents == template.format(project=project)
@@ -323,16 +325,16 @@ class TestUpdateWsgiFile:
         self, fake_home, non_nested_submodule, virtualenvs_folder
     ):
         project = DjangoProject('mydomain.com', '3.6')
-        shutil.copytree(non_nested_submodule, project.project_path)
-        print(subprocess.check_call(['tree', project.project_path]))
+        shutil.copytree(str(non_nested_submodule), str(project.project_path))
+        print(subprocess.check_call(['tree', str(project.project_path)]))
         project.create_virtualenv()
         project.find_django_files()
         project.wsgi_file_path = Path(tempfile.NamedTemporaryFile().name)
 
         project.update_wsgi_file()
 
-        print(open(project.wsgi_file_path).read())
-        subprocess.check_output([project.virtualenv.path / 'bin/python', project.wsgi_file_path])
+        print(project.wsgi_file_path.open().read())
+        subprocess.check_output([str(project.virtualenv.path / 'bin/python'), str(project.wsgi_file_path)])
 
 
     @pytest.mark.slowtest
@@ -340,13 +342,12 @@ class TestUpdateWsgiFile:
         self, fake_home, more_nested_submodule, virtualenvs_folder
     ):
         project = DjangoProject('mydomain.com', '3.6')
-        shutil.copytree(more_nested_submodule, project.project_path)
+        shutil.copytree(str(more_nested_submodule), str(project.project_path))
         project.create_virtualenv()
         project.find_django_files()
         project.wsgi_file_path = Path(tempfile.NamedTemporaryFile().name)
 
         project.update_wsgi_file()
 
-        print(open(project.wsgi_file_path).read())
-        subprocess.check_output([project.virtualenv.path / 'bin/python', project.wsgi_file_path])
-
+        print(project.wsgi_file_path.open().read())
+        subprocess.check_output([str(project.virtualenv.path / 'bin/python'), str(project.wsgi_file_path)])

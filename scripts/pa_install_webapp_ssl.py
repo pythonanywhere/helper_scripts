@@ -12,27 +12,25 @@ Options:
                         starting with something like "BEGIN PRIVATE KEY" and ending with something like
                         "END PRIVATE KEY")
   --suppress-reload     The website will need to be reloaded in order to activate the new certificate/key combination
-                         -- this happens by default, use this option to suppress it.
+                        -- this happens by default, use this option to suppress it.
 """
 
 from docopt import docopt
-import getpass
 import os
-from textwrap import dedent
+import sys
 
 from pythonanywhere.api import Webapp
-from pythonanywhere.snakesay import snakesay
 
 
 def main(domain_name, certificate_file, private_key_file, suppress_reload):
     if not os.path.exists(certificate_file):
-        print(f"Could not find certificate file {certificate_file}")
+        print("Could not find certificate file {certificate_file}".format(certificate_file=certificate_file))
         sys.exit(1)
     with open(certificate_file, "r") as f:
         certificate = f.read()
 
     if not os.path.exists(private_key_file):
-        print(f"Could not find private key file {private_key_file}")
+        print("Could not find private key file {private_key_file}".format(private_key_file=private_key_file))
         sys.exit(1)
     with open(private_key_file, "r") as f:
         private_key = f.read()

@@ -70,21 +70,21 @@ class TestMain:
         expected_settings_path = expected_project_path / django_project_name / 'settings.py'
 
         django_version = subprocess.check_output([
-            expected_virtualenv / 'bin/python',
+            str(expected_virtualenv / 'bin/python'),
             '-c'
             'import django; print(django.get_version())'
         ]).decode().strip()
         assert django_version == expected_django_version
 
-        with open(expected_settings_path) as f:
+        with expected_settings_path.open() as f:
             lines = f.read().split('\n')
         assert "MEDIA_ROOT = os.path.join(BASE_DIR, 'media')" in lines
         assert "ALLOWED_HOSTS = ['mydomain.com']" in lines
 
-        assert 'base.css' in os.listdir(fake_home / domain / 'static/admin/css')
+        assert 'base.css' in os.listdir(str(fake_home / domain / 'static/admin/css'))
         server = subprocess.Popen([
-            expected_virtualenv / 'bin/python',
-            expected_project_path / 'manage.py',
+            str(expected_virtualenv / 'bin/python'),
+            str(expected_project_path / 'manage.py'),
             'runserver'
         ])
         process_killer.append(server)
@@ -103,4 +103,3 @@ def xtest_todos():
     assert not 'detect use of env vars??'
     assert not 'SECRET_KEY?'
     assert not 'database stuff?'
-

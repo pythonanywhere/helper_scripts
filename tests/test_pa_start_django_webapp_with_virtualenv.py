@@ -53,18 +53,18 @@ class TestMain:
                 main('mydomain.com', '1.9.2', '2.7', nuke=False)
 
         django_version = subprocess.check_output([
-            virtualenvs_folder / 'mydomain.com/bin/python',
+            str(virtualenvs_folder / 'mydomain.com/bin/python'),
             '-c'
             'import django; print(django.get_version())'
         ]).decode().strip()
         assert django_version == '1.9.2'
 
-        with open(fake_home / 'mydomain.com/mysite/settings.py') as f:
+        with (fake_home / 'mydomain.com/mysite/settings.py').open() as f:
             lines = f.read().split('\n')
         assert "MEDIA_ROOT = os.path.join(BASE_DIR, 'media')" in lines
         assert "ALLOWED_HOSTS = ['mydomain.com']" in lines
 
-        assert 'base.css' in os.listdir(fake_home / 'mydomain.com/static/admin/css')
+        assert 'base.css' in os.listdir(str(fake_home / 'mydomain.com/static/admin/css'))
 
 
     @pytest.mark.slowtest
@@ -78,9 +78,8 @@ class TestMain:
                 main('mydomain.com', '1.11.3', '3.6', nuke=True)
 
         django_version = subprocess.check_output([
-            virtualenvs_folder / 'mydomain.com/bin/python',
+            str(virtualenvs_folder / 'mydomain.com/bin/python'),
             '-c'
             'import django; print(django.get_version())'
         ]).decode().strip()
         assert django_version == '1.11.3'
-

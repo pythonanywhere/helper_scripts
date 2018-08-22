@@ -20,14 +20,14 @@ def speech_bubble_lines(speech):
     lines, width = rewrap(speech)
     if len(lines) <= 1:
         text = ''.join(lines)
-        yield f'< {text} >'
+        yield '< {text} >'.format(text=text)
 
     else:
         yield '  ' + '_' * width
-        yield f'/ {lines[0]} \\'
+        yield '/ {} \\'.format(lines[0])
         for line in lines[1:-1]:
-            yield f'| {line} |'
-        yield fr'\ {lines[-1]} /'
+            yield '| {} |'.format(line)
+        yield r'\ {} /'.format(lines[-1])
         yield '  ' + '-' * width
 
 

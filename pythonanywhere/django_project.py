@@ -12,8 +12,8 @@ class DjangoProject(Project):
 
     def download_repo(self, repo, nuke):
         if nuke and self.project_path.exists():
-            shutil.rmtree(self.project_path)
-        subprocess.check_call(['git', 'clone', repo, self.project_path])
+            shutil.rmtree(str(self.project_path))
+        subprocess.check_call(['git', 'clone', repo, str(self.project_path)])
 
 
     def create_virtualenv(self, django_version=None, nuke=False):
@@ -23,27 +23,27 @@ class DjangoProject(Project):
         elif django_version == 'latest':
             packages = 'django'
         else:
-            packages = f'django=={django_version}'
+            packages = 'django=={django_version}'.format(django_version=django_version)
         self.virtualenv.pip_install(packages)
 
 
     def detect_requirements(self):
         requirements_txt = self.project_path / 'requirements.txt'
         if requirements_txt.exists():
-            return f'-r {requirements_txt.resolve()}'
+            return '-r {resolved_requirements}'.format(resolved_requirements=requirements_txt.resolve())
         return 'django'
-    
-    
+
+
     def run_startproject(self, nuke):
         print(snakesay('Starting Django project'))
         if nuke and self.project_path.exists():
-            shutil.rmtree(self.project_path)
+            shutil.rmtree(str(self.project_path))
         self.project_path.mkdir()
         subprocess.check_call([
-            Path(self.virtualenv.path) / 'bin/django-admin.py',
+            str(Path(self.virtualenv.path) / 'bin/django-admin.py'),
             'startproject',
             'mysite',
-            self.project_path
+            str(self.project_path),
         ])
 
 
@@ -61,11 +61,11 @@ class DjangoProject(Project):
     def update_settings_file(self):
         print(snakesay('Updating settings.py'))
 
-        with open(self.settings_path) as f:
+        with self.settings_path.open() as f:
             settings = f.read()
         new_settings = settings.replace(
             'ALLOWED_HOSTS = []',
-            f'ALLOWED_HOSTS = [{self.domain!r}]'
+            'ALLOWED_HOSTS = [{domain!r}]'.format(domain=self.domain)
         )
         new_settings += dedent(
             """
@@ -74,15 +74,15 @@ class DjangoProject(Project):
             MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
             """
         )
-        with open(self.settings_path, 'w') as f:
+        with self.settings_path.open('w') as f:
             f.write(new_settings)
 
 
     def run_collectstatic(self):
         print(snakesay('Running collectstatic'))
         subprocess.check_call([
-            Path(self.virtualenv.path) / 'bin/python',
-            self.manage_py_path,
+            str(Path(self.virtualenv.path) / 'bin/python'),
+            str(self.manage_py_path),
             'collectstatic',
             '--noinput',
         ])
@@ -91,15 +91,14 @@ class DjangoProject(Project):
     def run_migrate(self):
         print(snakesay('Running migrate database'))
         subprocess.check_call([
-            Path(self.virtualenv.path) / 'bin/python',
-            self.manage_py_path,
+            str(Path(self.virtualenv.path) / 'bin/python'),
+            str(self.manage_py_path),
             'migrate',
         ])
 
 
     def update_wsgi_file(self):
-        print(snakesay(f'Updating wsgi file at {self.wsgi_file_path}'))
-        template = open(Path(__file__).parent / 'wsgi_file_template.py').read()
-        with open(self.wsgi_file_path, 'w') as f:
+        print(snakesay('Updating wsgi file at {wsgi_file_path}'.format(wsgi_file_path=self.wsgi_file_path)))
+        template = (Path(__file__).parent / 'wsgi_file_template.py').open().read()
+        with self.wsgi_file_path.open('w') as f:
             f.write(template.format(project=self))
-

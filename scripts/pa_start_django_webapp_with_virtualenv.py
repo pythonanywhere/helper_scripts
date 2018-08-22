@@ -24,7 +24,7 @@ def main(domain, django_version, python_version, nuke):
     if domain == 'your-username.pythonanywhere.com':
         username = getpass.getuser().lower()
         pa_domain = os.environ.get('PYTHONANYWHERE_DOMAIN', 'pythonanywhere.com')
-        domain = f'{username}.{pa_domain}'
+        domain = '{username}.{pa_domain}'.format(username=username, pa_domain=pa_domain)
 
     project = DjangoProject(domain, python_version)
     project.sanity_checks(nuke=nuke)
@@ -40,11 +40,10 @@ def main(domain, django_version, python_version, nuke):
 
     project.webapp.reload()
 
-    print(snakesay(f'All done!  Your site is now live at https://{domain}'))
+    print(snakesay('All done!  Your site is now live at https://{domain}'.format(domain=domain)))
 
 
 
 if __name__ == '__main__':
     arguments = docopt(__doc__)
     main(arguments['--domain'], arguments['--django'], arguments['--python'], nuke=arguments.get('--nuke'))
-

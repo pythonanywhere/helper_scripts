@@ -9,17 +9,15 @@ Usage:
 Options:
   <domain>              Domain name, eg www.mydomain.com
   --suppress-reload     The website will need to be reloaded in order to activate the new certificate/key combination
-                         -- this happens by default, use this option to suppress it.
+                        -- this happens by default, use this option to suppress it.
 """
 
 from docopt import docopt
 from os.path import expanduser
-import getpass
 import os
-from textwrap import dedent
+import sys
 
 from pythonanywhere.api import Webapp
-from pythonanywhere.snakesay import snakesay
 
 
 def main(domain_name, suppress_reload):
@@ -46,7 +44,9 @@ def main(domain_name, suppress_reload):
             break
 
     if not done:
-        print(f"Could not find certificate or key files (looked in {possible_paths})")
+        print("Could not find certificate or key files (looked in {possible_paths})".format(
+            possible_paths=possible_paths
+        ))
         sys.exit(2)
 
 

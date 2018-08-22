@@ -26,7 +26,7 @@ from pythonanywhere.snakesay import snakesay
 def main(domain, python_version, nuke):
     if domain == 'your-username.pythonanywhere.com':
         username = getpass.getuser().lower()
-        domain = f'{username}.pythonanywhere.com'
+        domain = '{username}.pythonanywhere.com'.format(username=username)
 
     project = Project(domain, python_version)
     project.sanity_checks(nuke=nuke)
@@ -36,11 +36,15 @@ def main(domain, python_version, nuke):
     project.webapp.reload()
 
     print(snakesay(dedent(
-        f'''
+        '''
         All done!
         - Your site is now live at https://{domain}
-        - Your web app config screen is here: https://www.pythonanywhere.com/user/{username}/webapps/{domain.replace('.', '_')}
-        '''
+        - Your web app config screen is here: https://www.pythonanywhere.com/user/{username}/webapps/{mangled_domain}
+        '''.format(
+            domain=domain,
+            username=username,
+            mangled_domain=domain.replace('.', '_')
+        )
     )))
 
 
@@ -49,4 +53,3 @@ def main(domain, python_version, nuke):
 if __name__ == '__main__':
     arguments = docopt(__doc__)
     main(arguments['--domain'], arguments['--python'], nuke=arguments.get('--nuke'))
-

@@ -127,7 +127,7 @@ class TestCreateWebapp:
             'domain_name': 'mydomain.com',
             'python_version': PYTHON_VERSIONS['2.7'],
         })
-        assert post.request.headers['Authorization'] == f'Token {api_token}'
+        assert post.request.headers['Authorization'] == 'Token {api_token}'.format(api_token=api_token)
 
 
     def test_does_patch_to_update_virtualenv_path_and_source_directory(self, api_responses, api_token):
@@ -144,7 +144,7 @@ class TestCreateWebapp:
             'virtualenv_path': '/virtualenv/path',
             'source_directory': '/project/path'
         })
-        assert patch.request.headers['Authorization'] == f'Token {api_token}'
+        assert patch.request.headers['Authorization'] == 'Token {api_token}'.format(api_token=api_token)
 
 
     def test_raises_if_post_does_not_20x(self, api_responses, api_token):
@@ -196,7 +196,7 @@ class TestCreateWebapp:
         delete = api_responses.calls[0]
         assert delete.request.method == 'DELETE'
         assert delete.request.url == webapp_url
-        assert delete.request.headers['Authorization'] == f'Token {api_token}'
+        assert delete.request.headers['Authorization'] == 'Token {api_token}'.format(api_token=api_token)
 
 
     def test_ignores_404_from_delete_call_when_nuking(self, api_responses, api_token):
@@ -222,14 +222,14 @@ class TestAddDefaultStaticFilesMapping:
         post1 = api_responses.calls[0]
         assert post1.request.url == expected_url
         assert post1.request.headers['content-type'] == 'application/json'
-        assert post1.request.headers['Authorization'] == f'Token {api_token}'
+        assert post1.request.headers['Authorization'] == 'Token {api_token}'.format(api_token=api_token)
         assert json.loads(post1.request.body.decode('utf8')) == {
             'url': '/static/', 'path': '/project/path/static'
         }
         post2 = api_responses.calls[1]
         assert post2.request.url == expected_url
         assert post2.request.headers['content-type'] == 'application/json'
-        assert post2.request.headers['Authorization'] == f'Token {api_token}'
+        assert post2.request.headers['Authorization'] == 'Token {api_token}'.format(api_token=api_token)
         assert json.loads(post2.request.body.decode('utf8')) == {
             'url': '/media/', 'path': '/project/path/media'
         }
@@ -247,7 +247,7 @@ class TestReloadWebapp:
         post = api_responses.calls[0]
         assert post.request.url == expected_url
         assert post.request.body is None
-        assert post.request.headers['Authorization'] == f'Token {api_token}'
+        assert post.request.headers['Authorization'] == 'Token {api_token}'.format(api_token=api_token)
 
 
     def test_raises_if_post_does_not_20x(self, api_responses, api_token):
@@ -276,7 +276,7 @@ class TestSetWebappSSL:
         assert json.loads(post.request.body.decode('utf8')) == {
             'private_key': 'private key data', 'cert': 'certificate data'
         }
-        assert post.request.headers['Authorization'] == f'Token {api_token}'
+        assert post.request.headers['Authorization'] == 'Token {api_token}'.format(api_token=api_token)
 
 
     def test_raises_if_post_does_not_20x(self, api_responses, api_token):

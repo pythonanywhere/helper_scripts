@@ -56,8 +56,7 @@ class TestVirtualenv:
         v.pip_install('aafigure')
 
         subprocess.check_call([
-            v.path / 'bin/python',
+            str(v.path / 'bin/python'),
             '-c'
             'import aafigure'
         ])
-

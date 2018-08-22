@@ -12,9 +12,11 @@ class Project:
     def __init__(self, domain, python_version):
         self.domain = domain
         self.python_version = python_version
-        self.project_path = Path(f'~/{domain}').expanduser()
+        self.project_path = Path('~/{domain}'.format(domain=domain)).expanduser()
         self.virtualenv = Virtualenv(self.domain, self.python_version)
-        self.wsgi_file_path = Path(f'/var/www/{domain.replace(".", "_")}_wsgi.py')
+        self.wsgi_file_path = Path(
+            '/var/www/{mangled_domain}_wsgi.py'.format(mangled_domain=domain.replace(".", "_"))
+        )
         self.webapp = Webapp(domain)
 
 
@@ -23,9 +25,19 @@ class Project:
         if nuke:
             return
         if self.virtualenv.path.exists():
-            raise SanityException(f'You already have a virtualenv for {self.domain}.\n\nUse the --nuke option if you want to replace it.')
+            raise SanityException(
+                "You already have a virtualenv for {domain}.\n\n"
+                "Use the --nuke option if you want to replace it.".format(
+                    domain=self.domain
+                )
+            )
         if self.project_path.exists():
-            raise SanityException(f'You already have a project folder at {self.project_path}.\n\nUse the --nuke option if you want to replace it.')
+            raise SanityException(
+                "You already have a project folder at {project_path}.\n\n"
+                "Use the --nuke option if you want to replace it.".format(
+                    project_path=self.project_path
+                )
+            )
 
 
     def create_webapp(self, nuke):
@@ -37,7 +49,6 @@ class Project:
 
 
     def start_bash(self):
-        print(snakesay(f'Starting Bash shell with activated virtualenv in project directory.  Press Ctrl+D to exit.'))
+        print(snakesay('Starting Bash shell with activated virtualenv in project directory.  Press Ctrl+D to exit.'))
         unique_id = str(uuid.uuid4())
         launch_bash_in_virtualenv(self.virtualenv.path, unique_id, self.project_path)
-
