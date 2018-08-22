@@ -37,9 +37,10 @@ setup(
     data_files=[],
     entry_points={},
     scripts=[
+        'scripts/pa_install_webapp_letsencrypt_ssl.py',
+        'scripts/pa_install_webapp_ssl.py',
         'scripts/pa_start_django_webapp_with_virtualenv.py',
         'scripts/pa_autoconfigure_django.py',
         'pythonanywhere/snakesay.py',
     ]
 )
-
