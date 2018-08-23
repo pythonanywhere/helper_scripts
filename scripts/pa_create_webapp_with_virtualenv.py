@@ -1,4 +1,4 @@
-#!/usr/bin/python3.6
+#!/usr/bin/python3.5
 """Create a web app with a virtualenv
 
 - creates a simple hello world web app

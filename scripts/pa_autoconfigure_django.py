@@ -1,4 +1,4 @@
-#!/usr/bin/python3.6
+#!/usr/bin/python3.5
 """Autoconfigure a Django project from on a github URL.
 
 - downloads the repo
