@@ -24,10 +24,10 @@ def speech_bubble_lines(speech):
 
     else:
         yield '  ' + '_' * width
-        yield '/ {} \\'.format(lines[0])
-        for line in lines[1:-1]:
+        yield '/ ' + (' ' * width) + ' \\'
+        for line in lines:
             yield '| {} |'.format(line)
-        yield r'\ {} /'.format(lines[-1])
+        yield '\\ ' + (' ' * width) + ' /'
         yield '  ' + '-' * width
 
 
