@@ -1,8 +1,9 @@
-from textwrap import dedent
 import getpass
 import os
-from pathlib import Path
 import requests
+from datetime import datetime
+from textwrap import dedent
+from pathlib import Path
 
 from pythonanywhere.exceptions import SanityException
 from pythonanywhere.snakesay import snakesay
@@ -157,3 +158,19 @@ class Webapp:
                     response_text=response.text,
                 )
             )
+
+
+    def get_ssl_info(self):
+        url = get_api_endpoint().format(username=getpass.getuser()) + self.domain + '/ssl/'
+        response = call_api(url, 'get')
+        if not response.ok:
+            raise Exception(
+                'GET SSL details via API failed, got {response}:{response_text}'.format(
+                    response=response,
+                    response_text=response.text,
+                )
+            )
+
+        result = response.json()
+        result["not_after"] = datetime.strptime(result["not_after"], "%Y%m%dT%H%M%SZ")
+        return result

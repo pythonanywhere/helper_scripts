@@ -18,6 +18,7 @@ import os
 import sys
 
 from pythonanywhere.api import Webapp
+from pythonanywhere.snakesay import snakesay
 
 
 def main(domain_name, suppress_reload):
@@ -39,6 +40,18 @@ def main(domain_name, suppress_reload):
             webapp.set_ssl(certificate, private_key)
             if not suppress_reload:
                 webapp.reload()
+
+            ssl_details = webapp.get_ssl_info()
+            print(snakesay(
+                "That's all set up now :-)\n"
+                "Your new certificate will expire on {expiry:%d %B %Y},\n"
+                "so shortly before then you should renew it\n"
+                "(see https://help.pythonanywhere.com/pages/LetsEncrypt/)\n"
+                "and install the new certificate".format(
+                    expiry=ssl_details["not_after"]
+                )
+            ))
+
 
             done = True
             break

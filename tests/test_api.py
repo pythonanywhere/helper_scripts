@@ -2,6 +2,7 @@ import getpass
 import json
 import pytest
 import responses
+from datetime import datetime
 from unittest.mock import patch
 from urllib.parse import urlencode
 
@@ -287,4 +288,43 @@ class TestSetWebappSSL:
             Webapp('mydomain.com').set_ssl("foo", "bar")
 
         assert 'POST to set SSL details via API failed' in str(e.value)
+        assert 'nope' in str(e.value)
+
+
+class TestGetWebappSSLInfo:
+
+    def test_returns_json_from_server_having_parsed_expiry(self, api_responses, api_token):
+        expected_url = get_api_endpoint().format(username=getpass.getuser()) + 'mydomain.com/ssl/'
+        api_responses.add(
+            responses.GET, expected_url, status=200,
+            body=json.dumps({
+                "not_after": "20180824T171623Z",
+                "issuer_name": "PythonAnywhere test CA",
+                "subject_name": "www.mycoolsite.com",
+                "subject_alternate_names": ["www.mycoolsite.com", "mycoolsite.com"],
+            })
+        )
+
+        assert Webapp('mydomain.com').get_ssl_info() == {
+            "not_after": datetime(2018, 8, 24, 17, 16, 23),
+            "issuer_name": "PythonAnywhere test CA",
+            "subject_name": "www.mycoolsite.com",
+            "subject_alternate_names": ["www.mycoolsite.com", "mycoolsite.com"],
+        }
+
+
+        get = api_responses.calls[0]
+        assert get.request.method == 'GET'
+        assert get.request.url == expected_url
+        assert get.request.headers['Authorization'] == 'Token {api_token}'.format(api_token=api_token)
+
+
+    def test_raises_if_get_does_not_return_200(self, api_responses, api_token):
+        expected_url = get_api_endpoint().format(username=getpass.getuser()) + 'mydomain.com/ssl/'
+        api_responses.add(responses.GET, expected_url, status=404, body='nope')
+
+        with pytest.raises(Exception) as e:
+            Webapp('mydomain.com').get_ssl_info()
+
+        assert 'GET SSL details via API failed, got' in str(e.value)
         assert 'nope' in str(e.value)
