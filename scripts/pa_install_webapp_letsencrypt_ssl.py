@@ -47,7 +47,7 @@ def main(domain_name, suppress_reload):
                 "Your new certificate will expire on {expiry:%d %B %Y},\n"
                 "so shortly before then you should renew it\n"
                 "(see https://help.pythonanywhere.com/pages/LetsEncrypt/)\n"
-                "and install the new certificate".format(
+                "and install the new certificate.".format(
                     expiry=ssl_details["not_after"]
                 )
             ))
