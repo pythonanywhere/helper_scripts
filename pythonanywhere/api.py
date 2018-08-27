@@ -174,3 +174,32 @@ class Webapp:
         result = response.json()
         result["not_after"] = datetime.strptime(result["not_after"], "%Y%m%dT%H%M%SZ")
         return result
+
+    def delete_log(self, log_type, index=0):
+        if index:
+            print(snakesay(
+                'Deleting old (archive number {index}) {type} log file for {domain} via API'.format(index=index,
+                                                                                                    type=log_type,
+                                                                                                    domain=self.domain)))
+        else:
+            print(snakesay(
+                'Deleting current {type} log file for {domain} via API'.format(type=log_type, domain=self.domain)))
+
+        if index == 1:
+            url = get_api_endpoint("files").format(username=getpass.getuser()) + "path/var/log/{domain}.{type}.log.1/".format(
+                domain=self.domain, type=log_type)
+        elif index > 1:
+            url = get_api_endpoint("files").format(
+                username=getpass.getuser()) + "path/var/log/{domain}.{type}.log.{index}.gz/".format(
+                domain=self.domain, type=log_type, index=index)
+        else:
+            url = get_api_endpoint("files").format(username=getpass.getuser()) + "path/var/log/{domain}.{type}.log/".format(
+                domain=self.domain, type=log_type)
+        response = call_api(url, "delete")
+        if not response.ok:
+            raise Exception(
+                "DELETE log file via API failed, got {response}:{response_text}".format(
+                    response=response,
+                    response_text=response.text,
+                )
+            )

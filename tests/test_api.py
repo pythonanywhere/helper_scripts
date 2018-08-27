@@ -328,3 +328,41 @@ class TestGetWebappSSLInfo:
 
         assert 'GET SSL details via API failed, got' in str(e.value)
         assert 'nope' in str(e.value)
+
+
+class TestDeleteWebappLog:
+
+    def test_delete_current_access_log(self, api_responses, api_token):
+        expected_url = get_api_endpoint(flavour="files").format(
+            username=getpass.getuser()) + "path/var/log/mydomain.com.access.log/"
+        api_responses.add(responses.DELETE, expected_url, status=200)
+
+        Webapp("mydomain.com").delete_log(log_type="access")
+
+        post = api_responses.calls[0]
+        assert post.request.url == expected_url
+        assert post.request.body is None
+        assert post.request.headers['Authorization'] == 'Token {api_token}'.format(api_token=api_token)
+
+    def test_delete_old_access_log(self, api_responses, api_token):
+        expected_url = get_api_endpoint(flavour="files").format(
+            username=getpass.getuser()) + "path/var/log/mydomain.com.access.log.1/"
+        api_responses.add(responses.DELETE, expected_url, status=200)
+
+        Webapp("mydomain.com").delete_log(log_type="access", index=1)
+
+        post = api_responses.calls[0]
+        assert post.request.url == expected_url
+        assert post.request.body is None
+        assert post.request.headers['Authorization'] == 'Token {api_token}'.format(api_token=api_token)
+
+    def test_raises_if_post_does_not_20x(self, api_responses, api_token):
+        expected_url = get_api_endpoint(flavour="files").format(
+            username=getpass.getuser()) + "path/var/log/mydomain.com.access.log/"
+        api_responses.add(responses.DELETE, expected_url, status=404, body="nope")
+
+        with pytest.raises(Exception) as e:
+            Webapp("mydomain.com").delete_log(log_type="access")
+
+        assert "DELETE log file via API failed" in str(e.value)
+        assert "nope" in str(e.value)
