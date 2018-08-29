@@ -22,6 +22,8 @@ PYTHON_VERSIONS = {
 class AuthenticationError(Exception):
     pass
 
+class NoTokenError(Exception):
+    pass
 
 def get_api_endpoint(flavour="webapps"):
     domain = os.environ.get('PYTHONANYWHERE_DOMAIN', 'pythonanywhere.com')
@@ -29,7 +31,14 @@ def get_api_endpoint(flavour="webapps"):
 
 
 def call_api(url, method, **kwargs):
-    token = os.environ['API_TOKEN']
+    token = os.environ.get('API_TOKEN')
+    if token is None:
+        raise NoTokenError(
+            "Oops, you don't seem to have an API token.  "
+            "Please go to the 'Account' page on PythonAnywhere, then to the 'API Token' "
+            "tab.  Click the 'Create a new API token' button to create the token, then "
+            "start a new console and try running this script again."
+        )
     insecure = os.environ.get('PYTHONANYWHERE_INSECURE_API') == 'true'
     response = requests.request(
         method=method,
