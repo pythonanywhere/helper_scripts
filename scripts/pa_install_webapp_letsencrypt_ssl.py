@@ -27,6 +27,7 @@ def main(domain_name, suppress_reload):
         os.path.join(homedir, 'letsencrypt', domain_name),
         os.path.join(homedir, 'letsencrypt', 'certs', domain_name),
     )
+    done = False
     for path in possible_paths:
         certificate_file = os.path.join(path, 'fullchain.pem')
         private_key_file = os.path.join(path, 'privkey.pem')
