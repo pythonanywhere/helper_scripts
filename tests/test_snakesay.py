@@ -14,22 +14,22 @@ def test_two_lines():
     two_lines = 'a' * 81
     message = snakesay(two_lines)
     print(message)
-    assert r'/ aaaaaa' in message
-    assert 'aaaaaa \\' in message
-    assert r'\ aaaaaa' in message
+    assert '/ ' in message
+    assert '| aaaaa' in message
+    assert 'aaaaa |' in message
+    assert '\\ ' in message
 
 
 def test_three_lines():
     three_lines = 'a' * 80 * 2 + 'a'
     long_message = snakesay(three_lines)
     print(long_message)
-    assert r'/ aaaaaa' in long_message
-    assert 'aaaaaa \\' in long_message
+    assert '/ ' in long_message
 
-    assert r'| aaaaaa' in long_message
-    assert r'aaaaaa |' in long_message
+    assert '| aaaaaa' in long_message
+    assert 'aaaaaa |' in long_message
 
-    assert r'\ aaaaaa' in long_message
+    assert '\\ ' in long_message
 
 
 def test_multiple_arguments():
