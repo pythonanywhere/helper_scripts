@@ -333,7 +333,7 @@ class TestGetWebappSSLInfo:
 class TestDeleteWebappLog:
 
     def test_delete_current_access_log(self, api_responses, api_token):
-        expected_url = get_api_endpoint(flavour="files").format(
+        expected_url = get_api_endpoint(flavor="files").format(
             username=getpass.getuser()) + "path/var/log/mydomain.com.access.log/"
         api_responses.add(responses.DELETE, expected_url, status=200)
 
@@ -345,7 +345,7 @@ class TestDeleteWebappLog:
         assert post.request.headers['Authorization'] == 'Token {api_token}'.format(api_token=api_token)
 
     def test_delete_old_access_log(self, api_responses, api_token):
-        expected_url = get_api_endpoint(flavour="files").format(
+        expected_url = get_api_endpoint(flavor="files").format(
             username=getpass.getuser()) + "path/var/log/mydomain.com.access.log.1/"
         api_responses.add(responses.DELETE, expected_url, status=200)
 
@@ -357,7 +357,7 @@ class TestDeleteWebappLog:
         assert post.request.headers['Authorization'] == 'Token {api_token}'.format(api_token=api_token)
 
     def test_raises_if_post_does_not_20x(self, api_responses, api_token):
-        expected_url = get_api_endpoint(flavour="files").format(
+        expected_url = get_api_endpoint(flavor="files").format(
             username=getpass.getuser()) + "path/var/log/mydomain.com.access.log/"
         api_responses.add(responses.DELETE, expected_url, status=404, body="nope")
 
