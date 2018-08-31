@@ -22,12 +22,14 @@ PYTHON_VERSIONS = {
 class AuthenticationError(Exception):
     pass
 
+
 class NoTokenError(Exception):
     pass
 
-def get_api_endpoint(flavor="webapps"):
+
+def get_api_endpoint():
     domain = os.environ.get('PYTHONANYWHERE_DOMAIN', 'pythonanywhere.com')
-    return 'https://www.{domain}/api/v0/user/{{username}}/{flavor}/'.format(domain=domain, flavor=flavor)
+    return 'https://www.{domain}/api/v0/user/{{username}}/{{flavor}}/'.format(domain=domain)
 
 
 def call_api(url, method, **kwargs):
@@ -84,7 +86,7 @@ class Webapp:
         if nuke:
             return
 
-        url = get_api_endpoint().format(username=getpass.getuser()) + self.domain + '/'
+        url = get_api_endpoint().format(username=getpass.getuser(), flavor="webapps") + self.domain + '/'
         response = call_api(url, 'get')
         if response.status_code == 200:
             raise SanityException(
@@ -98,9 +100,9 @@ class Webapp:
     def create(self, python_version, virtualenv_path, project_path, nuke):
         print(snakesay('Creating web app via API'))
         if nuke:
-            webapp_url = get_api_endpoint().format(username=getpass.getuser()) + self.domain + '/'
+            webapp_url = get_api_endpoint().format(username=getpass.getuser(), flavor="webapps") + self.domain + '/'
             call_api(webapp_url, 'delete')
-        post_url = get_api_endpoint().format(username=getpass.getuser())
+        post_url = get_api_endpoint().format(username=getpass.getuser(), flavor="webapps")
         patch_url = post_url + self.domain + '/'
         response = call_api(post_url, 'post', data={
             'domain_name': self.domain, 'python_version': PYTHON_VERSIONS[python_version]},
@@ -130,7 +132,7 @@ class Webapp:
     def add_default_static_files_mappings(self, project_path):
         print(snakesay('Adding static files mappings for /static/ and /media/'))
 
-        url = get_api_endpoint().format(username=getpass.getuser()) + self.domain + '/static_files/'
+        url = get_api_endpoint().format(username=getpass.getuser(), flavor="webapps") + self.domain + '/static_files/'
         call_api(url, 'post', json=dict(
             url='/static/', path=str(Path(project_path) / 'static'),
         ))
@@ -142,7 +144,7 @@ class Webapp:
 
     def reload(self):
         print(snakesay('Reloading {domain} via API'.format(domain=self.domain)))
-        url = get_api_endpoint().format(username=getpass.getuser()) + self.domain + '/reload/'
+        url = get_api_endpoint().format(username=getpass.getuser(), flavor="webapps") + self.domain + '/reload/'
         response = call_api(url, 'post')
         if not response.ok:
             raise Exception(
@@ -155,7 +157,7 @@ class Webapp:
 
     def set_ssl(self, certificate, private_key):
         print(snakesay('Setting up SSL for {domain} via API'.format(domain=self.domain)))
-        url = get_api_endpoint().format(username=getpass.getuser()) + self.domain + '/ssl/'
+        url = get_api_endpoint().format(username=getpass.getuser(), flavor="webapps") + self.domain + '/ssl/'
         response = call_api(
             url, 'post',
             json={'cert': certificate, 'private_key': private_key}
@@ -170,7 +172,7 @@ class Webapp:
 
 
     def get_ssl_info(self):
-        url = get_api_endpoint().format(username=getpass.getuser()) + self.domain + '/ssl/'
+        url = get_api_endpoint().format(username=getpass.getuser(), flavor="webapps") + self.domain + '/ssl/'
         response = call_api(url, 'get')
         if not response.ok:
             raise Exception(
@@ -195,14 +197,14 @@ class Webapp:
                 'Deleting current {type} log file for {domain} via API'.format(type=log_type, domain=self.domain)))
 
         if index == 1:
-            url = get_api_endpoint("files").format(username=getpass.getuser()) + "path/var/log/{domain}.{type}.log.1/".format(
+            url = get_api_endpoint().format(username=getpass.getuser(), flavor="files") + "path/var/log/{domain}.{type}.log.1/".format(
                 domain=self.domain, type=log_type)
         elif index > 1:
-            url = get_api_endpoint("files").format(
-                username=getpass.getuser()) + "path/var/log/{domain}.{type}.log.{index}.gz/".format(
+            url = get_api_endpoint().format(
+                username=getpass.getuser(), flavor="files") + "path/var/log/{domain}.{type}.log.{index}.gz/".format(
                 domain=self.domain, type=log_type, index=index)
         else:
-            url = get_api_endpoint("files").format(username=getpass.getuser()) + "path/var/log/{domain}.{type}.log/".format(
+            url = get_api_endpoint().format(username=getpass.getuser(), flavor="files") + "path/var/log/{domain}.{type}.log/".format(
                 domain=self.domain, type=log_type)
         response = call_api(url, "delete")
         if not response.ok:
