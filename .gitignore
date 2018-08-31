@@ -82,7 +82,7 @@ celerybeat-schedule
 venv/
 ENV/
 
-#PyChram project folder
+#PyCharm project folder
 .idea/
 
 # Spyder project settings

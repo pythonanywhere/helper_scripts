@@ -26,6 +26,7 @@ class AuthenticationError(Exception):
 class NoTokenError(Exception):
     pass
 
+
 def get_api_endpoint():
     domain = os.environ.get('PYTHONANYWHERE_DOMAIN', 'pythonanywhere.com')
     return 'https://www.{domain}/api/v0/user/{{username}}/{{flavor}}/'.format(domain=domain)
