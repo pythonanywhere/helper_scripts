@@ -12,7 +12,7 @@ Usage:
 
 Options:
   --domain=<domain>         Domain name, eg www.mydomain.com   [default: your-username.pythonanywhere.com]
-  --python=<python-version> Python version, eg "2.7"    [default: 3.6]
+  --python=<python-version> Python version, eg "2.7"    [default: 3.5]
   --nuke                    *Irrevocably* delete any existing web app config on this domain. Irrevocably.
 """
 
