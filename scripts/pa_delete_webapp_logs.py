@@ -5,7 +5,7 @@
 - deletes logs via api
 
 Usage:
-  pa_delete_webapp_logs.py [--domain=<domain>] [--log_type=<log_type>]
+  pa_delete_webapp_logs.py [--domain=<domain>] [--log_type=<log_type>] [--log_index=<log_index>]
 
 Options:
   --domain=<domain>         Domain name, eg www.mydomain.com   [default: your-username.pythonanywhere.com]
