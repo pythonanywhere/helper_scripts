@@ -9,8 +9,8 @@ Usage:
 
 Options:
   --domain=<domain>         Domain name, eg www.mydomain.com   [default: your-username.pythonanywhere.com]
-  --log_type                Log type, could be access, error, server or all   [default: all]
-  --log_index               Log index, 0 for current log, 1-9 for one of archive logs or all [default: all]
+  --log_type=<log_type>     Log type, could be access, error, server or all   [default: all]
+  --log_index=<log_index>   Log index, 0 for current log, 1-9 for one of archive logs or all [default: all]
 """
 
 from docopt import docopt
