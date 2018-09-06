@@ -1,5 +1,6 @@
 import getpass
 import os
+import re
 import requests
 from datetime import datetime
 from textwrap import dedent
@@ -226,7 +227,7 @@ class Webapp:
                     response_text=response.text,
                 )
             )
-        if response.text[0] == "[" and response.text[-1] == "]":
+        if re.match(r"\[.*\]", response.text):
             file_list = eval(response.text)
         else:
             raise Exception(
