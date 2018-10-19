@@ -1,6 +1,5 @@
 import getpass
 import os
-import re
 import requests
 from datetime import datetime
 from textwrap import dedent
