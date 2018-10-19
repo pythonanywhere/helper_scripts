@@ -214,3 +214,34 @@ class Webapp:
                     response_text=response.text,
                 )
             )
+
+    def get_log_info(self):
+        url = get_api_endpoint().format(username=getpass.getuser(),
+                                        flavor="files") + "tree/?path=/var/log/"
+        response = call_api(url, "get")
+        if not response.ok:
+            raise Exception(
+                "GET log files info via API failed, got {response}:{response_text}".format(
+                    response=response,
+                    response_text=response.text,
+                )
+            )
+        file_list = response.json()
+        log_types = ["access", "error", "server"]
+        logs = {"access": [], "error": [], "server": []}
+        log_prefix = "/var/log/{domain}.".format(domain=self.domain)
+        for file_name in file_list:
+            if type(file_name) == str and file_name.startswith(log_prefix):
+                log = file_name[len(log_prefix):].split(".")
+                if log[0] in log_types:
+                    log_type = log[0]
+                    if log[-1] == "log":
+                        log_index = 0
+                    elif log[-1] == "1":
+                        log_index = 1
+                    elif log[-1] == "gz":
+                        log_index = int(log[-2])
+                    else:
+                        continue
+                    logs[log_type].append(log_index)
+        return logs

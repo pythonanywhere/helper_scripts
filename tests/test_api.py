@@ -356,7 +356,7 @@ class TestDeleteWebappLog:
         assert post.request.body is None
         assert post.request.headers['Authorization'] == 'Token {api_token}'.format(api_token=api_token)
 
-    def test_raises_if_post_does_not_20x(self, api_responses, api_token):
+    def test_raises_if_delete_does_not_20x(self, api_responses, api_token):
         expected_url = get_api_endpoint().format(
             username=getpass.getuser(), flavor="files") + "path/var/log/mydomain.com.access.log/"
         api_responses.add(responses.DELETE, expected_url, status=404, body="nope")
@@ -365,4 +365,39 @@ class TestDeleteWebappLog:
             Webapp("mydomain.com").delete_log(log_type="access")
 
         assert "DELETE log file via API failed" in str(e.value)
+        assert "nope" in str(e.value)
+
+
+class TestGetWebappLogs:
+
+    def test_get_list_of_logs(self, api_responses, api_token):
+        expected_url = get_api_endpoint().format(
+            username=getpass.getuser(), flavor="files") + "tree/?path=/var/log/"
+        api_responses.add(responses.GET, expected_url, status=200,
+                          body="['/var/log/blah','/var/log/mydomain.com.access.log',\
+                          '/var/log/mydomain.com.access.log.1',\
+                          '/var/log/mydomain.com.access.log.2.gz',\
+                          '/var/log/mydomain.com.error.log',\
+                          '/var/log/mydomain.com.error.log.1',\
+                          '/var/log/mydomain.com.error.log.2.gz',\
+                          '/var/log/mydomain.com.server.log',\
+                          '/var/log/mydomain.com.server.log.1',\
+                          '/var/log/mydomain.com.server.log.2.gz']")
+
+        logs = Webapp("mydomain.com").get_log_info()
+
+        post = api_responses.calls[0]
+        assert post.request.url == expected_url
+        assert post.request.headers['Authorization'] == 'Token {api_token}'.format(api_token=api_token)
+        assert logs == {"access": [0, 1, 2], "error": [0, 1, 2], "server": [0, 1, 2]}
+
+    def test_raises_if_get_does_not_20x(self, api_responses, api_token):
+        expected_url = get_api_endpoint().format(
+            username=getpass.getuser(), flavor="files") + "tree/?path=/var/log/"
+        api_responses.add(responses.GET, expected_url, status=404, body="nope")
+
+        with pytest.raises(Exception) as e:
+            Webapp("mydomain.com").get_log_info()
+
+        assert "GET log files info via API failed" in str(e.value)
         assert "nope" in str(e.value)
