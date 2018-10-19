@@ -401,13 +401,3 @@ class TestGetWebappLogs:
 
         assert "GET log files info via API failed" in str(e.value)
         assert "nope" in str(e.value)
-
-    def test_raises_if_response_text_not_list(self, api_responses, api_token):
-        expected_url = get_api_endpoint().format(
-            username=getpass.getuser(), flavor="files") + "tree/?path=/var/log/"
-        api_responses.add(responses.GET, expected_url, status=200, body="print('Behold malicious code')")
-
-        with pytest.raises(Exception) as e:
-            Webapp("mydomain.com").get_log_info()
-
-        assert "GET log files info via API failed, got print('Behold malicious code')" in str(e.value)

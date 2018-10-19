@@ -227,17 +227,13 @@ class Webapp:
                     response_text=response.text,
                 )
             )
-        if re.match(r"\[.*\]", response.text):
-            file_list = eval(response.text)
-        else:
-            raise Exception(
-                "GET log files info via API failed, got {text} instead of list of files".format(text=response.text))
+        file_list = response.json()
         log_types = ["access", "error", "server"]
         logs = {"access": [], "error": [], "server": []}
         log_prefix = "/var/log/{domain}.".format(domain=self.domain)
-        for file in file_list:
-            if type(file) == str and file.startswith(log_prefix):
-                log = file[len(log_prefix):].split(".")
+        for file_name in file_list:
+            if type(file_name) == str and file_name.startswith(log_prefix):
+                log = file_name[len(log_prefix):].split(".")
                 if log[0] in log_types:
                     log_type = log[0]
                     if log[-1] == "log":
