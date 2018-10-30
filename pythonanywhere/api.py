@@ -21,8 +21,14 @@ class NoTokenError(Exception):
 
 
 def get_api_endpoint():
-    domain = os.environ.get("PYTHONANYWHERE_DOMAIN", "pythonanywhere.com")
-    return "https://www.{domain}/api/v0/user/{{username}}/{{flavor}}/".format(domain=domain)
+    hostname = os.environ.get(
+        "PYTHONANYWHERE_SITE",
+        "www." + os.environ.get(
+            "PYTHONANYWHERE_DOMAIN",
+            "pythonanywhere.com"
+        )
+    )
+    return "https://{hostname}/api/v0/user/{{username}}/{{flavor}}/".format(hostname=hostname)
 
 
 def call_api(url, method, **kwargs):
