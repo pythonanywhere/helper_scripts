@@ -1,4 +1,6 @@
 [![Build Status](https://travis-ci.org/pythonanywhere/helper_scripts.svg?branch=master)](https://travis-ci.org/pythonanywhere/helper_scripts)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 
 # PythonAnywhere helper scripts
 
@@ -23,6 +25,8 @@ Pull requests are welcome!  You'll find tests in the [tests](tests) folder...
     # running the tests:
     pytest
 
+    # make sure that the code that you have written is well tested:
+    pytest --cov=pythonanywhere --cov=scripts
+
     # to just run the fast tests:
     pytest -m 'not slowtest' -v
-
