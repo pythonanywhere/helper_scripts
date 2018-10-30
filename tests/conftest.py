@@ -62,9 +62,10 @@ def virtualenvs_folder():
         os.environ["WORKON_HOME"] = old_workon
     shutil.rmtree(str(tempdir))
 
-    new_envs = set(actual_virtualenvs.iterdir()) - set(old_virtualenvs)
-    if new_envs:
-        raise Exception("virtualenvs path mocking failed somewehere: {}, {}".format(new_envs, tempdir))
+    if actual_virtualenvs.is_dir():
+        new_envs = set(actual_virtualenvs.iterdir()) - set(old_virtualenvs)
+        if new_envs:
+            raise Exception("virtualenvs path mocking failed somewehere: {}, {}".format(new_envs, tempdir))
 
 
 @pytest.fixture
