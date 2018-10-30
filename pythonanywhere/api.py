@@ -136,9 +136,13 @@ class Webapp:
         response = call_api(url, "post", json={"cert": certificate, "private_key": private_key})
         if not response.ok:
             raise Exception(
-                "POST to set SSL details via API failed, got {response}:{response_text}".format(
-                    response=response, response_text=response.text
-                )
+                dedent(
+                    """
+                    POST to set SSL details via API failed, got {response}:{response_text}
+                    If you just created an API token, you need to set the API_TOKEN environment variable or start a new console.
+                    Also you need to have setup a `{domain}` PythonAnywhere webapp for this to work.
+                    """
+                ).format(response=response, response_text=response.text, domain=self.domain)
             )
 
     def get_ssl_info(self):
