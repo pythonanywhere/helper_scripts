@@ -70,8 +70,8 @@ class TestDetectDjangoVersion:
 
 
 @pytest.fixture
-def project_with_mock_virtualenv():
-    project = DjangoProject('mydomain.com', 'python.version')
+def project_with_mock_virtualenv(virtualenvs_folder):
+    project = DjangoProject("mydomain.com", "python.version")
     project.virtualenv.create = Mock()
     project.virtualenv.pip_install = Mock()
     yield project

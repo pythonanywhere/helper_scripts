@@ -48,8 +48,11 @@ def fake_home(local_pip_cache):
 
 @pytest.fixture
 def virtualenvs_folder():
-    actual_virtualenvs = Path('/home/{user}/.virtualenvs'.format(user=getuser()))
-    old_virtualenvs = set(Path(actual_virtualenvs).iterdir())
+    actual_virtualenvs = Path("/home/{user}/.virtualenvs".format(user=getuser()))
+    if actual_virtualenvs.is_dir():
+        old_virtualenvs = set(Path(actual_virtualenvs).iterdir())
+    else:
+        old_virtualenvs = {}
 
     tempdir = _get_temp_dir()
     old_workon = os.environ.get('WORKON_HOME')

@@ -17,10 +17,9 @@ class Virtualenv:
 
 
     def create(self, nuke):
-        print(snakesay('Creating virtualenv with Python{python_version}'.format(python_version=self.python_version)))
-        command = 'mkvirtualenv --python=/usr/bin/python{python_version} {domain}'.format(
-            python_version=self.python_version,
-            domain=self.domain,
+        print(snakesay("Creating virtualenv with Python{python_version}".format(python_version=self.python_version)))
+        command = "mkvirtualenv --python=python{python_version} {domain}".format(
+            python_version=self.python_version, domain=self.domain
         )
         if nuke:
             command = 'rmvirtualenv {domain} && {command}'.format(

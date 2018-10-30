@@ -161,9 +161,12 @@ class TestCreateWebapp:
 
     def test_raises_if_post_returns_a_200_with_status_error(self, api_responses, api_token):
         expected_post_url = get_api_endpoint().format(username=getpass.getuser(), flavor="webapps")
-        api_responses.add(responses.POST, expected_post_url, status=200, body=json.dumps({
-            "status": "ERROR", "error_type": "bad", "error_message": "bad things happened"
-        }))
+        api_responses.add(
+            responses.POST,
+            expected_post_url,
+            status=200,
+            body=json.dumps({"status": "ERROR", "error_type": "bad", "error_message": "bad things happened"}),
+        )
 
         with pytest.raises(Exception) as e:
             Webapp('mydomain.com').create('2.7', '/virtualenv/path', '/project/path', nuke=False)
@@ -371,18 +374,26 @@ class TestDeleteWebappLog:
 class TestGetWebappLogs:
 
     def test_get_list_of_logs(self, api_responses, api_token):
-        expected_url = get_api_endpoint().format(
-            username=getpass.getuser(), flavor="files") + "tree/?path=/var/log/"
-        api_responses.add(responses.GET, expected_url, status=200,
-                          body="['/var/log/blah','/var/log/mydomain.com.access.log',\
-                          '/var/log/mydomain.com.access.log.1',\
-                          '/var/log/mydomain.com.access.log.2.gz',\
-                          '/var/log/mydomain.com.error.log',\
-                          '/var/log/mydomain.com.error.log.1',\
-                          '/var/log/mydomain.com.error.log.2.gz',\
-                          '/var/log/mydomain.com.server.log',\
-                          '/var/log/mydomain.com.server.log.1',\
-                          '/var/log/mydomain.com.server.log.2.gz']")
+        expected_url = get_api_endpoint().format(username=getpass.getuser(), flavor="files") + "tree/?path=/var/log/"
+        api_responses.add(
+            responses.GET,
+            expected_url,
+            status=200,
+            body=json.dumps(
+                [
+                    "/var/log/blah",
+                    "/var/log/mydomain.com.access.log",
+                    "/var/log/mydomain.com.access.log.1",
+                    "/var/log/mydomain.com.access.log.2.gz",
+                    "/var/log/mydomain.com.error.log",
+                    "/var/log/mydomain.com.error.log.1",
+                    "/var/log/mydomain.com.error.log.2.gz",
+                    "/var/log/mydomain.com.server.log",
+                    "/var/log/mydomain.com.server.log.1",
+                    "/var/log/mydomain.com.server.log.2.gz",
+                ]
+            ),
+        )
 
         logs = Webapp("mydomain.com").get_log_info()
 

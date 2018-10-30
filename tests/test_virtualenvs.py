@@ -27,8 +27,7 @@ class TestVirtualenv:
         args, kwargs = mock_subprocess.check_call.call_args
         command_list = args[0]
         bash_command = command_list[2]
-        assert 'mkvirtualenv --python=/usr/bin/python2.7 domain.com' in bash_command
-
+        assert "mkvirtualenv --python=python2.7 domain.com" in bash_command
 
     def test_nuke_option_deletes_virtualenv(self, mock_subprocess, virtualenvs_folder):
         v = Virtualenv('domain.com', '2.7')

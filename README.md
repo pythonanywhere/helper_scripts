@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/pythonanywhere/helper_scripts.svg?branch=master)](https://travis-ci.org/pythonanywhere/helper_scripts)
+
 # PythonAnywhere helper scripts
 
 These scripts are designed to be run from PythonAnywhere consoles
