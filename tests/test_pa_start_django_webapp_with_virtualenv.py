@@ -73,9 +73,16 @@ class TestMain:
 
         with patch("scripts.pa_start_django_webapp_with_virtualenv.DjangoProject.update_wsgi_file"):
             with patch("pythonanywhere.api.call_api"):
-                version = ".".join(python_version().split(".")[:2])
-                main("mydomain.com", "1.9.2", version, nuke=False)
-                main("mydomain.com", "1.11.3", version, nuke=True)
+                running_python_version = ".".join(python_version().split(".")[:2])
+                if running_python_version[0] == 2:
+                    old_django_version = "1.9.2"
+                    new_django_version = "1.11.3"
+                else:
+                    old_django_version = "2.0.8"
+                    new_django_version = "2.1.2"
+
+                main("mydomain.com", old_django_version, running_python_version, nuke=False)
+                main("mydomain.com", new_django_version, running_python_version, nuke=True)
 
         django_version = (
             subprocess.check_output(
@@ -87,4 +94,4 @@ class TestMain:
             .decode()
             .strip()
         )
-        assert django_version == "1.11.3"
+        assert django_version == new_django_version

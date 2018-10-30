@@ -8,6 +8,7 @@ from textwrap import dedent
 from unittest.mock import Mock, call
 
 import pytest
+
 import pythonanywhere.django_project
 from pythonanywhere.django_project import DjangoProject
 from pythonanywhere.exceptions import SanityException
@@ -283,10 +284,13 @@ class TestUpdateWsgiFile:
     def test_actually_produces_wsgi_file_that_can_import_project_non_nested(
         self, fake_home, non_nested_submodule, virtualenvs_folder
     ):
-        project = DjangoProject("mydomain.com", ".".join(python_version().split(".")[:2]))
+        running_python_version = ".".join(python_version().split(".")[:2])
+        project = DjangoProject("mydomain.com", running_python_version)
         shutil.copytree(str(non_nested_submodule), str(project.project_path))
-        print(subprocess.check_call(["tree", str(project.project_path)]))
-        project.create_virtualenv()
+        if running_python_version == "3.7":
+            project.create_virtualenv(django_version="latest")
+        else:
+            project.create_virtualenv()
         project.find_django_files()
         project.wsgi_file_path = Path(tempfile.NamedTemporaryFile().name)
 
@@ -299,9 +303,13 @@ class TestUpdateWsgiFile:
     def test_actually_produces_wsgi_file_that_can_import_nested_project(
         self, fake_home, more_nested_submodule, virtualenvs_folder
     ):
-        project = DjangoProject("mydomain.com", ".".join(python_version().split(".")[:2]))
+        running_python_version = ".".join(python_version().split(".")[:2])
+        project = DjangoProject("mydomain.com", running_python_version)
         shutil.copytree(str(more_nested_submodule), str(project.project_path))
-        project.create_virtualenv()
+        if running_python_version == "3.7":
+            project.create_virtualenv(django_version="latest")
+        else:
+            project.create_virtualenv()
         project.find_django_files()
         project.wsgi_file_path = Path(tempfile.NamedTemporaryFile().name)
 
