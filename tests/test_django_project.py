@@ -3,6 +3,7 @@ import shutil
 import subprocess
 import tempfile
 from pathlib import Path
+from platform import python_version
 from textwrap import dedent
 from unittest.mock import Mock, call
 
@@ -282,7 +283,7 @@ class TestUpdateWsgiFile:
     def test_actually_produces_wsgi_file_that_can_import_project_non_nested(
         self, fake_home, non_nested_submodule, virtualenvs_folder
     ):
-        project = DjangoProject("mydomain.com", "3.6")
+        project = DjangoProject("mydomain.com", ".".join(python_version().split(".")[:2]))
         shutil.copytree(str(non_nested_submodule), str(project.project_path))
         print(subprocess.check_call(["tree", str(project.project_path)]))
         project.create_virtualenv()
@@ -298,7 +299,7 @@ class TestUpdateWsgiFile:
     def test_actually_produces_wsgi_file_that_can_import_nested_project(
         self, fake_home, more_nested_submodule, virtualenvs_folder
     ):
-        project = DjangoProject("mydomain.com", "3.6")
+        project = DjangoProject("mydomain.com", ".".join(python_version().split(".")[:2]))
         shutil.copytree(str(more_nested_submodule), str(project.project_path))
         project.create_virtualenv()
         project.find_django_files()
