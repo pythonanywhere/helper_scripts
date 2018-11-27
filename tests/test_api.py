@@ -4,6 +4,7 @@ from datetime import datetime
 from unittest.mock import patch
 from urllib.parse import urlencode
 
+from dateutil.tz import tzutc
 import pytest
 import responses
 from pythonanywhere.api import PYTHON_VERSIONS, AuthenticationError, Webapp, call_api, get_api_endpoint
@@ -277,7 +278,9 @@ class TestSetWebappSSL:
 
 
 class TestGetWebappSSLInfo:
-    def test_returns_json_from_server_having_parsed_expiry(self, api_responses, api_token):
+    def test_returns_json_from_server_having_parsed_expiry_with_z_for_utc_and_no_separators(
+        self, api_responses, api_token
+    ):
         expected_url = get_api_endpoint().format(username=getpass.getuser(), flavor="webapps") + "mydomain.com/ssl/"
         api_responses.add(
             responses.GET,
@@ -294,7 +297,37 @@ class TestGetWebappSSLInfo:
         )
 
         assert Webapp("mydomain.com").get_ssl_info() == {
-            "not_after": datetime(2018, 8, 24, 17, 16, 23),
+            "not_after": datetime(2018, 8, 24, 17, 16, 23, tzinfo=tzutc()),
+            "issuer_name": "PythonAnywhere test CA",
+            "subject_name": "www.mycoolsite.com",
+            "subject_alternate_names": ["www.mycoolsite.com", "mycoolsite.com"],
+        }
+
+        get = api_responses.calls[0]
+        assert get.request.method == "GET"
+        assert get.request.url == expected_url
+        assert get.request.headers["Authorization"] == "Token {api_token}".format(api_token=api_token)
+
+    def test_returns_json_from_server_having_parsed_expiry_with_timezone_offset_and_separators(
+        self, api_responses, api_token
+    ):
+        expected_url = get_api_endpoint().format(username=getpass.getuser(), flavor="webapps") + "mydomain.com/ssl/"
+        api_responses.add(
+            responses.GET,
+            expected_url,
+            status=200,
+            body=json.dumps(
+                {
+                    "not_after": "2018-08-24T17:16:23+00:00",
+                    "issuer_name": "PythonAnywhere test CA",
+                    "subject_name": "www.mycoolsite.com",
+                    "subject_alternate_names": ["www.mycoolsite.com", "mycoolsite.com"],
+                }
+            ),
+        )
+
+        assert Webapp("mydomain.com").get_ssl_info() == {
+            "not_after": datetime(2018, 8, 24, 17, 16, 23, tzinfo=tzutc()),
             "issuer_name": "PythonAnywhere test CA",
             "subject_name": "www.mycoolsite.com",
             "subject_alternate_names": ["www.mycoolsite.com", "mycoolsite.com"],

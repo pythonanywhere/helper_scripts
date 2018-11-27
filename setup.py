@@ -32,6 +32,7 @@ setup(
     install_requires=[
         'docopt',
         'requests',
+        'python-dateutil',
     ],
     extras_require={},
     python_requires='>=3.5',

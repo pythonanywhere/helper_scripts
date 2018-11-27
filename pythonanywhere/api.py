@@ -1,9 +1,9 @@
 import getpass
 import os
-from datetime import datetime
 from pathlib import Path
 from textwrap import dedent
 
+from dateutil.parser import parse
 import requests
 
 from pythonanywhere.exceptions import SanityException
@@ -162,7 +162,7 @@ class Webapp:
             )
 
         result = response.json()
-        result["not_after"] = datetime.strptime(result["not_after"], "%Y%m%dT%H%M%SZ")
+        result["not_after"] = parse(result["not_after"])
         return result
 
     def delete_log(self, log_type, index=0):
