@@ -12,6 +12,7 @@ setup(
     version='0.7',
     description='PythonAnywhere helper tools for users',
     long_description=long_description,
+    long_description_content_type="text/markdown",
     url='https://github.com/pythonanywhere/helper_scripts/',
     author='PythonAnywhere LLP',
     author_email='developers@pythonanywhere.com',
