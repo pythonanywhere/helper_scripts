@@ -130,6 +130,18 @@ class Webapp:
         url = get_api_endpoint().format(username=getpass.getuser(), flavor="webapps") + self.domain + "/reload/"
         response = call_api(url, "post")
         if not response.ok:
+            if response.status_code == 409 and response.json()["error"] == "cname_error":
+                print(
+                    snakesay(
+                        dedent("""
+                            Could not find a CNAME for your website.  If you're using an A record,
+                            CloudFlare, or some other way of pointing your domain at PythonAnywhere
+                            then that should not be a problem.  If you're not, you should double-check
+                            your DNS setup.
+                        """)
+                    )
+                )
+                return
             raise Exception(
                 "POST to reload webapp via API failed, got {response}:{response_text}".format(
                     response=response, response_text=response.text

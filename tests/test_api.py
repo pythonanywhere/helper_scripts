@@ -236,7 +236,7 @@ class TestReloadWebapp:
         assert post.request.body is None
         assert post.request.headers["Authorization"] == "Token {api_token}".format(api_token=api_token)
 
-    def test_raises_if_post_does_not_20x(self, api_responses, api_token):
+    def test_raises_if_post_does_not_20x_that_is_not_a_cname_error(self, api_responses, api_token):
         expected_url = (
             get_api_endpoint().format(username=getpass.getuser(), flavor="webapps") + "mydomain.com/reload/"
         )
@@ -247,6 +247,15 @@ class TestReloadWebapp:
 
         assert "POST to reload webapp via API failed" in str(e.value)
         assert "nope" in str(e.value)
+
+    def test_does_not_raise_if_post_responds_with_a_cname_error(self, api_responses, api_token):
+        expected_url = (
+            get_api_endpoint().format(username=getpass.getuser(), flavor="webapps") + "mydomain.com/reload/"
+        )
+        api_responses.add(responses.POST, expected_url, status=409, json={"status": "error", "error": "cname_error"})
+
+        ## Should not raise
+        Webapp("mydomain.com").reload()
 
 
 class TestSetWebappSSL:
