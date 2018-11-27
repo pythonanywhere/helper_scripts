@@ -157,8 +157,8 @@ class Webapp:
                 dedent(
                     """
                     POST to set SSL details via API failed, got {response}:{response_text}
-                    If you just created an API token, you need to set the API_TOKEN environment variable or start a new console.
-                    Also you need to have setup a `{domain}` PythonAnywhere webapp for this to work.
+                    If you just created an API token, you need to set the API_TOKEN environment variable or start a
+                    new console.  Also you need to have setup a `{domain}` PythonAnywhere webapp for this to work.
                     """
                 ).format(response=response, response_text=response.text, domain=self.domain)
             )
@@ -228,7 +228,7 @@ class Webapp:
         log_prefix = "/var/log/{domain}.".format(domain=self.domain)
         for file_name in file_list:
             if type(file_name) == str and file_name.startswith(log_prefix):
-                log = file_name[len(log_prefix) :].split(".")
+                log = file_name[len(log_prefix):].split(".")
                 if log[0] in log_types:
                     log_type = log[0]
                     if log[-1] == "log":

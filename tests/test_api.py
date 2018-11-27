@@ -21,7 +21,9 @@ class TestGetAPIEndpoint:
         monkeypatch.setenv("PYTHONANYWHERE_DOMAIN", "wibble.com")
         assert get_api_endpoint() == "https://www.foo.com/api/v0/user/{username}/{flavor}/"
 
-    def test_gets_domain_from_pythonanywhere_domain_and_adds_on_www_if_set_but_no_pythonanywhere_site(self, monkeypatch):
+    def test_gets_domain_from_pythonanywhere_domain_and_adds_on_www_if_set_but_no_pythonanywhere_site(
+        self, monkeypatch
+    ):
         monkeypatch.setenv("PYTHONANYWHERE_DOMAIN", "foo.com")
         assert get_api_endpoint() == "https://www.foo.com/api/v0/user/{username}/{flavor}/"
 
