@@ -9,7 +9,7 @@ with (here / 'README.md').open(encoding='utf-8') as f:
 
 setup(
     name='pythonanywhere',
-    version='0.7.4',
+    version='0.8.1',
     description='PythonAnywhere helper tools for users',
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -43,6 +43,7 @@ setup(
     scripts=[
         'scripts/pa_install_webapp_letsencrypt_ssl.py',
         'scripts/pa_install_webapp_ssl.py',
+        'scripts/pa_reload_webapp.py',
         'scripts/pa_start_django_webapp_with_virtualenv.py',
         'scripts/pa_autoconfigure_django.py',
         'pythonanywhere/snakesay.py',
