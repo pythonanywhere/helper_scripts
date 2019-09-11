@@ -1,3 +1,3 @@
 [submodule "submodules/example-django-project"]
 	path = submodules/example-django-project
-	url = https://github.com/hjwp/example-django-project.git
+	url = https://github.com/pythonanywhere/example-django-project
