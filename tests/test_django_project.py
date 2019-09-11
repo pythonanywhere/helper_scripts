@@ -287,7 +287,7 @@ class TestUpdateWsgiFile:
         running_python_version = ".".join(python_version().split(".")[:2])
         project = DjangoProject("mydomain.com", running_python_version)
         shutil.copytree(str(non_nested_submodule), str(project.project_path))
-        if running_python_version == "3.7":
+        if running_python_version in ["3.7", "3.8"]:
             project.create_virtualenv(django_version="latest")
         else:
             project.create_virtualenv()
@@ -306,7 +306,7 @@ class TestUpdateWsgiFile:
         running_python_version = ".".join(python_version().split(".")[:2])
         project = DjangoProject("mydomain.com", running_python_version)
         shutil.copytree(str(more_nested_submodule), str(project.project_path))
-        if running_python_version == "3.7":
+        if running_python_version in ["3.7", "3.8"]:
             project.create_virtualenv(django_version="latest")
         else:
             project.create_virtualenv()
