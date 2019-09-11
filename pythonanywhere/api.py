@@ -9,7 +9,9 @@ import requests
 from pythonanywhere.exceptions import SanityException
 from pythonanywhere.snakesay import snakesay
 
-PYTHON_VERSIONS = {"2.7": "python27", "3.4": "python34", "3.5": "python35", "3.6": "python36", "3.7": "python37"}
+PYTHON_VERSIONS = {
+    "2.7": "python27", "3.4": "python34", "3.5": "python35", "3.6": "python36", "3.7": "python37", "3.8": "python38",
+}
 
 
 class AuthenticationError(Exception):
