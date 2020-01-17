@@ -43,16 +43,23 @@ def main(domain_name, suppress_reload):
                 webapp.reload()
 
             ssl_details = webapp.get_ssl_info()
-            print(snakesay(
-                "That's all set up now :-)\n"
-                "Your new certificate will expire on {expiry:%d %B %Y},\n"
-                "so shortly before then you should renew it\n"
-                "(see https://help.pythonanywhere.com/pages/LetsEncrypt/)\n"
-                "and install the new certificate.".format(
-                    expiry=ssl_details["not_after"]
+            print(
+                snakesay(
+                    "This method of handling Let's Encrypt certs\n"
+                    "**************IS DEPRECATED.**************\n\n"
+                    "You can now have a Let's Encrypt certificate managed by PythonAnywhere.\n"
+                    "We handle all the details of getting it, installing it,\n"
+                    "and managing renewals for you. So you don't need to do\n"
+                    "any of the stuff below any more.\n\n"
+                    "Anyway, All is set up for now. \n"
+                    "Your new certificate will expire on {expiry:%d %B %Y},\n"
+                    "so shortly before then you should switch to the new system\n"
+                    "(see https://help.pythonanywhere.com/pages/HTTPSSetup/)\n"
+                    "".format(
+                        expiry=ssl_details["not_after"]
+                    )
                 )
-            ))
-
+            )
 
             done = True
             break
