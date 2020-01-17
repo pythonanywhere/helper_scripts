@@ -20,3 +20,4 @@ install:
 script:
   - pytest
   - pytest --cov=pythonanywhere --cov=scripts --cov-fail-under=65
+  - pytest --mypy -m mypy
