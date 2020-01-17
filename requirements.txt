@@ -9,6 +9,7 @@ psutil==5.4.0
 py==1.7.0
 pytest==3.2.3
 pytest-cov==2.6.0
+pytest-mypy==0.4.2
 python-dateutil==2.7.5
 requests==2.22.0
 responses==0.8.1
