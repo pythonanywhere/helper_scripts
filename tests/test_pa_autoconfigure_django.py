@@ -31,27 +31,6 @@ class TestMain:
             call.start_bash(),
         ]
 
-
-    def test_domain_defaults_to_using_current_username_and_domain_from_env(self, monkeypatch):
-        username = getpass.getuser()
-        monkeypatch.setenv('PYTHONANYWHERE_DOMAIN', 'pythonanywhere.domain')
-        with patch('scripts.pa_autoconfigure_django.DjangoProject') as mock_DjangoProject:
-            main('a-repo', 'your-username.pythonanywhere.com', 'python.version', nuke=False)
-        assert mock_DjangoProject.call_args == call(
-            username + '.pythonanywhere.domain', 'python.version'
-        )
-
-
-    def test_lowercases_username(self):
-        with patch('scripts.pa_autoconfigure_django.getpass') as mock_getpass:
-            mock_getpass.getuser.return_value = 'UserName1'
-            with patch('scripts.pa_autoconfigure_django.DjangoProject') as mock_DjangoProject:
-                main('a-url', 'your-username.pythonanywhere.com', 'python.version', 'nukey')
-            assert mock_DjangoProject.call_args == call(
-                'username1.pythonanywhere.com', 'python.version'
-            )
-
-
     @pytest.mark.slowtest
     def test_actually_works_against_example_repo(
         self, fake_home, virtualenvs_folder, api_token, process_killer

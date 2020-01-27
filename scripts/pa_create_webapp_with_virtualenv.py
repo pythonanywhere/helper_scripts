@@ -21,13 +21,11 @@ from textwrap import dedent
 
 from pythonanywhere.project import Project
 from pythonanywhere.snakesay import snakesay
+from pythonanywhere.utils import ensure_domain
 
 
 def main(domain, python_version, nuke):
-    if domain == 'your-username.pythonanywhere.com':
-        username = getpass.getuser().lower()
-        domain = '{username}.pythonanywhere.com'.format(username=username)
-
+    domain = ensure_domain(domain)
     project = Project(domain, python_version)
     project.sanity_checks(nuke=nuke)
     project.virtualenv.create(nuke=nuke)
@@ -42,7 +40,7 @@ def main(domain, python_version, nuke):
         - Your web app config screen is here: https://www.pythonanywhere.com/user/{username}/webapps/{mangled_domain}
         '''.format(
             domain=domain,
-            username=username,
+            username=getpass.getuser().lower(),
             mangled_domain=domain.replace('.', '_')
         )
     )))

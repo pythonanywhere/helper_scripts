@@ -19,15 +19,11 @@ import os
 
 from pythonanywhere.api import Webapp
 from pythonanywhere.snakesay import snakesay
+from pythonanywhere.utils import ensure_domain
 
 
 def main(domain, log_type, log_index):
-    if domain == 'your-username.pythonanywhere.com':
-        username = getpass.getuser().lower()
-        pa_domain = os.environ.get('PYTHONANYWHERE_DOMAIN', 'pythonanywhere.com')
-        domain = '{username}.{pa_domain}'.format(username=username, pa_domain=pa_domain)
-
-    webapp = Webapp(domain)
+    webapp = Webapp(ensure_domain(domain))
     log_types = ["access", "error", "server"]
     logs = webapp.get_log_info()
     if log_type == "all" and log_index == "all":

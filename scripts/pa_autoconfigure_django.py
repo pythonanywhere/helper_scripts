@@ -17,19 +17,14 @@ Options:
 """
 
 from docopt import docopt
-import getpass
-import os
 
 from pythonanywhere.django_project import DjangoProject
 from pythonanywhere.snakesay import snakesay
+from pythonanywhere.utils import ensure_domain
 
 
 def main(repo_url, domain, python_version, nuke):
-    if domain == 'your-username.pythonanywhere.com':
-        username = getpass.getuser().lower()
-        pa_domain = os.environ.get('PYTHONANYWHERE_DOMAIN', 'pythonanywhere.com')
-        domain = '{username}.{pa_domain}'.format(username=username, pa_domain=pa_domain)
-
+    domain = ensure_domain(domain)
     project = DjangoProject(domain, python_version)
     project.sanity_checks(nuke=nuke)
     project.download_repo(repo_url, nuke=nuke),

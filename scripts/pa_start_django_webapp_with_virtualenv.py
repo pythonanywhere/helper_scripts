@@ -13,19 +13,14 @@ Options:
 """
 
 from docopt import docopt
-import getpass
-import os
 
 from pythonanywhere.snakesay import snakesay
 from pythonanywhere.django_project import DjangoProject
+from pythonanywhere.utils import ensure_domain
 
 
 def main(domain, django_version, python_version, nuke):
-    if domain == 'your-username.pythonanywhere.com':
-        username = getpass.getuser().lower()
-        pa_domain = os.environ.get('PYTHONANYWHERE_DOMAIN', 'pythonanywhere.com')
-        domain = '{username}.{pa_domain}'.format(username=username, pa_domain=pa_domain)
-
+    domain = ensure_domain(domain)
     project = DjangoProject(domain, python_version)
     project.sanity_checks(nuke=nuke)
     project.create_virtualenv(django_version, nuke=nuke)
@@ -41,7 +36,6 @@ def main(domain, django_version, python_version, nuke):
     project.webapp.reload()
 
     print(snakesay('All done!  Your site is now live at https://{domain}'.format(domain=domain)))
-
 
 
 if __name__ == '__main__':
