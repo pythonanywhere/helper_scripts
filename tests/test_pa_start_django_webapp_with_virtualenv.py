@@ -1,4 +1,3 @@
-import getpass
 import os
 import subprocess
 from platform import python_version
@@ -32,7 +31,7 @@ class TestMain:
     ):
 
         with patch("scripts.pa_start_django_webapp_with_virtualenv.DjangoProject.update_wsgi_file"):
-            with patch("pythonanywhere.api.call_api"):
+            with patch("pythonanywhere.api.webapp.call_api"):
                 main("mydomain.com", "1.9.2", "2.7", nuke=False)
 
         django_version = (
@@ -58,7 +57,7 @@ class TestMain:
     def test_nuke_option_lets_you_run_twice(self, fake_home, virtualenvs_folder, api_token):
 
         with patch("scripts.pa_start_django_webapp_with_virtualenv.DjangoProject.update_wsgi_file"):
-            with patch("pythonanywhere.api.call_api"):
+            with patch("pythonanywhere.api.webapp.call_api"):
                 running_python_version = ".".join(python_version().split(".")[:2])
                 if running_python_version[0] == 2:
                     old_django_version = "1.9.2"
