@@ -7,7 +7,8 @@ from urllib.parse import urlencode
 from dateutil.tz import tzutc
 import pytest
 import responses
-from pythonanywhere.api import PYTHON_VERSIONS, AuthenticationError, Webapp, call_api, get_api_endpoint
+from pythonanywhere.api.base import PYTHON_VERSIONS, AuthenticationError, call_api, get_api_endpoint
+from pythonanywhere.api.webapp import Webapp
 from pythonanywhere.exceptions import SanityException
 
 
@@ -38,13 +39,13 @@ class TestCallAPI:
 
     def test_passes_verify_from_environment(self, api_token, monkeypatch):
         monkeypatch.setenv("PYTHONANYWHERE_INSECURE_API", "true")
-        with patch("pythonanywhere.api.requests") as mock_requests:
+        with patch("pythonanywhere.api.base.requests") as mock_requests:
             call_api("url", "post", foo="bar")
         args, kwargs = mock_requests.request.call_args
         assert kwargs["verify"] is False
 
     def test_verify_is_true_if_env_not_set(self, api_token):
-        with patch("pythonanywhere.api.requests") as mock_requests:
+        with patch("pythonanywhere.api.base.requests") as mock_requests:
             call_api("url", "post", foo="bar")
         args, kwargs = mock_requests.request.call_args
         assert kwargs["verify"] is True

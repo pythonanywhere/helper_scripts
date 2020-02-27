@@ -1,5 +1,4 @@
 from unittest.mock import call, patch
-import getpass
 import os
 import pytest
 import subprocess
@@ -7,7 +6,6 @@ import requests
 import time
 
 from scripts.pa_autoconfigure_django import main
-
 
 
 class TestMain:
@@ -39,7 +37,7 @@ class TestMain:
         domain = 'mydomain.com'
         with patch('scripts.pa_autoconfigure_django.DjangoProject.update_wsgi_file'):
             with patch('scripts.pa_autoconfigure_django.DjangoProject.start_bash'):
-                with patch('pythonanywhere.api.call_api'):
+                with patch('pythonanywhere.api.webapp.call_api'):
                     main(repo, domain, '2.7', nuke=False)
 
         expected_django_version = '1.11.1'
