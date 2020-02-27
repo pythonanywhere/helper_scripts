@@ -96,3 +96,8 @@ ENV/
 .ropeproject
 .venv
 
+# Emacs local variables
+.dir-locals.el
+
+# pytest
+.pytest_cache/
