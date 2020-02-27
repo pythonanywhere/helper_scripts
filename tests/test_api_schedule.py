@@ -1,12 +1,11 @@
 import getpass
 import json
-from unittest.mock import call
 
 import pytest
 import responses
 
-from pythonanywhere.api import get_api_endpoint
-from pythonanywhere.schedule_api import Schedule
+from pythonanywhere.api.base import get_api_endpoint
+from pythonanywhere.api.schedule import Schedule
 
 
 @pytest.fixture

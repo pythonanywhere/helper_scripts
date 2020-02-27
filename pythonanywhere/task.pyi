@@ -2,7 +2,7 @@ from typing import List, Optional, Type, TypeVar, Union
 
 from typing_extensions import Literal
 
-from pythonanywhere.schedule_api import Schedule
+from pythonanywhere.api.schedule import Schedule
 
 T = TypeVar("T", bound="Task")
 

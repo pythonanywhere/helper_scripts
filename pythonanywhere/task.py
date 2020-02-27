@@ -4,7 +4,7 @@ providing features for programmatic handling of scheduled task."""
 
 import logging
 
-from pythonanywhere.schedule_api import Schedule
+from pythonanywhere.api.schedule import Schedule
 from pythonanywhere.snakesay import snakesay
 
 logger = logging.getLogger(name=__name__)
@@ -33,7 +33,7 @@ class Task:
     defined by user.
 
     `Task` class is API agnostic meaning all API calls are made using the
-    `pythonanywhere.schedule_api.Schedule` interface via `Task.schedule`
+    `pythonanywhere.api.schedule.Schedule` interface via `Task.schedule`
     attribute."""
 
     def __init__(self):

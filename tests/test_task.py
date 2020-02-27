@@ -68,7 +68,7 @@ class TestTaskToBeCreated:
 @pytest.mark.tasks
 class TestTaskFromId:
     def test_updates_specs(self, task_specs, mocker):
-        mock_get_specs = mocker.patch("pythonanywhere.schedule_api.Schedule.get_specs")
+        mock_get_specs = mocker.patch("pythonanywhere.api.schedule.Schedule.get_specs")
         mock_get_specs.return_value = task_specs
 
         task = Task.from_id(task_id=42)
@@ -81,7 +81,7 @@ class TestTaskFromId:
 @pytest.mark.tasks
 class TestTaskCreateSchedule:
     def test_creates_daily_task(self, mocker, task_specs):
-        mock_create = mocker.patch("pythonanywhere.schedule_api.Schedule.create")
+        mock_create = mocker.patch("pythonanywhere.api.schedule.Schedule.create")
         mock_create.return_value = task_specs
         mock_update_specs = mocker.patch("pythonanywhere.task.Task.update_specs")
         task = Task.to_be_created(command="echo foo", hour=16, minute=0, disabled=False)
@@ -98,7 +98,7 @@ class TestTaskCreateSchedule:
 @pytest.mark.tasks
 class TestTaskDeleteSchedule:
     def test_calls_schedule_delete(self, example_task, mocker):
-        mock_delete = mocker.patch("pythonanywhere.schedule_api.Schedule.delete")
+        mock_delete = mocker.patch("pythonanywhere.api.schedule.Schedule.delete")
         mock_delete.return_value = True
         mock_snake = mocker.patch("pythonanywhere.task.snakesay")
         mock_logger = mocker.patch("pythonanywhere.task.logger.info")
@@ -110,7 +110,7 @@ class TestTaskDeleteSchedule:
         assert mock_logger.call_args == call(mock_snake.return_value)
 
     def test_raises_when_schedule_delete_fails(self, mocker):
-        mock_delete = mocker.patch("pythonanywhere.schedule_api.Schedule.delete")
+        mock_delete = mocker.patch("pythonanywhere.api.schedule.Schedule.delete")
         mock_delete.side_effect = Exception("error msg")
 
         with pytest.raises(Exception) as e:
@@ -123,7 +123,7 @@ class TestTaskDeleteSchedule:
 @pytest.mark.tasks
 class TestTaskUpdateSchedule:
     def test_updates_specs_and_prints_porcelain(self, mocker, example_task, task_specs):
-        mock_schedule_update = mocker.patch("pythonanywhere.schedule_api.Schedule.update")
+        mock_schedule_update = mocker.patch("pythonanywhere.api.schedule.Schedule.update")
         mock_info = mocker.patch("pythonanywhere.task.logger.info")
         mock_update_specs = mocker.patch("pythonanywhere.task.Task.update_specs")
         params = {"enabled": False}
@@ -146,7 +146,7 @@ class TestTaskUpdateSchedule:
         assert mock_update_specs.call_args == call(task_specs)
 
     def test_updates_specs_and_snakesays(self, mocker, example_task, task_specs):
-        mock_schedule_update = mocker.patch("pythonanywhere.schedule_api.Schedule.update")
+        mock_schedule_update = mocker.patch("pythonanywhere.api.schedule.Schedule.update")
         mock_info = mocker.patch("pythonanywhere.task.logger.info")
         mock_snake = mocker.patch("pythonanywhere.task.snakesay")
         mock_update_specs = mocker.patch("pythonanywhere.task.Task.update_specs")
@@ -161,7 +161,7 @@ class TestTaskUpdateSchedule:
         assert mock_update_specs.call_args == call(task_specs)
 
     def test_changes_daily_to_hourly(self, example_task, task_specs, mocker):
-        mock_schedule_update = mocker.patch("pythonanywhere.schedule_api.Schedule.update")
+        mock_schedule_update = mocker.patch("pythonanywhere.api.schedule.Schedule.update")
         mock_update_specs = mocker.patch("pythonanywhere.task.Task.update_specs")
         params = {"interval": "hourly"}
         task_specs.update({**params, "hour": None})
@@ -172,7 +172,7 @@ class TestTaskUpdateSchedule:
         assert mock_update_specs.call_args == call(task_specs)
 
     def test_warns_when_nothing_to_update(self, mocker, example_task, task_specs):
-        mock_schedule_update = mocker.patch("pythonanywhere.schedule_api.Schedule.update")
+        mock_schedule_update = mocker.patch("pythonanywhere.api.schedule.Schedule.update")
         mock_snake = mocker.patch("pythonanywhere.task.snakesay")
         mock_warning = mocker.patch("pythonanywhere.task.logger.warning")
         mock_update_specs = mocker.patch("pythonanywhere.task.Task.update_specs")
@@ -192,7 +192,7 @@ class TestTaskUpdateSchedule:
 @pytest.mark.tasks
 class TestTaskList:
     def test_instatiates_task_list_calling_proper_methods(self, task_specs, mocker):
-        mock_get_list = mocker.patch("pythonanywhere.schedule_api.Schedule.get_list")
+        mock_get_list = mocker.patch("pythonanywhere.api.schedule.Schedule.get_list")
         mock_get_list.return_value = [task_specs]
         mock_from_specs = mocker.patch("pythonanywhere.task.Task.from_api_specs")
 

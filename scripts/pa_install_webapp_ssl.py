@@ -19,7 +19,7 @@ from docopt import docopt
 import os
 import sys
 
-from pythonanywhere.api import Webapp
+from pythonanywhere.api.webapp import Webapp
 from pythonanywhere.snakesay import snakesay
 
 

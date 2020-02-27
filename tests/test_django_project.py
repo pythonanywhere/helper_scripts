@@ -16,7 +16,7 @@ from pythonanywhere.exceptions import SanityException
 
 class TestDownloadRepo:
     @pytest.mark.slowtest
-    def test_actually_downloads_repo(self, fake_home):
+    def test_actually_downloads_repo(self, fake_home, virtualenvs_folder):
         repo = "https://gist.github.com/hjwp/4173bcface139beb7632ec93726f91ea"
         project = DjangoProject("www.a.domain.com", "py.version")
         project.download_repo(repo, nuke=False)
@@ -24,12 +24,12 @@ class TestDownloadRepo:
         assert "file1.py" in os.listdir(str(project.project_path))
         assert "file2.py" in os.listdir(str(project.project_path))
 
-    def test_calls_git_subprocess(self, mock_subprocess, fake_home):
+    def test_calls_git_subprocess(self, mock_subprocess, fake_home, virtualenvs_folder):
         project = DjangoProject("www.a.domain.com", "py.version")
         project.download_repo("repo", nuke=False)
         assert mock_subprocess.check_call.call_args == call(["git", "clone", "repo", str(project.project_path)])
 
-    def test_nuke_option_deletes_directory_first(self, mock_subprocess, fake_home):
+    def test_nuke_option_deletes_directory_first(self, mock_subprocess, fake_home, virtualenvs_folder):
         project = DjangoProject("www.a.domain.com", "py.version")
         project.project_path.mkdir()
         (project.project_path / "old-thing.txt").touch()
@@ -38,7 +38,7 @@ class TestDownloadRepo:
         project.download_repo("repo", nuke=True)
         assert "old-thing.txt" not in project.project_path.iterdir()
 
-    def test_nuke_option_ignores_directory_doesnt_exist(self, mock_subprocess, fake_home):
+    def test_nuke_option_ignores_directory_doesnt_exist(self, mock_subprocess, fake_home, virtualenvs_folder):
         project = DjangoProject("www.a.domain.com", "py.version")
         mock_subprocess.check_call.side_effect = lambda *_, **__: Path(project.project_path).mkdir()
 
@@ -48,11 +48,11 @@ class TestDownloadRepo:
 
 
 class TestDetectDjangoVersion:
-    def test_is_versionless_django_by_default(self, fake_home):
+    def test_is_versionless_django_by_default(self, fake_home, virtualenvs_folder):
         project = DjangoProject("mydomain.com", "python.version")
         assert project.detect_requirements() == "django"
 
-    def test_if_requirements_txt_exists(self, fake_home):
+    def test_if_requirements_txt_exists(self, fake_home, virtualenvs_folder):
         project = DjangoProject("mydomain.com", "python.version")
         project.project_path.mkdir()
         requirements_txt = project.project_path / "requirements.txt"
@@ -92,12 +92,12 @@ class TestCreateVirtualenv:
 
 
 class TestRunStartproject:
-    def test_creates_folder(self, mock_subprocess, fake_home):
+    def test_creates_folder(self, mock_subprocess, fake_home, virtualenvs_folder):
         project = DjangoProject("mydomain.com", "python.version")
         project.run_startproject(nuke=False)
         assert (fake_home / "mydomain.com").is_dir()
 
-    def test_calls_startproject(self, mock_subprocess, fake_home):
+    def test_calls_startproject(self, mock_subprocess, fake_home, virtualenvs_folder):
         project = DjangoProject("mydomain.com", "python.version")
         project.run_startproject(nuke=False)
         assert mock_subprocess.check_call.call_args == call(
@@ -109,7 +109,7 @@ class TestRunStartproject:
             ]
         )
 
-    def test_nuke_option_deletes_directory_first(self, mock_subprocess, fake_home):
+    def test_nuke_option_deletes_directory_first(self, mock_subprocess, fake_home, virtualenvs_folder):
         project = DjangoProject("mydomain.com", "python.version")
         (fake_home / project.domain).mkdir()
         old_file = fake_home / project.domain / "old_file.py"
@@ -119,7 +119,7 @@ class TestRunStartproject:
 
         assert not old_file.exists()
 
-    def test_nuke_option_handles_directory_not_existing(self, mock_subprocess, fake_home):
+    def test_nuke_option_handles_directory_not_existing(self, mock_subprocess, fake_home, virtualenvs_folder):
         project = DjangoProject("mydomain.com", "python.version")
         project.run_startproject(nuke=True)  # should not raise
 
@@ -143,7 +143,7 @@ def more_nested_submodule():
 
 
 class TestFindDjangoFiles:
-    def test_non_nested(self, fake_home, non_nested_submodule):
+    def test_non_nested(self, fake_home, non_nested_submodule, virtualenvs_folder):
         project = DjangoProject("mydomain.com", "python.version")
         shutil.copytree(str(non_nested_submodule), str(project.project_path))
         expected_settings_path = project.project_path / "myproject/settings.py"
@@ -156,7 +156,7 @@ class TestFindDjangoFiles:
         assert project.settings_path == expected_settings_path
         assert project.manage_py_path == expected_manage_py
 
-    def test_nested(self, fake_home, more_nested_submodule):
+    def test_nested(self, fake_home, more_nested_submodule, virtualenvs_folder):
         project = DjangoProject("mydomain.com", "python.version")
         shutil.copytree(str(more_nested_submodule), str(project.project_path))
         expected_settings_path = project.project_path / "mysite/mysite/settings.py"
@@ -169,14 +169,14 @@ class TestFindDjangoFiles:
         assert project.settings_path == expected_settings_path
         assert project.manage_py_path == expected_manage_py
 
-    def test_raises_if_empty_project_folder(self, fake_home):
+    def test_raises_if_empty_project_folder(self, fake_home, virtualenvs_folder):
         project = DjangoProject("mydomain.com", "python.version")
         with pytest.raises(SanityException) as e:
             project.find_django_files()
 
         assert "Could not find your settings.py" in str(e.value)
 
-    def test_raises_if_no_settings_in_any_subfolders(self, fake_home):
+    def test_raises_if_no_settings_in_any_subfolders(self, fake_home, virtualenvs_folder):
         project = DjangoProject("mydomain.com", "python.version")
         not_this_folder = project.project_path / "not_this_folder"
         not_this_folder.mkdir(parents=True)
@@ -185,7 +185,7 @@ class TestFindDjangoFiles:
 
         assert "Could not find your settings.py" in str(e.value)
 
-    def test_raises_if_manage_py_not_found(self, fake_home, non_nested_submodule):
+    def test_raises_if_manage_py_not_found(self, fake_home, non_nested_submodule, virtualenvs_folder):
         project = DjangoProject("mydomain.com", "python.version")
         shutil.copytree(str(non_nested_submodule), str(project.project_path))
         expected_manage_py = project.project_path / "manage.py"
@@ -198,7 +198,7 @@ class TestFindDjangoFiles:
 
 
 class TestUpdateSettingsFile:
-    def test_adds_STATIC_and_MEDIA_config_to_settings(self):
+    def test_adds_STATIC_and_MEDIA_config_to_settings(self, virtualenvs_folder):
         project = DjangoProject("mydomain.com", "python.version")
         project.settings_path = Path(tempfile.NamedTemporaryFile().name)
 
@@ -223,7 +223,7 @@ class TestUpdateSettingsFile:
         assert "STATIC_ROOT = os.path.join(BASE_DIR, 'static')" in lines
         assert "MEDIA_ROOT = os.path.join(BASE_DIR, 'media')" in lines
 
-    def test_adds_domain_to_ALLOWED_HOSTS(self):
+    def test_adds_domain_to_ALLOWED_HOSTS(self, virtualenvs_folder):
         project = DjangoProject("mydomain.com", "python.version")
         project.settings_path = Path(tempfile.NamedTemporaryFile().name)
 
@@ -247,7 +247,7 @@ class TestUpdateSettingsFile:
 
 
 class TestRunCollectStatic:
-    def test_runs_manage_py_in_correct_virtualenv(self, mock_subprocess, fake_home):
+    def test_runs_manage_py_in_correct_virtualenv(self, mock_subprocess, fake_home, virtualenvs_folder):
         project = DjangoProject("mydomain.com", "python.version")
         project.manage_py_path = Path("/path/to/manage.py")
         project.run_collectstatic()
@@ -257,7 +257,7 @@ class TestRunCollectStatic:
 
 
 class TestRunMigrate:
-    def test_runs_manage_py_in_correct_virtualenv(self, mock_subprocess, fake_home):
+    def test_runs_manage_py_in_correct_virtualenv(self, mock_subprocess, fake_home, virtualenvs_folder):
         project = DjangoProject("mydomain.com", "python.version")
         project.manage_py_path = Path("/path/to/manage.py")
         project.run_migrate()
@@ -267,7 +267,7 @@ class TestRunMigrate:
 
 
 class TestUpdateWsgiFile:
-    def test_updates_wsgi_file_from_template(self):
+    def test_updates_wsgi_file_from_template(self, virtualenvs_folder):
         project = DjangoProject("mydomain.com", "python.version")
         project.wsgi_file_path = Path(tempfile.NamedTemporaryFile().name)
         project.settings_path = Path("/path/to/settingsfolder/settings.py")

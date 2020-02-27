@@ -1,7 +1,7 @@
 from pathlib import Path
 import uuid
 
-from pythonanywhere.api import Webapp
+from pythonanywhere.api.webapp import Webapp
 from pythonanywhere.exceptions import SanityException
 from pythonanywhere.virtualenvs import Virtualenv
 from pythonanywhere.launch_bash_in_virtualenv import launch_bash_in_virtualenv

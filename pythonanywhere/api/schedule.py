@@ -3,7 +3,7 @@
 
 import getpass
 
-from pythonanywhere.api import call_api, get_api_endpoint
+from pythonanywhere.api.base import call_api, get_api_endpoint
 
 
 class Schedule:

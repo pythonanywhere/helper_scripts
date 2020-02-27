@@ -60,6 +60,8 @@ def virtualenvs_folder():
     yield tempdir
     if old_workon:
         os.environ["WORKON_HOME"] = old_workon
+    else:
+        del os.environ["WORKON_HOME"]
     shutil.rmtree(str(tempdir))
 
     if actual_virtualenvs.is_dir():

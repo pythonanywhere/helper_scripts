@@ -14,10 +14,8 @@ Options:
 """
 
 from docopt import docopt
-import getpass
-import os
 
-from pythonanywhere.api import Webapp
+from pythonanywhere.api.webapp import Webapp
 from pythonanywhere.snakesay import snakesay
 from pythonanywhere.utils import ensure_domain
 
