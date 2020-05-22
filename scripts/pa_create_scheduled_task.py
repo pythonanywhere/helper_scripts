@@ -1,4 +1,4 @@
-#!/usr/bin/python3.5
+#!/usr/bin/python3.6
 """Create a scheduled task.
 
 Two categories of tasks are available: daily and hourly.

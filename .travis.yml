@@ -3,21 +3,14 @@ sudo: false
 language: python
 
 python:
-  - 3.5
   - 3.6
   - 3.7
   - 3.8
-
-# tmp fix until travis gets python3.7
-dist: xenial
-sudo: true
 
 install:
   - pip install -r requirements.txt
   - pip install -e .
 
-
 script:
   - pytest
   - pytest --cov=pythonanywhere --cov=scripts --cov-fail-under=65
-  - pytest --mypy -m mypy

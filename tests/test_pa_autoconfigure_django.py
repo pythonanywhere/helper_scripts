@@ -1,3 +1,4 @@
+from platform import python_version
 from unittest.mock import call, patch
 import os
 import pytest
@@ -33,14 +34,15 @@ class TestMain:
     def test_actually_works_against_example_repo(
         self, fake_home, virtualenvs_folder, api_token, process_killer
     ):
-        repo = 'https://github.com/hjwp/example-django-project.git'
+        running_python_version = ".".join(python_version().split(".")[:2])
+        repo = 'https://github.com/pythonanywhere/example-django-project.git'
         domain = 'mydomain.com'
         with patch('scripts.pa_autoconfigure_django.DjangoProject.update_wsgi_file'):
             with patch('scripts.pa_autoconfigure_django.DjangoProject.start_bash'):
                 with patch('pythonanywhere.api.webapp.call_api'):
-                    main(repo, domain, '2.7', nuke=False)
+                    main(repo, domain, running_python_version, nuke=False)
 
-        expected_django_version = '1.11.1'
+        expected_django_version = '3.0.6'
         expected_virtualenv = virtualenvs_folder / domain
         expected_project_path = fake_home / domain
         django_project_name = 'myproject'
@@ -56,7 +58,7 @@ class TestMain:
         with expected_settings_path.open() as f:
             lines = f.read().split('\n')
         assert "MEDIA_ROOT = os.path.join(BASE_DIR, 'media')" in lines
-        assert "ALLOWED_HOSTS = ['mydomain.com']" in lines
+        assert "ALLOWED_HOSTS = ['mydomain.com']  # type: List[str]" in lines
 
         assert 'base.css' in os.listdir(str(fake_home / domain / 'static/admin/css'))
         server = subprocess.Popen([

@@ -29,10 +29,10 @@ class TestMain:
     def test_actually_creates_django_project_in_virtualenv_with_hacked_settings_and_static_files(
         self, fake_home, virtualenvs_folder, api_token
     ):
-
+        running_python_version = ".".join(python_version().split(".")[:2])
         with patch("scripts.pa_start_django_webapp_with_virtualenv.DjangoProject.update_wsgi_file"):
             with patch("pythonanywhere.api.webapp.call_api"):
-                main("mydomain.com", "1.9.2", "2.7", nuke=False)
+                main("mydomain.com", "2.2.12", running_python_version, nuke=False)
 
         django_version = (
             subprocess.check_output(
@@ -44,7 +44,7 @@ class TestMain:
             .decode()
             .strip()
         )
-        assert django_version == "1.9.2"
+        assert django_version == "2.2.12"
 
         with (fake_home / "mydomain.com/mysite/settings.py").open() as f:
             lines = f.read().split("\n")
@@ -59,12 +59,8 @@ class TestMain:
         with patch("scripts.pa_start_django_webapp_with_virtualenv.DjangoProject.update_wsgi_file"):
             with patch("pythonanywhere.api.webapp.call_api"):
                 running_python_version = ".".join(python_version().split(".")[:2])
-                if running_python_version[0] == 2:
-                    old_django_version = "1.9.2"
-                    new_django_version = "1.11.3"
-                else:
-                    old_django_version = "2.0.8"
-                    new_django_version = "2.1.2"
+                old_django_version = "2.2.12"
+                new_django_version = "3.0.6"
 
                 main("mydomain.com", old_django_version, running_python_version, nuke=False)
                 main("mydomain.com", new_django_version, running_python_version, nuke=True)

@@ -1,4 +1,4 @@
-#!/usr/bin/python3.5
+#!/usr/bin/python3.6
 """Delete scheduled task(s) by id or nuke'em all.
 
 Usage:

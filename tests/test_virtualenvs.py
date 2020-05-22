@@ -1,5 +1,6 @@
 import subprocess
 from pathlib import Path
+from platform import python_version
 
 import pytest
 from pythonanywhere.virtualenvs import Virtualenv
@@ -11,7 +12,7 @@ class TestVirtualenv:
         assert v.path == Path(virtualenvs_folder) / "domain.com"
 
     def test_create_uses_bash_and_sources_virtualenvwrapper(self, mock_subprocess, virtualenvs_folder):
-        v = Virtualenv("domain.com", "2.7")
+        v = Virtualenv("domain.com", "3.6")
         v.create(nuke=False)
         args, kwargs = mock_subprocess.check_call.call_args
         command_list = args[0]
@@ -19,15 +20,15 @@ class TestVirtualenv:
         assert command_list[2].startswith("source virtualenvwrapper.sh && mkvirtualenv")
 
     def test_create_calls_mkvirtualenv_with_python_version_and_domain(self, mock_subprocess, virtualenvs_folder):
-        v = Virtualenv("domain.com", "2.7")
+        v = Virtualenv("domain.com", "3.6")
         v.create(nuke=False)
         args, kwargs = mock_subprocess.check_call.call_args
         command_list = args[0]
         bash_command = command_list[2]
-        assert "mkvirtualenv --python=python2.7 domain.com" in bash_command
+        assert "mkvirtualenv --python=python3.6 domain.com" in bash_command
 
     def test_nuke_option_deletes_virtualenv(self, mock_subprocess, virtualenvs_folder):
-        v = Virtualenv("domain.com", "2.7")
+        v = Virtualenv("domain.com", "3.6")
         v.create(nuke=True)
         args, kwargs = mock_subprocess.check_call.call_args
         command_list = args[0]
@@ -35,7 +36,7 @@ class TestVirtualenv:
         assert command_list[2].startswith("source virtualenvwrapper.sh && rmvirtualenv domain.com")
 
     def test_install_pip_installs_each_package(self, mock_subprocess, virtualenvs_folder):
-        v = Virtualenv("domain.com", "2.7")
+        v = Virtualenv("domain.com", "3.6")
         v.create(nuke=False)
         v.pip_install("package1 package2==1.1.2")
         args, kwargs = mock_subprocess.check_call.call_args_list[-1]
@@ -45,7 +46,8 @@ class TestVirtualenv:
 
     @pytest.mark.slowtest
     def test_actually_installing_a_real_package(self, fake_home, virtualenvs_folder):
-        v = Virtualenv("www.adomain.com", "2.7")
+        running_python_version = ".".join(python_version().split(".")[:2])
+        v = Virtualenv("www.adomain.com", running_python_version)
         v.create(nuke=False)
         v.pip_install("aafigure")
 
