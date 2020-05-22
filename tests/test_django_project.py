@@ -57,9 +57,7 @@ class TestDetectDjangoVersion:
         project.project_path.mkdir()
         requirements_txt = project.project_path / "requirements.txt"
         requirements_txt.touch()
-        assert project.detect_requirements() == "-r {requirements_txt}".format(
-            requirements_txt=requirements_txt.resolve()
-        )
+        assert project.detect_requirements() == f"-r {requirements_txt.resolve()}"
 
 
 @pytest.fixture

@@ -55,9 +55,7 @@ class Webapp:
         )
         if not response.ok or response.json().get("status") == "ERROR":
             raise Exception(
-                "POST to create webapp via API failed, got {response}:{response_text}".format(
-                    response=response, response_text=response.text
-                )
+                f"POST to create webapp via API failed, got {response}:{response.text}"
             )
         response = call_api(
             patch_url, "patch", data={"virtualenv_path": virtualenv_path, "source_directory": project_path}
@@ -78,7 +76,7 @@ class Webapp:
         call_api(url, "post", json=dict(url="/media/", path=str(Path(project_path) / "media")))
 
     def reload(self):
-        print(snakesay("Reloading {domain} via API".format(domain=self.domain)))
+        print(snakesay(f"Reloading {self.domain} via API"))
         url = get_api_endpoint().format(username=getpass.getuser(), flavor="webapps") + self.domain + "/reload/"
         response = call_api(url, "post")
         if not response.ok:
@@ -95,13 +93,11 @@ class Webapp:
                 )
                 return
             raise Exception(
-                "POST to reload webapp via API failed, got {response}:{response_text}".format(
-                    response=response, response_text=response.text
-                )
+                f"POST to reload webapp via API failed, got {response}:{response.text}"
             )
 
     def set_ssl(self, certificate, private_key):
-        print(snakesay("Setting up SSL for {domain} via API".format(domain=self.domain)))
+        print(snakesay(f"Setting up SSL for {self.domain} via API"))
         url = get_api_endpoint().format(username=getpass.getuser(), flavor="webapps") + self.domain + "/ssl/"
         response = call_api(url, "post", json={"cert": certificate, "private_key": private_key})
         if not response.ok:
@@ -120,9 +116,7 @@ class Webapp:
         response = call_api(url, "get")
         if not response.ok:
             raise Exception(
-                "GET SSL details via API failed, got {response}:{response_text}".format(
-                    response=response, response_text=response.text
-                )
+                f"GET SSL details via API failed, got {response}:{response.text}"
             )
 
         result = response.json()
@@ -141,28 +135,26 @@ class Webapp:
         else:
             print(
                 snakesay(
-                    "Deleting current {type} log file for {domain} via API".format(type=log_type, domain=self.domain)
+                    f"Deleting current {log_type} log file for {self.domain} via API"
                 )
             )
 
         if index == 1:
             url = get_api_endpoint().format(
                 username=getpass.getuser(), flavor="files"
-            ) + "path/var/log/{domain}.{type}.log.1/".format(domain=self.domain, type=log_type)
+            ) + f"path/var/log/{self.domain}.{log_type}.log.1/"
         elif index > 1:
             url = get_api_endpoint().format(
                 username=getpass.getuser(), flavor="files"
-            ) + "path/var/log/{domain}.{type}.log.{index}.gz/".format(domain=self.domain, type=log_type, index=index)
+            ) + f"path/var/log/{self.domain}.{log_type}.log.{index}.gz/"
         else:
             url = get_api_endpoint().format(
                 username=getpass.getuser(), flavor="files"
-            ) + "path/var/log/{domain}.{type}.log/".format(domain=self.domain, type=log_type)
+            ) + f"path/var/log/{self.domain}.{log_type}.log/"
         response = call_api(url, "delete")
         if not response.ok:
             raise Exception(
-                "DELETE log file via API failed, got {response}:{response_text}".format(
-                    response=response, response_text=response.text
-                )
+                f"DELETE log file via API failed, got {response}:{response.text}"
             )
 
     def get_log_info(self):
@@ -170,14 +162,12 @@ class Webapp:
         response = call_api(url, "get")
         if not response.ok:
             raise Exception(
-                "GET log files info via API failed, got {response}:{response_text}".format(
-                    response=response, response_text=response.text
-                )
+                f"GET log files info via API failed, got {response}:{response.text}"
             )
         file_list = response.json()
         log_types = ["access", "error", "server"]
         logs = {"access": [], "error": [], "server": []}
-        log_prefix = "/var/log/{domain}.".format(domain=self.domain)
+        log_prefix = f"/var/log/{self.domain}."
         for file_name in file_list:
             if type(file_name) == str and file_name.startswith(log_prefix):
                 log = file_name[len(log_prefix):].split(".")

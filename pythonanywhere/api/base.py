@@ -23,7 +23,7 @@ def get_api_endpoint():
             "pythonanywhere.com"
         )
     )
-    return "https://{hostname}/api/v0/user/{{username}}/{{flavor}}/".format(hostname=hostname)
+    return f"https://{hostname}/api/v0/user/{{username}}/{{flavor}}/"
 
 
 def call_api(url, method, **kwargs):
@@ -39,16 +39,14 @@ def call_api(url, method, **kwargs):
     response = requests.request(
         method=method,
         url=url,
-        headers={"Authorization": "Token {token}".format(token=token)},
+        headers={"Authorization": f"Token {token}"},
         verify=not insecure,
         **kwargs
     )
     if response.status_code == 401:
         print(response, response.text)
         raise AuthenticationError(
-            "Authentication error {status_code} calling API: {response_text}".format(
-                status_code=response.status_code, response_text=response.text
-            )
+            f"Authentication error {response.status_code} calling API: {response.text}"
         )
     return response
 

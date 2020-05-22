@@ -64,14 +64,14 @@ def main(*, task_id, **kwargs):
 
     # get user path instead of server path:
     if specs.get("logfile"):
-        specs.update({"logfile": task.logfile.replace("/user/{}/files".format(task.user), "")})
+        specs.update({"logfile": task.logfile.replace(f"/user/{task.user}/files", "")})
 
-    intro = "Task {} specs: ".format(task_id)
+    intro = f"Task {task_id} specs: "
     if print_only_values:
         specs = "\n".join([str(val) for val in specs.values()])
         logger.info(specs)
     elif print_snake:
-        specs = ["<{}>: {}".format(spec, value) for spec, value in specs.items()]
+        specs = [f"<{spec}>: {value}" for spec, value in specs.items()]
         specs.sort()
         logger.info(snakesay(intro + ", ".join(specs)))
     else:

@@ -12,10 +12,10 @@ class Project:
     def __init__(self, domain, python_version):
         self.domain = domain
         self.python_version = python_version
-        self.project_path = Path('~/{domain}'.format(domain=domain)).expanduser()
+        self.project_path = Path(f'~/{domain}').expanduser()
         self.virtualenv = Virtualenv(self.domain, self.python_version)
         self.wsgi_file_path = Path(
-            '/var/www/{mangled_domain}_wsgi.py'.format(mangled_domain=domain.replace(".", "_"))
+            f"/var/www/{domain.replace('.', '_')}_wsgi.py"
         )
         self.webapp = Webapp(domain)
 

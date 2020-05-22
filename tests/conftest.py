@@ -43,12 +43,12 @@ def fake_home(local_pip_cache):
 
     new_stuff = set(Path(old_home).iterdir()) - old_home_contents
     if new_stuff:
-        raise Exception("home mocking failed somewehere: {}, {}".format(new_stuff, tempdir))
+        raise Exception(f"home mocking failed somewehere: {new_stuff}, {tempdir}")
 
 
 @pytest.fixture
 def virtualenvs_folder():
-    actual_virtualenvs = Path("/home/{user}/.virtualenvs".format(user=getuser()))
+    actual_virtualenvs = Path(f"/home/{getuser()}/.virtualenvs")
     if actual_virtualenvs.is_dir():
         old_virtualenvs = set(Path(actual_virtualenvs).iterdir())
     else:
@@ -67,7 +67,7 @@ def virtualenvs_folder():
     if actual_virtualenvs.is_dir():
         new_envs = set(actual_virtualenvs.iterdir()) - set(old_virtualenvs)
         if new_envs:
-            raise Exception("virtualenvs path mocking failed somewehere: {}, {}".format(new_envs, tempdir))
+            raise Exception(f"virtualenvs path mocking failed somewehere: {new_envs}, {tempdir}")
 
 
 @pytest.fixture

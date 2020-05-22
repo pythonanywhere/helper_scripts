@@ -18,7 +18,7 @@ def main(domain_name):
     webapp = Webapp(domain_name)
     webapp.reload()
     print(snakesay(
-        "{} has been reloaded".format(domain_name)
+        f"{domain_name} has been reloaded"
     ))
 
 

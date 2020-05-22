@@ -46,8 +46,7 @@ class Schedule:
 
         if not result.ok:
             raise Exception(
-                "POST to set new task via API failed, got {result}: "
-                "{result_text}".format(result=result, result_text=result.text)
+                f"POST to set new task via API failed, got {result}: {result.text}"
             )
 
     def get_specs(self, task_id):
@@ -57,7 +56,7 @@ class Schedule:
         :returns: dictionary of existing task specs"""
 
         result = call_api(
-            "{base_url}{task_id}/".format(base_url=self.base_url, task_id=task_id), "GET"
+            f"{self.base_url}{task_id}/", "GET"
         )
         if result.status_code == 200:
             return result.json()
@@ -75,7 +74,7 @@ class Schedule:
         :returns: True when API response is 204"""
 
         result = call_api(
-            "{base_url}{task_id}/".format(base_url=self.base_url, task_id=task_id), "DELETE"
+            f"{self.base_url}{task_id}/", "DELETE"
         )
 
         if result.status_code == 204:
@@ -83,8 +82,7 @@ class Schedule:
 
         if not result.ok:
             raise Exception(
-                "DELETE via API on task {task_id} failed, got {result}: "
-                "{result_text}".format(task_id=task_id, result=result, result_text=result.text)
+                f"DELETE via API on task {task_id} failed, got {result}: {result.text}"
             )
 
     def update(self, task_id, params):
@@ -99,7 +97,7 @@ class Schedule:
         :param params: dictionary of specs to update"""
 
         result = call_api(
-            "{base_url}{task_id}/".format(base_url=self.base_url, task_id=task_id),
+            f"{self.base_url}{task_id}/",
             "PATCH",
             json=params,
         )
@@ -107,7 +105,5 @@ class Schedule:
             return result.json()
         else:
             raise Exception(
-                "Could not update task {task_id}. Got {result}: {content}".format(
-                    task_id=task_id, result=result, content=result.text
-                )
+                f"Could not update task {task_id}. Got {result}: {result.text}"
             )

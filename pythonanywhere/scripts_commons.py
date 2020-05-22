@@ -45,7 +45,7 @@ class ScriptSchema(Schema):
     tabulate_format = Or(
         None,
         And(str, lambda f: f in tabulate_formats),
-        error="--format should match one of: {}".format(", ".join(tabulate_formats)),
+        error=f"--format should match one of: {', '.join(tabulate_formats)}",
     )
 
     replacements = {"--": "", "<": "", ">": ""}

@@ -98,9 +98,7 @@ class TestCreateWebapp:
         assert post.request.body == urlencode(
             {"domain_name": "mydomain.com", "python_version": PYTHON_VERSIONS["3.7"]}
         )
-        assert post.request.headers["Authorization"] == "Token {api_token}".format(
-            api_token=api_token
-        )
+        assert post.request.headers["Authorization"] == f"Token {api_token}"
 
     def test_does_patch_to_update_virtualenv_path_and_source_directory(
         self, api_responses, api_token
@@ -129,9 +127,7 @@ class TestCreateWebapp:
         assert patch.request.body == urlencode(
             {"virtualenv_path": "/virtualenv/path", "source_directory": "/project/path"}
         )
-        assert patch.request.headers["Authorization"] == "Token {api_token}".format(
-            api_token=api_token
-        )
+        assert patch.request.headers["Authorization"] == f"Token {api_token}"
 
     def test_raises_if_post_does_not_20x(self, api_responses, api_token):
         expected_post_url = get_api_endpoint().format(
@@ -229,9 +225,7 @@ class TestCreateWebapp:
         delete = api_responses.calls[0]
         assert delete.request.method == "DELETE"
         assert delete.request.url == webapp_url
-        assert delete.request.headers["Authorization"] == "Token {api_token}".format(
-            api_token=api_token
-        )
+        assert delete.request.headers["Authorization"] == f"Token {api_token}"
 
     def test_ignores_404_from_delete_call_when_nuking(self, api_responses, api_token):
         post_url = get_api_endpoint().format(
@@ -266,9 +260,7 @@ class TestAddDefaultStaticFilesMapping:
         post1 = api_responses.calls[0]
         assert post1.request.url == expected_url
         assert post1.request.headers["content-type"] == "application/json"
-        assert post1.request.headers["Authorization"] == "Token {api_token}".format(
-            api_token=api_token
-        )
+        assert post1.request.headers["Authorization"] == f"Token {api_token}"
         assert json.loads(post1.request.body.decode("utf8")) == {
             "url": "/static/",
             "path": "/project/path/static",
@@ -276,9 +268,7 @@ class TestAddDefaultStaticFilesMapping:
         post2 = api_responses.calls[1]
         assert post2.request.url == expected_url
         assert post2.request.headers["content-type"] == "application/json"
-        assert post2.request.headers["Authorization"] == "Token {api_token}".format(
-            api_token=api_token
-        )
+        assert post2.request.headers["Authorization"] == f"Token {api_token}"
         assert json.loads(post2.request.body.decode("utf8")) == {
             "url": "/media/",
             "path": "/project/path/media",
@@ -298,9 +288,7 @@ class TestReloadWebapp:
         post = api_responses.calls[0]
         assert post.request.url == expected_url
         assert post.request.body is None
-        assert post.request.headers["Authorization"] == "Token {api_token}".format(
-            api_token=api_token
-        )
+        assert post.request.headers["Authorization"] == f"Token {api_token}"
 
     def test_raises_if_post_does_not_20x_that_is_not_a_cname_error(
         self, api_responses, api_token
@@ -353,9 +341,7 @@ class TestSetWebappSSL:
             "private_key": "private key data",
             "cert": "certificate data",
         }
-        assert post.request.headers["Authorization"] == "Token {api_token}".format(
-            api_token=api_token
-        )
+        assert post.request.headers["Authorization"] == f"Token {api_token}"
 
     def test_raises_if_post_does_not_20x(self, api_responses, api_token):
         expected_url = (
@@ -403,9 +389,7 @@ class TestGetWebappSSLInfo:
         get = api_responses.calls[0]
         assert get.request.method == "GET"
         assert get.request.url == expected_url
-        assert get.request.headers["Authorization"] == "Token {api_token}".format(
-            api_token=api_token
-        )
+        assert get.request.headers["Authorization"] == f"Token {api_token}"
 
     def test_returns_json_from_server_having_parsed_expiry_with_timezone_offset_and_separators(
         self, api_responses, api_token
@@ -438,9 +422,7 @@ class TestGetWebappSSLInfo:
         get = api_responses.calls[0]
         assert get.request.method == "GET"
         assert get.request.url == expected_url
-        assert get.request.headers["Authorization"] == "Token {api_token}".format(
-            api_token=api_token
-        )
+        assert get.request.headers["Authorization"] == f"Token {api_token}"
 
     def test_raises_if_get_does_not_return_200(self, api_responses, api_token):
         expected_url = (
@@ -469,9 +451,7 @@ class TestDeleteWebappLog:
         post = api_responses.calls[0]
         assert post.request.url == expected_url
         assert post.request.body is None
-        assert post.request.headers["Authorization"] == "Token {api_token}".format(
-            api_token=api_token
-        )
+        assert post.request.headers["Authorization"] == f"Token {api_token}"
 
     def test_delete_old_access_log(self, api_responses, api_token):
         expected_url = (
@@ -485,9 +465,7 @@ class TestDeleteWebappLog:
         post = api_responses.calls[0]
         assert post.request.url == expected_url
         assert post.request.body is None
-        assert post.request.headers["Authorization"] == "Token {api_token}".format(
-            api_token=api_token
-        )
+        assert post.request.headers["Authorization"] == f"Token {api_token}"
 
     def test_raises_if_delete_does_not_20x(self, api_responses, api_token):
         expected_url = (
@@ -533,9 +511,7 @@ class TestGetWebappLogs:
 
         post = api_responses.calls[0]
         assert post.request.url == expected_url
-        assert post.request.headers["Authorization"] == "Token {api_token}".format(
-            api_token=api_token
-        )
+        assert post.request.headers["Authorization"] == f"Token {api_token}"
         assert logs == {"access": [0, 1, 2], "error": [0, 1, 2], "server": [0, 1, 2]}
 
     def test_raises_if_get_does_not_20x(self, api_responses, api_token):

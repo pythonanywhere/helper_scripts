@@ -32,7 +32,7 @@ def task_from_id(mocker):
         "enabled": False,
         "hour": 10,
         "interval": "daily",
-        "logfile": "/user/{}/files/foo".format(user),
+        "logfile": f"/user/{user}/files/foo",
         "minute": 23,
         "printable_time": "10:23",
         "task_id": 42,

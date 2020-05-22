@@ -23,14 +23,14 @@ class DjangoProject(Project):
         elif django_version == 'latest':
             packages = 'django'
         else:
-            packages = 'django=={django_version}'.format(django_version=django_version)
+            packages = f'django=={django_version}'
         self.virtualenv.pip_install(packages)
 
 
     def detect_requirements(self):
         requirements_txt = self.project_path / 'requirements.txt'
         if requirements_txt.exists():
-            return '-r {resolved_requirements}'.format(resolved_requirements=requirements_txt.resolve())
+            return f'-r {requirements_txt.resolve()}'
         return 'django'
 
 
@@ -65,7 +65,7 @@ class DjangoProject(Project):
             settings = f.read()
         new_settings = settings.replace(
             'ALLOWED_HOSTS = []',
-            'ALLOWED_HOSTS = [{domain!r}]'.format(domain=self.domain)
+            f'ALLOWED_HOSTS = [{self.domain!r}]'
         )
         new_settings += dedent(
             """
@@ -98,7 +98,7 @@ class DjangoProject(Project):
 
 
     def update_wsgi_file(self):
-        print(snakesay('Updating wsgi file at {wsgi_file_path}'.format(wsgi_file_path=self.wsgi_file_path)))
+        print(snakesay(f'Updating wsgi file at {self.wsgi_file_path}'))
         template = (Path(__file__).parent / 'wsgi_file_template.py').open().read()
         with self.wsgi_file_path.open('w') as f:
             f.write(template.format(project=self))

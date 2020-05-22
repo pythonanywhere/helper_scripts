@@ -55,15 +55,13 @@ class Task:
     def __repr__(self):
         enabled = "enabled" if self.enabled else "disabled"
         status = (
-            "{} at {}".format(enabled, self.printable_time)
+            f"{enabled} at {self.printable_time}"
             if self.printable_time
             else "ready to be created"
         )
-        num = " <{}>:".format(self.task_id) if self.task_id else ""
+        num = f" <{self.task_id}>:" if self.task_id else ""
 
-        return "{interval} task{num} '{command}' {status}".format(
-            interval=self.interval.title(), num=num, command=self.command, status=status
-        )
+        return f"{self.interval.title()} task{num} '{self.command}' {status}"
 
     @classmethod
     def from_id(cls, task_id):
@@ -164,7 +162,7 @@ class Task:
         *Note*: use this method on `Task.from_id` instance."""
 
         if self.schedule.delete(self.task_id):
-            logger.info(snakesay("Task {} deleted!".format(self.task_id)))
+            logger.info(snakesay(f"Task {self.task_id} deleted!"))
 
     def update_schedule(self, params, *, porcelain=False):
         """Updates existing task using `params`.
@@ -208,14 +206,14 @@ class Task:
         }
 
         def make_spec_str(key, old_spec, new_spec):
-            return "<{}> from '{}' to '{}'".format(key, old_spec, new_spec)
+            return f"<{key}> from '{old_spec}' to '{new_spec}'"
 
         updated = [make_spec_str(key, val[0], val[1]) for key, val in diff.items()]
 
         def make_msg(join_with):
             fill = " " if join_with == ", " else join_with
-            intro = "Task {} updated:{}".format(self.task_id, fill)
-            return "{}{}".format(intro, join_with.join(updated))
+            intro = f"Task {self.task_id} updated:{fill}"
+            return f"{intro}{join_with.join(updated)}"
 
         if updated:
             if porcelain:

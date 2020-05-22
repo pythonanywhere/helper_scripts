@@ -15,14 +15,14 @@ def task_list(mocker):
         "command": "echo foo",
         "enabled": True,
         "expiry": None,
-        "extend_url": "/user/{}/schedule/task/42/extend".format(username),
+        "extend_url": f"/user/{username}/schedule/task/42/extend",
         "hour": 16,
         "id": 42,
         "interval": "daily",
         "logfile": "/user/{username}/files/var/log/tasklog-126708-daily-at-1600-echo_foo.log",
         "minute": 0,
         "printable_time": "16:00",
-        "url": "/api/v0/user/{}/schedule/42".format(username),
+        "url": f"/api/v0/user/{username}/schedule/42",
         "user": username,
     }
     specs2 = {**specs1}

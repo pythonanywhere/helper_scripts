@@ -21,24 +21,24 @@ def write_temporary_bashrc(virtualenv_path, unique_id, source_directory):
     else:
         bashrc = ''
     if os.path.dirname(virtualenv_path) == os.path.join(HOME, '.virtualenvs'):
-        activate_script = u'workon {}'.format(os.path.basename(virtualenv_path))
+        activate_script = f'workon {os.path.basename(virtualenv_path)}'
     else:
         activate_script_path = os.path.join(virtualenv_path, 'bin', 'activate')
         if not os.path.exists(activate_script_path):
-            print('Could not find virtualenv activation script at {}'.format(activate_script_path))
+            print(f'Could not find virtualenv activation script at {activate_script_path}')
             sys.exit(-1)
         with open(activate_script_path) as f:
             activate_script = f.read()
 
-    tmprc = os.path.join(TMP, 'tmprc.{}'.format(unique_id))
+    tmprc = os.path.join(TMP, f'tmprc.{unique_id}')
     with open(tmprc, 'w') as f:
         f.write(bashrc)
         f.write('\n')
         f.write(activate_script)
         f.write('\n')
-        f.write('cd {}\n'.format(source_directory))
+        f.write(f'cd {source_directory}\n')
         f.write('\n')
-        f.write('rm {}'.format(tmprc))
+        f.write(f'rm {tmprc}')
     return tmprc
 
 

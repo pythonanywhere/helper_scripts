@@ -21,14 +21,14 @@ def task_specs():
         "command": "echo foo",
         "enabled": True,
         "expiry": None,
-        "extend_url": "/user/{username}/schedule/task/123/extend".format(username=username),
+        "extend_url": f"/user/{username}/schedule/task/123/extend",
         "hour": 16,
         "id": 123,
         "interval": "daily",
         "logfile": "/user/{username}/files/var/log/tasklog-126708-daily-at-1600-echo_foo.log",
         "minute": 0,
         "printable_time": "16:00",
-        "url": "/api/v0/user/{username}/schedule/123".format(username=username),
+        "url": f"/api/v0/user/{username}/schedule/123",
         "user": username,
     }
 

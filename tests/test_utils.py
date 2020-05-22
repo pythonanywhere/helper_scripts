@@ -13,7 +13,7 @@ class TestEnsureDomain:
 
         result = ensure_domain("your-username.pythonanywhere.com")
 
-        assert result == "{}.pythonanywhere.domain".format(username)
+        assert result == f"{username}.pythonanywhere.domain"
 
     def test_lowercases_username(self, monkeypatch):
         with patch('pythonanywhere.utils.getpass') as mock_getpass:

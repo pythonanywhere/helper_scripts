@@ -65,9 +65,7 @@ def main(domain_name, suppress_reload):
             break
 
     if not done:
-        print("Could not find certificate or key files (looked in {possible_paths})".format(
-            possible_paths=possible_paths
-        ))
+        print(f"Could not find certificate or key files (looked in {possible_paths})")
         sys.exit(2)
 
 

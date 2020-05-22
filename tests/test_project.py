@@ -57,7 +57,7 @@ class TestSanityChecks:
         with pytest.raises(SanityException) as e:
             project.sanity_checks(nuke=False)
 
-        expected_msg = "You already have a project folder at {fake_home}/mydomain.com".format(fake_home=fake_home)
+        expected_msg = f"You already have a project folder at {fake_home}/mydomain.com"
         assert expected_msg in str(e.value)
         assert "nuke" in str(e.value)
 
