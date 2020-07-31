@@ -204,10 +204,10 @@ class TestUpdateSettingsFile:
             f.write(
                 dedent(
                     """
-                # settings file
-                STATIC_URL = '/static/'
-                ALLOWED_HOSTS = []
-                """
+                    # settings file
+                    STATIC_URL = '/static/'
+                    ALLOWED_HOSTS = []
+                    """
                 )
             )
 
@@ -229,10 +229,10 @@ class TestUpdateSettingsFile:
             f.write(
                 dedent(
                     """
-                # settings file
-                STATIC_URL = '/static/'
-                ALLOWED_HOSTS = []
-                """
+                    # settings file
+                    STATIC_URL = '/static/'
+                    ALLOWED_HOSTS = []
+                    """
                 )
             )
 
@@ -242,6 +242,78 @@ class TestUpdateSettingsFile:
             lines = f.read().split("\n")
 
         assert "ALLOWED_HOSTS = ['mydomain.com']" in lines
+
+    def test_only_adds_MEDIA_URL_if_its_not_already_there(self, virtualenvs_folder):
+        project = DjangoProject("mydomain.com", "python.version")
+        project.settings_path = Path(tempfile.NamedTemporaryFile().name)
+
+        with project.settings_path.open("w") as f:
+            f.write(
+                dedent(
+                    """
+                    # settings file
+                    STATIC_URL = '/static/'
+                    ALLOWED_HOSTS = []
+                    MEDIA_ROOT = media_root
+                    """
+                )
+            )
+
+        project.update_settings_file()
+
+        with project.settings_path.open() as f:
+            lines = f.read().split("\n")
+
+        assert "MEDIA_ROOT = media_root" in lines
+        assert "MEDIA_ROOT = os.path.join(BASE_DIR, 'media')" not in lines
+
+    def test_only_adds_STATIC_ROOT_if_its_not_already_there(self, virtualenvs_folder):
+        project = DjangoProject("mydomain.com", "python.version")
+        project.settings_path = Path(tempfile.NamedTemporaryFile().name)
+
+        with project.settings_path.open("w") as f:
+            f.write(
+                dedent(
+                    """
+                    # settings file
+                    STATIC_URL = '/static/'
+                    ALLOWED_HOSTS = []
+                    STATIC_ROOT = static_root
+                    """
+                )
+            )
+
+        project.update_settings_file()
+
+        with project.settings_path.open() as f:
+            lines = f.read().split("\n")
+
+        assert "STATIC_ROOT = '/static/'" not in lines
+        assert "STATIC_ROOT = static_root" in lines
+
+    def test_only_adds_MEDIA_ROOT_if_its_not_already_there(self, virtualenvs_folder):
+        project = DjangoProject("mydomain.com", "python.version")
+        project.settings_path = Path(tempfile.NamedTemporaryFile().name)
+
+        with project.settings_path.open("w") as f:
+            f.write(
+                dedent(
+                    """
+                    # settings file
+                    STATIC_URL = '/static/'
+                    ALLOWED_HOSTS = []
+                    MEDIA_ROOT = media_root
+                    """
+                )
+            )
+
+        project.update_settings_file()
+
+        with project.settings_path.open() as f:
+            lines = f.read().split("\n")
+
+        assert "MEDIA_ROOT = media_root" in lines
+        assert "MEDIA_ROOT = os.path.join(BASE_DIR, 'media')" not in lines
 
 
 class TestRunCollectStatic:
@@ -275,6 +347,7 @@ class TestUpdateWsgiFile:
 
         with project.wsgi_file_path.open() as f:
             contents = f.read()
+
         print(contents)
         assert contents == template.format(project=project)
 
@@ -289,6 +362,7 @@ class TestUpdateWsgiFile:
             project.create_virtualenv(django_version="latest")
         else:
             project.create_virtualenv()
+
         project.find_django_files()
         project.wsgi_file_path = Path(tempfile.NamedTemporaryFile().name)
 
@@ -308,6 +382,7 @@ class TestUpdateWsgiFile:
             project.create_virtualenv(django_version="latest")
         else:
             project.create_virtualenv()
+
         project.find_django_files()
         project.wsgi_file_path = Path(tempfile.NamedTemporaryFile().name)
 

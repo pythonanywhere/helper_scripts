@@ -1,7 +1,7 @@
 from pathlib import Path
+import re
 import shutil
 import subprocess
-from textwrap import dedent
 
 from pythonanywhere.exceptions import SanityException
 from pythonanywhere.snakesay import snakesay
@@ -67,13 +67,13 @@ class DjangoProject(Project):
             'ALLOWED_HOSTS = []',
             f'ALLOWED_HOSTS = [{self.domain!r}]'
         )
-        new_settings += dedent(
-            """
-            MEDIA_URL = '/media/'
-            STATIC_ROOT = os.path.join(BASE_DIR, 'static')
-            MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-            """
-        )
+        if re.search(r'^MEDIA_ROOT\s*=', settings, flags=re.MULTILINE) is None:
+            new_settings += "\nMEDIA_URL = '/media/'"
+        if re.search(r'^STATIC_ROOT\s*=', settings, flags=re.MULTILINE) is None:
+            new_settings += "\nSTATIC_ROOT = os.path.join(BASE_DIR, 'static')"
+        if re.search(r'^MEDIA_ROOT\s*=', settings, flags=re.MULTILINE) is None:
+            new_settings += "\nMEDIA_ROOT = os.path.join(BASE_DIR, 'media')"
+
         with self.settings_path.open('w') as f:
             f.write(new_settings)
 
