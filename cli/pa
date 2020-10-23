@@ -1,0 +1,19 @@
+#!/usr/bin/python3
+
+import typer
+
+from cli import django
+from cli import webapp
+
+help = """This is a new experimental PythonAnywhere cli client.
+
+It was build with typer & click under the hood.
+"""
+
+app = typer.Typer(help=help)
+app.add_typer(webapp.app, name="webapp", help="Everything for web apps")
+app.add_typer(django.app, name="django", help="Makes Django Girls tutorial projects deployment easy")
+
+
+if __name__ == "__main__":
+    app()
