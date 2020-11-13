@@ -26,3 +26,10 @@ class Virtualenv:
         print(snakesay(f"Pip installing {packages} (this may take a couple of minutes)"))
         commands = [str(self.path / "bin/pip"), "install"] + packages.split()
         subprocess.check_call(commands)
+
+    def get_version(self, package_name):
+        commands = [str(self.path / "bin/pip"), "show", package_name]
+        output = subprocess.check_output(commands).decode()
+        for line in output.splitlines():
+            if line.startswith("Version: "):
+                return line.split()[1]

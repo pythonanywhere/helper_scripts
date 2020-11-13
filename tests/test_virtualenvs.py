@@ -52,3 +52,12 @@ class TestVirtualenv:
         v.pip_install("aafigure")
 
         subprocess.check_call([str(v.path / "bin/python"), "-c" "import aafigure"])
+
+    @pytest.mark.slowtest
+    def test_gets_version(self, fake_home, virtualenvs_folder):
+        running_python_version = ".".join(python_version().split(".")[:2])
+        v = Virtualenv("www.adomain.com", running_python_version)
+        v.create(nuke=False)
+        v.pip_install("aafigure==0.6")
+
+        assert v.get_version("aafigure") == "0.6"

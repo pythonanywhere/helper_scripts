@@ -196,9 +196,10 @@ class TestFindDjangoFiles:
 
 
 class TestUpdateSettingsFile:
-    def test_adds_STATIC_and_MEDIA_config_to_settings(self, virtualenvs_folder):
+    def test_adds_STATIC_and_MEDIA_config_to_settings_with_old_django(self, virtualenvs_folder):
         project = DjangoProject("mydomain.com", "python.version")
         project.settings_path = Path(tempfile.NamedTemporaryFile().name)
+        project.virtualenv.get_version = Mock(return_value="1.0")
 
         with project.settings_path.open("w") as f:
             f.write(
@@ -221,9 +222,36 @@ class TestUpdateSettingsFile:
         assert "STATIC_ROOT = os.path.join(BASE_DIR, 'static')" in lines
         assert "MEDIA_ROOT = os.path.join(BASE_DIR, 'media')" in lines
 
+    def test_adds_STATIC_and_MEDIA_config_to_settings_with_new_django(self, virtualenvs_folder):
+        project = DjangoProject("mydomain.com", "python.version")
+        project.settings_path = Path(tempfile.NamedTemporaryFile().name)
+        project.virtualenv.get_version = Mock(return_value="3.1.1")
+
+        with project.settings_path.open("w") as f:
+            f.write(
+                dedent(
+                    """
+                    # settings file
+                    STATIC_URL = '/static/'
+                    ALLOWED_HOSTS = []
+                    """
+                )
+            )
+
+        project.update_settings_file()
+
+        with project.settings_path.open() as f:
+            lines = f.read().split("\n")
+
+        assert "STATIC_URL = '/static/'" in lines
+        assert "MEDIA_URL = '/media/'" in lines
+        assert "STATIC_ROOT = Path(BASE_DIR / 'static')" in lines
+        assert "MEDIA_ROOT = Path(BASE_DIR / 'media')" in lines
+
     def test_adds_domain_to_ALLOWED_HOSTS(self, virtualenvs_folder):
         project = DjangoProject("mydomain.com", "python.version")
         project.settings_path = Path(tempfile.NamedTemporaryFile().name)
+        project.virtualenv.get_version = Mock(return_value="1.0")
 
         with project.settings_path.open("w") as f:
             f.write(
@@ -246,6 +274,7 @@ class TestUpdateSettingsFile:
     def test_only_adds_MEDIA_URL_if_its_not_already_there(self, virtualenvs_folder):
         project = DjangoProject("mydomain.com", "python.version")
         project.settings_path = Path(tempfile.NamedTemporaryFile().name)
+        project.virtualenv.get_version = Mock(return_value="1.0")
 
         with project.settings_path.open("w") as f:
             f.write(
@@ -270,6 +299,7 @@ class TestUpdateSettingsFile:
     def test_only_adds_STATIC_ROOT_if_its_not_already_there(self, virtualenvs_folder):
         project = DjangoProject("mydomain.com", "python.version")
         project.settings_path = Path(tempfile.NamedTemporaryFile().name)
+        project.virtualenv.get_version = Mock(return_value="1.0")
 
         with project.settings_path.open("w") as f:
             f.write(
@@ -294,6 +324,7 @@ class TestUpdateSettingsFile:
     def test_only_adds_MEDIA_ROOT_if_its_not_already_there(self, virtualenvs_folder):
         project = DjangoProject("mydomain.com", "python.version")
         project.settings_path = Path(tempfile.NamedTemporaryFile().name)
+        project.virtualenv.get_version = Mock(return_value="1.0")
 
         with project.settings_path.open("w") as f:
             f.write(

@@ -3,6 +3,8 @@ import re
 import shutil
 import subprocess
 
+from packaging import version
+
 from pythonanywhere.exceptions import SanityException
 from pythonanywhere.snakesay import snakesay
 from .project import Project
@@ -32,6 +34,7 @@ class DjangoProject(Project):
         if requirements_txt.exists():
             return f'-r {requirements_txt.resolve()}'
         return 'django'
+
 
 
     def run_startproject(self, nuke):
@@ -67,12 +70,21 @@ class DjangoProject(Project):
             'ALLOWED_HOSTS = []',
             f'ALLOWED_HOSTS = [{self.domain!r}]'
         )
+
+        new_django = version.parse(self.virtualenv.get_version("django")) >= version.parse("3.1")
+
         if re.search(r'^MEDIA_ROOT\s*=', settings, flags=re.MULTILINE) is None:
             new_settings += "\nMEDIA_URL = '/media/'"
         if re.search(r'^STATIC_ROOT\s*=', settings, flags=re.MULTILINE) is None:
-            new_settings += "\nSTATIC_ROOT = os.path.join(BASE_DIR, 'static')"
+            if new_django:
+                new_settings += "\nSTATIC_ROOT = Path(BASE_DIR / 'static')"
+            else:
+                new_settings += "\nSTATIC_ROOT = os.path.join(BASE_DIR, 'static')"
         if re.search(r'^MEDIA_ROOT\s*=', settings, flags=re.MULTILINE) is None:
-            new_settings += "\nMEDIA_ROOT = os.path.join(BASE_DIR, 'media')"
+            if new_django:
+                new_settings += "\nMEDIA_ROOT = Path(BASE_DIR / 'media')"
+            else:
+                new_settings += "\nMEDIA_ROOT = os.path.join(BASE_DIR, 'media')"
 
         with self.settings_path.open('w') as f:
             f.write(new_settings)
