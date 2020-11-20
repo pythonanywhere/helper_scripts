@@ -2,7 +2,7 @@ import os
 import subprocess
 import time
 from platform import python_version
-from unittest.mock import Mock, call
+from unittest.mock import call
 
 import pytest
 import requests
@@ -13,10 +13,27 @@ from cli.django import app
 runner = CliRunner()
 
 
-def test_autoconfigure_calls_all_stuff_in_right_order(mocker):
-    mock_project = mocker.patch("cli.django.DjangoProject")
-    mocker.patch("cli.webapp.ensure_domain", Mock(side_effect=lambda x: x))
+@pytest.fixture
+def mock_django_project(mocker):
+    return mocker.patch("cli.django.DjangoProject")
 
+
+@pytest.fixture
+def mock_update_wsgi_file(mocker):
+    return mocker.patch("cli.django.DjangoProject.update_wsgi_file")
+
+
+@pytest.fixture
+def mock_call_api(mocker):
+    return mocker.patch("pythonanywhere.api.webapp.call_api")
+
+
+@pytest.fixture
+def running_python_version():
+    return ".".join(python_version().split(".")[:2])
+
+
+def test_autoconfigure_calls_all_stuff_in_right_order(mock_django_project):
     result = runner.invoke(
         app,
         [
@@ -29,9 +46,8 @@ def test_autoconfigure_calls_all_stuff_in_right_order(mocker):
             "--nuke",
         ],
     )
-    print(result.stdout)
-    mock_project.assert_called_once_with("www.domain.com", "python.version")
-    assert mock_project.return_value.method_calls == [
+    mock_django_project.assert_called_once_with("www.domain.com", "python.version")
+    assert mock_django_project.return_value.method_calls == [
         call.sanity_checks(nuke=True),
         call.download_repo("repo.url", nuke=True),
         call.create_virtualenv(nuke=True),
@@ -52,12 +68,16 @@ def test_autoconfigure_calls_all_stuff_in_right_order(mocker):
 
 @pytest.mark.slowtest
 def test_autoconfigure_actually_works_against_example_repo(
-    mocker, fake_home, virtualenvs_folder, api_token, process_killer
+    mocker,
+    mock_call_api,
+    mock_update_wsgi_file,
+    fake_home,
+    virtualenvs_folder,
+    api_token,
+    process_killer,
+    running_python_version,
 ):
-    mocker.patch("cli.django.DjangoProject.update_wsgi_file")
     mocker.patch("cli.django.DjangoProject.start_bash")
-    mocker.patch("pythonanywhere.api.webapp.call_api")
-    running_python_version = ".".join(python_version().split(".")[:2])
     repo = "https://github.com/pythonanywhere/example-django-project.git"
     domain = "mydomain.com"
 
@@ -108,3 +128,129 @@ def test_autoconfigure_actually_works_against_example_repo(
     time.sleep(2)
     response = requests.get("http://localhost:8000/", headers={"HOST": "mydomain.com"})
     assert "Hello from an example django project" in response.text
+
+
+def test_start_calls_all_stuff_in_right_order(mock_django_project):
+    result = runner.invoke(
+        app,
+        [
+            "start",
+            "-d",
+            "www.domain.com",
+            "-j",
+            "django.version",
+            "-p",
+            "python.version",
+            "--nuke",
+        ],
+    )
+
+    assert mock_django_project.call_args == call("www.domain.com", "python.version")
+    assert mock_django_project.return_value.method_calls == [
+        call.sanity_checks(nuke=True),
+        call.create_virtualenv("django.version", nuke=True),
+        call.run_startproject(nuke=True),
+        call.find_django_files(),
+        call.update_settings_file(),
+        call.run_collectstatic(),
+        call.create_webapp(nuke=True),
+        call.add_static_file_mappings(),
+        call.update_wsgi_file(),
+        call.webapp.reload(),
+    ]
+    assert (
+        f"All done!  Your site is now live at https://www.domain.com" in result.stdout
+    )
+
+
+@pytest.mark.slowtest
+def test_start_actually_creates_django_project_in_virtualenv_with_hacked_settings_and_static_files(
+    mock_call_api,
+    mock_update_wsgi_file,
+    fake_home,
+    virtualenvs_folder,
+    api_token,
+    running_python_version,
+):
+    runner.invoke(
+        app,
+        [
+            "start",
+            "-d",
+            "mydomain.com",
+            "-j",
+            "2.2.12",
+            "-p",
+            running_python_version,
+        ],
+    )
+
+    django_version = (
+        subprocess.check_output(
+            [
+                str(virtualenvs_folder / "mydomain.com/bin/python"),
+                "-c" "import django; print(django.get_version())",
+            ]
+        )
+        .decode()
+        .strip()
+    )
+    assert django_version == "2.2.12"
+
+    with (fake_home / "mydomain.com/mysite/settings.py").open() as f:
+        lines = f.read().split("\n")
+    assert "MEDIA_ROOT = os.path.join(BASE_DIR, 'media')" in lines
+    assert "ALLOWED_HOSTS = ['mydomain.com']" in lines
+
+    assert "base.css" in os.listdir(str(fake_home / "mydomain.com/static/admin/css"))
+
+
+@pytest.mark.slowtest
+def test_nuke_option_lets_you_run_twice(
+    mock_call_api,
+    mock_update_wsgi_file,
+    fake_home,
+    virtualenvs_folder,
+    api_token,
+    running_python_version,
+):
+    old_django_version = "2.2.12"
+    new_django_version = "3.0.6"
+
+    runner.invoke(
+        app,
+        [
+            "start",
+            "-d",
+            "mydomain.com",
+            "-j",
+            old_django_version,
+            "-p",
+            running_python_version,
+        ],
+    )
+    runner.invoke(
+        app,
+        [
+            "start",
+            "-d",
+            "mydomain.com",
+            "-j",
+            new_django_version,
+            "-p",
+            running_python_version,
+            "--nuke",
+        ],
+    )
+
+    django_version = (
+        subprocess.check_output(
+            [
+                str(virtualenvs_folder / "mydomain.com/bin/python"),
+                "-c" "import django; print(django.get_version())",
+            ]
+        )
+        .decode()
+        .strip()
+    )
+    assert django_version == new_django_version
