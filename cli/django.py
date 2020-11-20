@@ -57,5 +57,47 @@ def autoconfigure(
 
 
 @app.command()
-def start():
-    raise NotImplementedError
+def start(
+    domain_name: str = typer.Option(
+        "your-username.pythonanywhere.com",
+        "-d",
+        "--domain",
+        help="Domain name, eg www.mydomain.com",
+    ),
+    django_version: str = typer.Option(
+        "latest",
+        "-j",
+        "--django_version",
+        help="Django version, eg '3.1.2'",
+    ),
+    python_version: str = typer.Option(
+        "3.6",
+        "-p",
+        "--python_version",
+        help="Python version, eg '3.8'",
+    ),
+    nuke: bool = typer.Option(
+        False,
+        help="*Irrevocably* delete any existing web app config on this domain. Irrevocably.",
+    ),
+):
+    """
+    Create a new Django webapp with a virtualenv.  Defaults to
+    your free domain, the latest version of Django and Python 3.6
+    """
+    domain = ensure_domain(domain_name)
+    project = DjangoProject(domain, python_version)
+    project.sanity_checks(nuke=nuke)
+    project.create_virtualenv(django_version, nuke=nuke)
+    project.run_startproject(nuke=nuke)
+    project.find_django_files()
+    project.update_settings_file()
+    project.run_collectstatic()
+    project.create_webapp(nuke=nuke)
+    project.add_static_file_mappings()
+
+    project.update_wsgi_file()
+
+    project.webapp.reload()
+
+    typer.echo(snakesay(f"All done!  Your site is now live at https://{domain}"))
