@@ -67,7 +67,7 @@ class TestMain:
             'runserver'
         ])
         process_killer.append(server)
-        time.sleep(1)
+        time.sleep(2)
         response = requests.get('http://localhost:8000/', headers={'HOST': 'mydomain.com'})
         assert 'Hello from an example django project' in response.text
 
