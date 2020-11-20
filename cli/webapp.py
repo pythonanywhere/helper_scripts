@@ -11,7 +11,12 @@ app = typer.Typer()
 
 @app.command()
 def reload(
-    domain_name: str = typer.Option("your-username.pythonanywhere.com", help="Domain name")
+    domain_name: str = typer.Option(
+        "your-username.pythonanywhere.com",
+        "-d",
+        "--domain",
+        help="Domain name, eg www.mydomain.com   [default: your-username.pythonanywhere.com]",
+    )
 ):
     domain_name = ensure_domain(domain_name)
     webapp = Webapp(domain_name)
