@@ -12,10 +12,21 @@ app = typer.Typer()
 @app.command()
 def autoconfigure(
     repo_url: str,
-    domain_name: str = typer.Option("your-username.pythonanywhere.com", help="Domain name, eg www.mydomain.com"),
-    python_version: str = typer.Option("3.6", help=""),
+    domain_name: str = typer.Option(
+        "your-username.pythonanywhere.com",
+        "-d",
+        "--domain",
+        help="Domain name, eg www.mydomain.com   [default: your-username.pythonanywhere.com]",
+    ),
+    python_version: str = typer.Option(
+        "3.6",
+        "-p",
+        "--python_version",
+        help="Python version, eg '3.8'    [default: 3.6]",
+    ),
     nuke: bool = typer.Option(
-        False, help="*Irrevocably* delete any existing web app config on this domain. Irrevocably."
+        False,
+        help="*Irrevocably* delete any existing web app config on this domain. Irrevocably.",
     ),
 ):
     """
