@@ -43,3 +43,8 @@ def autoconfigure(
     project.webapp.reload()
     typer.echo(snakesay(f"All done!  Your site is now live at https://{domain_name}\n"))
     project.start_bash()
+
+
+@app.command()
+def start():
+    raise NotImplementedError

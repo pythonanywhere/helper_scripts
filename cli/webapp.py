@@ -17,3 +17,13 @@ def reload(
     webapp = Webapp(domain_name)
     webapp.reload()
     typer.echo(snakesay(f"{domain_name} has been reloaded"))
+
+
+@app.command()
+def delete_logs():
+    raise NotImplementedError
+
+
+@app.command()
+def install_ssl():
+    raise NotImplementedError
