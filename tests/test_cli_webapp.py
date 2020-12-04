@@ -1,7 +1,10 @@
 import getpass
+import tempfile
+from datetime import datetime
 from unittest.mock import call
 
 import pytest
+from dateutil.tz import tzutc
 from typer.testing import CliRunner
 
 from cli.webapp import app
@@ -18,6 +21,17 @@ def mock_webapp(mocker):
         "server": [0, 1, 2],
     }
     return mock_webapp
+
+
+@pytest.fixture(name="file_with_content")
+def fixture_file_with_content():
+    def file_with_content(content):
+        filename = tempfile.NamedTemporaryFile(mode="w", encoding="utf8").name
+        with open(filename, "w") as f:
+            f.write(content)
+        return filename
+
+    return file_with_content
 
 
 def test_create_calls_all_stuff_in_right_order(mocker):
@@ -48,16 +62,6 @@ def test_create_calls_all_stuff_in_right_order(mocker):
         f"https://www.pythonanywhere.com/user/{getpass.getuser().lower()}/webapps/www_domain_com"
         in result.stdout
     )
-
-
-def test_reload(mock_webapp):
-    domain_name = "foo.bar.baz"
-
-    result = runner.invoke(app, ["reload", "-d", domain_name])
-
-    assert f"{domain_name} has been reloaded" in result.stdout
-    mock_webapp.assert_called_once_with(domain_name)
-    assert mock_webapp.return_value.method_calls == [call.reload()]
 
 
 def test_delete_all_logs(mock_webapp):
@@ -134,3 +138,58 @@ def test_delete_all_current_logs(mock_webapp):
         call("server", 0),
     ]
     assert "All done!" in result.stdout
+
+
+def test_install_ssl_with_default_reload(mock_webapp, file_with_content):
+    mock_webapp.return_value.get_ssl_info.return_value = {
+        "not_after": datetime(2018, 8, 24, 17, 16, 23, tzinfo=tzutc())
+    }
+    domain_name = "foo.bar.baz"
+    certificate = "certificate"
+    certificate_file = file_with_content(certificate)
+    private_key = "private_key"
+    private_key_file = file_with_content(private_key)
+
+    result = runner.invoke(
+        app,
+        ["install-ssl", "foo.bar.baz", certificate_file, private_key_file],
+    )
+
+    mock_webapp.assert_called_once_with(domain_name)
+    mock_webapp.return_value.set_ssl.assert_called_once_with(certificate, private_key)
+    mock_webapp.return_value.reload.assert_called_once()
+    assert f"for {domain_name}" in result.stdout
+    assert "2018-08-24," in result.stdout
+
+
+def test_install_ssl_with_reload_suppressed(mock_webapp, file_with_content):
+    domain_name = "foo.bar.baz"
+    certificate = "certificate"
+    certificate_file = file_with_content(certificate)
+    private_key = "private_key"
+    private_key_file = file_with_content(private_key)
+
+    runner.invoke(
+        app,
+        [
+            "install-ssl",
+            "foo.bar.baz",
+            certificate_file,
+            private_key_file,
+            "--suppress-reload",
+        ],
+    )
+
+    mock_webapp.assert_called_once_with(domain_name)
+    mock_webapp.return_value.set_ssl.assert_called_once_with(certificate, private_key)
+    mock_webapp.return_value.reload.assert_not_called()
+
+
+def test_reload(mock_webapp):
+    domain_name = "foo.bar.baz"
+
+    result = runner.invoke(app, ["reload", "-d", domain_name])
+
+    assert f"{domain_name} has been reloaded" in result.stdout
+    mock_webapp.assert_called_once_with(domain_name)
+    assert mock_webapp.return_value.method_calls == [call.reload()]
