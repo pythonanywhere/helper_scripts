@@ -24,7 +24,7 @@ def create(
     python_version: str = typer.Option(
         "3.6",
         "-p",
-        "--python_version",
+        "--python-version",
         help="Python version, eg '3.8'",
     ),
     nuke: bool = typer.Option(
@@ -50,7 +50,7 @@ def create(
 
 
 class LogType(str, Enum):
-    access ="access"
+    access = "access"
     error = "error"
     server = "server"
     all = "all"
@@ -81,13 +81,13 @@ def delete_logs(
     log_type: LogType = typer.Option(
         LogType.all,
         "-t",
-        "--log_type",
+        "--log-type",
     ),
     log_index: LogIndex = typer.Option(
         LogIndex.all,
         "-i",
-        "--log_index",
-        help="0 for current log, 1-9 for one of archive logs or all for all of them"
+        "--log-index",
+        help="0 for current log, 1-9 for one of archive logs or all for all of them",
     ),
 ):
     webapp = Webapp(ensure_domain(domain_name))
