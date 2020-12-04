@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 import getpass
 from enum import Enum
+from pathlib import Path
 
 import typer
 
@@ -104,12 +105,60 @@ def delete_logs(
             webapp.delete_log(log_type, int(i))
     else:
         webapp.delete_log(log_type, int(log_index))
-    typer.echo(snakesay('All done!'))
+    typer.echo(snakesay("All done!"))
 
 
 @app.command()
-def install_ssl():
-    raise NotImplementedError
+def install_ssl(
+    domain_name: str = typer.Argument(
+        ...,
+        help="Domain name, eg www.mydomain.com",
+    ),
+    certificate_file: Path = typer.Argument(
+        ...,
+        exists=True,
+        file_okay=True,
+        readable=True,
+        resolve_path=True,
+        help="The name of the file containing the combined certificate in PEM format (normally a number of blocks, "
+        'each one starting "BEGIN CERTIFICATE" and ending "END CERTIFICATE")',
+    ),
+    private_key_file: Path = typer.Argument(
+        ...,
+        exists=True,
+        file_okay=True,
+        readable=True,
+        resolve_path=True,
+        help="The name of the file containing the private key in PEM format (a file with one block, "
+        'starting with something like "BEGIN PRIVATE KEY" and ending with something like "END PRIVATE KEY")',
+    ),
+    suppress_reload: bool = typer.Option(
+        False,
+        help="The website will need to be reloaded in order to activate the new certificate/key combination "
+        "-- this happens by default, use this option to suppress it.",
+    ),
+):
+    with open(certificate_file, "r") as f:
+        certificate = f.read()
+
+    with open(private_key_file, "r") as f:
+        private_key = f.read()
+
+    webapp = Webapp(domain_name)
+    webapp.set_ssl(certificate, private_key)
+    if not suppress_reload:
+        webapp.reload()
+
+    ssl_details = webapp.get_ssl_info()
+    typer.echo(
+        snakesay(
+            "That's all set up now :-)\n"
+            f"Your new certificate for {domain_name} will expire\n"
+            f"on {ssl_details['not_after'].date().isoformat()},\n"
+            "so shortly before then you should renew it\n"
+            "and install the new certificate."
+        )
+    )
 
 
 @app.command()
