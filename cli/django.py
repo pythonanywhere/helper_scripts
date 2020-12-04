@@ -21,7 +21,7 @@ def autoconfigure(
     python_version: str = typer.Option(
         "3.6",
         "-p",
-        "--python_version",
+        "--python-version",
         help="Python version, eg '3.8'    [default: 3.6]",
     ),
     nuke: bool = typer.Option(
@@ -67,13 +67,13 @@ def start(
     django_version: str = typer.Option(
         "latest",
         "-j",
-        "--django_version",
+        "--django-version",
         help="Django version, eg '3.1.2'",
     ),
     python_version: str = typer.Option(
         "3.6",
         "-p",
-        "--python_version",
+        "--python-version",
         help="Python version, eg '3.8'",
     ),
     nuke: bool = typer.Option(
