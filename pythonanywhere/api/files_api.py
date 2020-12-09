@@ -17,10 +17,10 @@ class Files:
 
     Covers:
     - GET, POST and DELETE for files path endpoint
+    - POST for files sharing endpoint
 
     **********************************
     TODOS:
-    - POST for sharing
     - GET, DELETE for sharing path
     - GET for tree
     **********************************
@@ -30,13 +30,23 @@ class Files:
     - use :method: `Files.path_post` to upload or update file at given `dest_path` using contents
       from `source`
     - use :method: `Files.path_delete` to delete file/directory on on given `path`
+
+    "sharing" methods:
+    - use :method: `Files.sharing_post` to enable sharing a file from `path` (if not shared before)
+      and get a link to it
     """
 
     base_url = get_api_endpoint().format(username=getpass.getuser(), flavor="files")
     path_endpoint = urljoin(base_url, "path")
+    sharing_endpoint = urljoin(base_url, "sharing/")
 
     def _error_msg(self, result):
+        """TODO: error responses should be unified at the API side """
+
         if "application/json" in result.headers.get("content-type", ""):
+            jsn = result.json()
+            msg = jsn.get("detail") or jsn.get("message") or jsn.get("error", "")
+            return f": {msg}"
         return ""
 
     def path_get(self, path):
@@ -97,5 +107,17 @@ class Files:
 
         raise Exception(
             f"DELETE on {url} failed, got {result}{self._error_msg(result)}"
+        )
+
+    def sharing_post(self, path):
+        url = self.sharing_endpoint
+
+        result = call_api(url, "POST", json={'path': path})
+
+        if result.ok:
+            return result.status_code, result.json()["url"]
+
+        raise Exception(
+            f"POST to {url} to share '{path}' failed, got {result}{self._error_msg(result)}"
         )
 

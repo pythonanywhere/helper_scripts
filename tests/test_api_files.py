@@ -218,3 +218,51 @@ class TestFilesDeletePath(TestFiles):
             "File does not exist"
         )
         assert str(e.value) == expected_error_msg
+
+
+@pytest.mark.files
+class TestFilesPostSharing(TestFiles):
+    def test_returns_url_when_path_successfully_shared_or_has_been_shared_before(
+        self, api_token, api_responses
+    ):
+        valid_path = f"{self.home_dir_path}/README.txt"
+        shared_url = f"/user/{self.username}/shares/asdf1234/"
+        partial_response = dict(
+            method=responses.POST,
+            url=urljoin(self.base_url, "sharing/"),
+            body=bytes(f'{{"url": "{shared_url}"}}', "utf"),
+            headers={"Content-Type": "application/json"},
+        )
+        api_responses.add(**partial_response, status=201)
+        api_responses.add(**partial_response, status=200)
+
+        files = Files()
+        first_share = files.sharing_post(valid_path)
+
+        assert first_share[0] == 201
+        assert first_share[1] == shared_url
+
+        second_share = files.sharing_post(valid_path)
+
+        assert second_share[0] == 200
+        assert second_share[1] == shared_url
+
+    @pytest.mark.skip(reason="not implemented in the api yet")
+    def test_raises_exception_when_path_not_provided(self, api_token, api_responses):
+        url = urljoin(self.base_url, "sharing/")
+        api_responses.add(
+            responses.POST,
+            url=url,
+            status=400,
+            body=bytes('{"error": "required field (path) not found"}', "utf"),
+            headers={"Content-Type": "application/json"},
+        )
+
+        with pytest.raises(Exception) as e:
+            Files().sharing_post("")
+
+        expected_error_msg = (
+            f"POST to {url} to share '' failed, got <Response [400]>: "
+            "provided path is not valid"  # or similar
+        )
+        assert str(e.value) == expected_error_msg
