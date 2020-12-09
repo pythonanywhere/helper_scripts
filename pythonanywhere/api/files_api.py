@@ -15,20 +15,21 @@ class Files:
     which is stored in a class variable `Files.base_url`, then calls
     `call_api` with appropriate arguments to execute files action.
 
-    Covers GET and POST for files path endpoint.
+    Covers:
+    - GET, POST and DELETE for files path endpoint
 
     **********************************
     TODOS:
-    - DELETE for path endpoint
     - POST for sharing
     - GET, DELETE for sharing path
     - GET for tree
     **********************************
 
     "path" methods:
-    - use :method: `Files.path_get` to get contents of file or directory from `path`,
-    - use :method: `Files.path_post` to upload or update file at given `dest_path` using contents 
-      from `source`.
+    - use :method: `Files.path_get` to get contents of file or directory from `path`
+    - use :method: `Files.path_post` to upload or update file at given `dest_path` using contents
+      from `source`
+    - use :method: `Files.path_delete` to delete file/directory on on given `path`
     """
 
     base_url = get_api_endpoint().format(username=getpass.getuser(), flavor="files")
@@ -36,7 +37,6 @@ class Files:
 
     def _error_msg(self, result):
         if "application/json" in result.headers.get("content-type", ""):
-            return ": " + result.json()["detail"]
         return ""
 
     def path_get(self, path):
@@ -86,3 +86,16 @@ class Files:
         raise Exception(
             f"POST to upload contents to {url} failed, got {result}{self._error_msg(result)}"
         )
+
+    def path_delete(self, path):
+        url = f"{self.path_endpoint}{path}"
+
+        result = call_api(url, "DELETE")
+
+        if result.status_code == 204:
+            return result.status_code
+
+        raise Exception(
+            f"DELETE on {url} failed, got {result}{self._error_msg(result)}"
+        )
+

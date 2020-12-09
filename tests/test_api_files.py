@@ -1,5 +1,6 @@
 import getpass
 import json
+import tempfile
 from unittest.mock import patch
 from urllib.parse import urljoin
 
@@ -104,7 +105,8 @@ class TestFilesPostPath(TestFiles):
             status=201,
         )
 
-        result = Files().path_post(new_file_path, "new contents\n", as_string=True)
+        with tempfile.NamedTemporaryFile() as ntf:
+            result = Files().path_post(new_file_path, ntf.name, as_string=False)
 
         assert result == 201
 
@@ -136,7 +138,7 @@ class TestFilesPostPath(TestFiles):
 
         assert str(e.value) == "Source should be an existing file or a string"
 
-    def test_raises_when_no_contents(self, api_token, api_responses):
+    def test_raises_when_no_contents_provided(self, api_token, api_responses):
         valid_path = f"{self.home_dir_path}/README.txt"
         valid_url = urljoin(self.base_url, f"path{valid_path}")
         body = bytes('{"detail": "You must provide a file with the name \'content\'."}', "utf")
@@ -154,5 +156,65 @@ class TestFilesPostPath(TestFiles):
         expected_error_msg = (
             f"POST to upload contents to {valid_url} failed, got <Response [400]>: "
             "You must provide a file with the name 'content'."
+        )
+        assert str(e.value) == expected_error_msg
+
+
+@pytest.mark.files
+class TestFilesDeletePath(TestFiles):
+    def test_returns_204_on_successful_file_deletion(self, api_token, api_responses):
+        valid_path = f"{self.home_dir_path}/README.txt"
+        valid_url = urljoin(self.base_url, f"path{valid_path}")
+        api_responses.add(
+            responses.DELETE,
+            url=valid_url,
+            status=204,
+        )
+
+        result = Files().path_delete(valid_path)
+
+        assert result == 204
+
+    def test_raises_when_permission_denied(self, api_token, api_responses):
+        home_dir_url = urljoin(self.base_url, f"path{self.home_dir_path}")
+        body = bytes(
+            '{"message":"You do not have permission to delete this","code":"forbidden"}',
+            "utf"
+        )
+        api_responses.add(
+            responses.DELETE,
+            url=home_dir_url,
+            status=403,
+            body=body,
+            headers={"Content-Type": "application/json"},
+        )
+
+        with pytest.raises(Exception) as e:
+            Files().path_delete(self.home_dir_path)
+
+        expected_error_msg = (
+            f"DELETE on {home_dir_url} failed, got <Response [403]>: "
+            "You do not have permission to delete this"
+        )
+        assert str(e.value) == expected_error_msg
+
+    def test_raises_when_wrong_path_provided(self, api_token, api_responses):
+        invalid_path = "/home/some_other_user/"
+        invalid_url = urljoin(self.base_url, f"path{invalid_path}")
+        body = bytes('{"message":"File does not exist","code":"not_found"}', "utf")
+        api_responses.add(
+            responses.DELETE,
+            url=invalid_url,
+            status=404,
+            body=body,
+            headers={"Content-Type": "application/json"},
+        )
+
+        with pytest.raises(Exception) as e:
+            Files().path_delete(invalid_path)
+
+        expected_error_msg = (
+            f"DELETE on {invalid_url} failed, got <Response [404]>: "
+            "File does not exist"
         )
         assert str(e.value) == expected_error_msg
