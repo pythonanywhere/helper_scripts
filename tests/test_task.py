@@ -45,7 +45,7 @@ class TestTaskToBeCreated:
         assert task.enabled is True
         assert task.__repr__() == "Daily task 'myscript.py' ready to be created"
 
-    def test_instantiates_new_hourly_disabled(self, mocker):
+    def test_instantiates_new_hourly_disabled(self):
         task = Task.to_be_created(command="myscript.py", hour=None, minute=10, disabled=True)
         assert task.command == "myscript.py"
         assert task.hour is None
