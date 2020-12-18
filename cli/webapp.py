@@ -56,18 +56,12 @@ class LogType(str, Enum):
     all = "all"
 
 
-class LogIndex(str, Enum):
-    current = "0"
-    one = "1"
-    two = "2"
-    three = "3"
-    four = "4"
-    five = "5"
-    six = "6"
-    seven = "7"
-    eight = "8"
-    nine = "9"
-    all = "all"
+def index_callback(value: str):
+    if value == "all" or (value.isnumeric() and int(value) in range(10)):
+        return value
+    raise typer.BadParameter(
+        "log_index has to be 0 for current log, 1-9 for one of archive logs or all for all of them"
+    )
 
 
 @app.command()
@@ -83,10 +77,11 @@ def delete_logs(
         "-t",
         "--log-type",
     ),
-    log_index: LogIndex = typer.Option(
-        LogIndex.all,
+    log_index: str = typer.Option(
+        "all",
         "-i",
         "--log-index",
+        callback=index_callback,
         help="0 for current log, 1-9 for one of archive logs or all for all of them",
     ),
 ):
