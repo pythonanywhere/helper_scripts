@@ -121,3 +121,9 @@ class Files:
             f"POST to {url} to share '{path}' failed, got {result}{self._error_msg(result)}"
         )
 
+    def sharing_get(self, path):
+        url = f"{self.sharing_endpoint}?path={path}"
+
+        result = call_api(url, "GET")
+
+        return result.json()["url"] if result.ok else ""

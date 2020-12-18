@@ -266,3 +266,29 @@ class TestFilesPostSharing(TestFiles):
             "provided path is not valid"  # or similar
         )
         assert str(e.value) == expected_error_msg
+
+
+@pytest.mark.files
+class TestFilesGetSharing(TestFiles):
+    def test_returns_sharing_url_when_path_is_shared(self, api_token, api_responses):
+        valid_path = f"{self.home_dir_path}/README.txt"
+        sharing_url = urljoin(self.base_url, f"sharing/")
+        get_url = urljoin(self.base_url, f"sharing/?path={valid_path}")
+        shared_url = f"/user/{self.username}/shares/asdf1234/"
+        partial_response = dict(
+            body=bytes(f'{{"url": "{shared_url}"}}', "utf"),
+            headers={"Content-Type": "application/json"},
+        )
+        api_responses.add(**partial_response, method=responses.POST, url=sharing_url, status=201)
+        api_responses.add(**partial_response, method=responses.GET, url=get_url, status=200)
+        files = Files()
+        files.sharing_post(valid_path)
+
+        assert files.sharing_get(valid_path) == shared_url
+
+    def test_returns_empty_string_when_path_not_shared(self, api_token, api_responses):
+        valid_path = f"{self.home_dir_path}/README.txt"
+        url = urljoin(self.base_url, f"sharing/?path={valid_path}")
+        api_responses.add(method=responses.GET, url=url, status=404)
+
+        assert Files().sharing_get(valid_path) == ""
