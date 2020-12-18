@@ -303,3 +303,66 @@ class TestFilesSharingDelete(TestFiles):
         api_responses.add(method=responses.DELETE, url=url, status=204)
 
         assert Files().sharing_delete(valid_path) == 204
+
+
+@pytest.mark.files
+class TestFilesTreeGet(TestFiles):
+    def test_returns_list_of_the_regular_files_and_subdirectories_of_a_directory(
+        self, api_token, api_responses
+    ):
+        url = urljoin(self.base_url, f"tree/?path={self.home_dir_path}")
+        self.default_home_dir_files["foo"] = {
+            "type": "directory", "url": f"{self.base_url}path{self.home_dir_path}/foo"
+        },
+        tree = f'["{self.home_dir_path}/README.txt", "{self.home_dir_path}/foo/"]'
+        api_responses.add(
+            responses.GET,
+            url=url,
+            status=200,
+            body=bytes(tree, "utf"),
+            headers={"Content-Type": "application/json"},
+        )
+
+        result = Files().tree_get(self.home_dir_path)
+
+        assert result == [f"{self.home_dir_path}/{file}" for file in ["README.txt", "foo/"]]
+
+    def test_raises_when_path_not_pointing_to_directory(self, api_token, api_responses):
+        invalid_path = "/hmoe/oof"
+        url = urljoin(self.base_url, f"tree/?path={invalid_path}")
+        api_responses.add(
+            responses.GET,
+            url=url,
+            status=400,
+            body=bytes(f'{{"detail": "{invalid_path} is not a directory"}}', "utf"),
+            headers={"Content-Type": "application/json"},
+        )
+
+        with pytest.raises(Exception) as e:
+            Files().tree_get(invalid_path)
+
+        expected_error_msg = (
+            f"GET to {url} failed, got <Response [400]>: {invalid_path} is not a directory"
+        )
+        print(e.value)
+        assert str(e.value) == expected_error_msg
+
+    def test_raises_when_path_does_not_exist(self, api_token, api_responses):
+        invalid_path = "/hmoe/oof"
+        url = urljoin(self.base_url, f"tree/?path={invalid_path}")
+        api_responses.add(
+            responses.GET,
+            url=url,
+            status=400,
+            body=bytes(f'{{"detail": "{invalid_path} does not exist"}}', "utf"),
+            headers={"Content-Type": "application/json"},
+        )
+
+        with pytest.raises(Exception) as e:
+            Files().tree_get(invalid_path)
+
+        expected_error_msg = (
+            f"GET to {url} failed, got <Response [400]>: {invalid_path} does not exist"
+        )
+        print(e.value)
+        assert str(e.value) == expected_error_msg
