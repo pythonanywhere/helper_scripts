@@ -1,5 +1,5 @@
 """ Interface speaking with PythonAnywhere API providing methods for files.
-*Don't use* `Files` :class: in helper scripts, use `pythonanywhere.files` classes instead."""
+*Don't use* `Files` :class: in helper scripts, use `pythonanywhere.files.Path` class instead."""
 
 import getpass
 from os import path

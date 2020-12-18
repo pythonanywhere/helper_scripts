@@ -22,6 +22,12 @@ class TestFiles:
         ".profile": {"type": "file", "url": f"{base_url}path{home_dir_path}/.profile"},
         "README.txt": {"type": "file", "url": f"{base_url}path{home_dir_path}/README.txt"},
     }
+    readme_contents = (
+        b"# vim: set ft=rst:\n\nSee https://help.pythonanywhere.com/ "
+        b'(or click the "Help" link at the top\nright) '
+        b"for help on how to use PythonAnywhere, including tips on copying and\n"
+        b"pasting from consoles, and writing your own web applications.\n"
+    )
 
 
 @pytest.mark.files
@@ -43,12 +49,7 @@ class TestFilesPathGet(TestFiles):
     def test_returns_file_contents_when_file_path_provided(self, api_token, api_responses):
         filepath = urljoin(self.home_dir_path, "README.txt")
         file_url = urljoin(self.base_url, f"path{filepath}")
-        body = (
-            b"# vim: set ft=rst:\n\nSee https://help.pythonanywhere.com/ "
-            b'(or click the "Help" link at the top\nright) '
-            b"for help on how to use PythonAnywhere, including tips on copying and\n"
-            b"pasting from consoles, and writing your own web applications.\n"
-        )
+        body = self.readme_contents
         api_responses.add(
             responses.GET,
             url=file_url,
