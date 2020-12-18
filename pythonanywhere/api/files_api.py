@@ -18,11 +18,7 @@ class Files:
     Covers:
     - GET, POST and DELETE for files path endpoint
     - POST, GET and DELETE for files sharing endpoint
-
-    **********************************
-    TODOS:
-    - GET for tree
-    **********************************
+    - GET for tree endpoint
 
     "path" methods:
     - use :method: `Files.path_get` to get contents of file or directory from `path`
@@ -38,6 +34,7 @@ class Files:
     base_url = get_api_endpoint().format(username=getpass.getuser(), flavor="files")
     path_endpoint = urljoin(base_url, "path")
     sharing_endpoint = urljoin(base_url, "sharing/")
+    tree_endpoint = urljoin(base_url, "tree/")
 
     def _error_msg(self, result):
         """TODO: error responses should be unified at the API side """
@@ -133,3 +130,13 @@ class Files:
         result = call_api(url, "DELETE")
 
         return result.status_code
+
+    def tree_get(self, path):
+        url = f"{self.tree_endpoint}?path={path}"
+
+        result = call_api(url, "GET")
+
+        if result.ok:
+            return result.json()
+
+        raise Exception(f"GET to {url} failed, got {result}{self._error_msg(result)}")
