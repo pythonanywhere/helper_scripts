@@ -17,11 +17,10 @@ class Files:
 
     Covers:
     - GET, POST and DELETE for files path endpoint
-    - POST for files sharing endpoint
+    - POST, GET and DELETE for files sharing endpoint
 
     **********************************
     TODOS:
-    - GET, DELETE for sharing path
     - GET for tree
     **********************************
 
@@ -127,3 +126,10 @@ class Files:
         result = call_api(url, "GET")
 
         return result.json()["url"] if result.ok else ""
+
+    def sharing_delete(self, path):
+        url = f"{self.sharing_endpoint}?path={path}"
+
+        result = call_api(url, "DELETE")
+
+        return result.status_code
