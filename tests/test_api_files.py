@@ -25,7 +25,7 @@ class TestFiles:
 
 
 @pytest.mark.files
-class TestFilesGetPath(TestFiles):
+class TestFilesPathGet(TestFiles):
     def test_returns_contents_of_directory_when_path_to_dir_provided(
         self, api_token, api_responses,
     ):
@@ -82,7 +82,7 @@ class TestFilesGetPath(TestFiles):
 
 
 @pytest.mark.files
-class TestFilesPostPath(TestFiles):
+class TestFilesPathPost(TestFiles):
     def test_returns_200_when_file_updated(self, api_token, api_responses):
         existing_file_path = f"{self.home_dir_path}/README.txt"
         existing_file_url = self.default_home_dir_files["README.txt"]["url"]
@@ -161,7 +161,7 @@ class TestFilesPostPath(TestFiles):
 
 
 @pytest.mark.files
-class TestFilesDeletePath(TestFiles):
+class TestFilesPathDelete(TestFiles):
     def test_returns_204_on_successful_file_deletion(self, api_token, api_responses):
         valid_path = f"{self.home_dir_path}/README.txt"
         valid_url = urljoin(self.base_url, f"path{valid_path}")
@@ -221,7 +221,7 @@ class TestFilesDeletePath(TestFiles):
 
 
 @pytest.mark.files
-class TestFilesPostSharing(TestFiles):
+class TestFilesSharingPost(TestFiles):
     def test_returns_url_when_path_successfully_shared_or_has_been_shared_before(
         self, api_token, api_responses
     ):
@@ -269,7 +269,7 @@ class TestFilesPostSharing(TestFiles):
 
 
 @pytest.mark.files
-class TestFilesGetSharing(TestFiles):
+class TestFilesSharingGet(TestFiles):
     def test_returns_sharing_url_when_path_is_shared(self, api_token, api_responses):
         valid_path = f"{self.home_dir_path}/README.txt"
         sharing_url = urljoin(self.base_url, f"sharing/")
@@ -292,3 +292,14 @@ class TestFilesGetSharing(TestFiles):
         api_responses.add(method=responses.GET, url=url, status=404)
 
         assert Files().sharing_get(valid_path) == ""
+
+
+@pytest.mark.files
+class TestFilesSharingDelete(TestFiles):
+    def test_returns_204_on_sucessful_unshare(self, api_token, api_responses):
+        valid_path = f"{self.home_dir_path}/README.txt"
+        url = urljoin(self.base_url, f"sharing/?path={valid_path}")
+        shared_url = f"/user/{self.username}/shares/asdf1234/"
+        api_responses.add(method=responses.DELETE, url=url, status=204)
+
+        assert Files().sharing_delete(valid_path) == 204
