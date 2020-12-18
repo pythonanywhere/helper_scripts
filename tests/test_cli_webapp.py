@@ -23,6 +23,11 @@ def mock_webapp(mocker):
     return mock_webapp
 
 
+@pytest.fixture
+def domain_name():
+    return "foo.bar.baz"
+
+
 @pytest.fixture(name="file_with_content")
 def fixture_file_with_content():
     def file_with_content(content):
@@ -64,15 +69,13 @@ def test_create_calls_all_stuff_in_right_order(mocker):
     )
 
 
-def test_delete_all_logs(mock_webapp):
-    domain_name = "foo.bar.baz"
-
+def test_delete_all_logs(mock_webapp, domain_name):
     result = runner.invoke(
         app,
         [
             "delete-logs",
             "-d",
-            "foo.bar.baz",
+            domain_name,
         ],
     )
 
@@ -91,15 +94,13 @@ def test_delete_all_logs(mock_webapp):
     assert "All done!" in result.stdout
 
 
-def test_delete_all_server_logs(mock_webapp):
-    domain_name = "foo.bar.baz"
-
+def test_delete_all_server_logs(mock_webapp, domain_name):
     result = runner.invoke(
         app,
         [
             "delete-logs",
             "-d",
-            "foo.bar.baz",
+            domain_name,
             "-t",
             "server",
         ],
@@ -114,9 +115,7 @@ def test_delete_all_server_logs(mock_webapp):
     assert "All done!" in result.stdout
 
 
-def test_delete_one_server_logs(mock_webapp):
-    domain_name = "foo.bar.baz"
-
+def test_delete_one_server_logs(mock_webapp, domain_name):
     result = runner.invoke(
         app, ["delete-logs", "-d", "foo.bar.baz", "-t", "server", "-i", "2"]
     )
@@ -126,9 +125,7 @@ def test_delete_one_server_logs(mock_webapp):
     assert "All done!" in result.stdout
 
 
-def test_delete_all_current_logs(mock_webapp):
-    domain_name = "foo.bar.baz"
-
+def test_delete_all_current_logs(mock_webapp, domain_name):
     result = runner.invoke(app, ["delete-logs", "-d", "foo.bar.baz", "-i", "0"])
 
     mock_webapp.assert_called_once_with(domain_name)
@@ -140,11 +137,18 @@ def test_delete_all_current_logs(mock_webapp):
     assert "All done!" in result.stdout
 
 
-def test_install_ssl_with_default_reload(mock_webapp, file_with_content):
+def test_validates_log_number(mock_webapp):
+    result = runner.invoke(
+        app, ["delete-logs", "-d", "foo.bar.baz", "-t", "server", "-i", "10"]
+    )
+    assert "Invalid value" in result.stdout
+    assert "log_index has to be 0 for current" in result.stdout
+
+
+def test_install_ssl_with_default_reload(mock_webapp, domain_name, file_with_content):
     mock_webapp.return_value.get_ssl_info.return_value = {
         "not_after": datetime(2018, 8, 24, 17, 16, 23, tzinfo=tzutc())
     }
-    domain_name = "foo.bar.baz"
     certificate = "certificate"
     certificate_file = file_with_content(certificate)
     private_key = "private_key"
@@ -152,7 +156,7 @@ def test_install_ssl_with_default_reload(mock_webapp, file_with_content):
 
     result = runner.invoke(
         app,
-        ["install-ssl", "foo.bar.baz", certificate_file, private_key_file],
+        ["install-ssl", domain_name, certificate_file, private_key_file],
     )
 
     mock_webapp.assert_called_once_with(domain_name)
@@ -162,8 +166,9 @@ def test_install_ssl_with_default_reload(mock_webapp, file_with_content):
     assert "2018-08-24," in result.stdout
 
 
-def test_install_ssl_with_reload_suppressed(mock_webapp, file_with_content):
-    domain_name = "foo.bar.baz"
+def test_install_ssl_with_reload_suppressed(
+    mock_webapp, domain_name, file_with_content
+):
     certificate = "certificate"
     certificate_file = file_with_content(certificate)
     private_key = "private_key"
@@ -173,7 +178,7 @@ def test_install_ssl_with_reload_suppressed(mock_webapp, file_with_content):
         app,
         [
             "install-ssl",
-            "foo.bar.baz",
+            domain_name,
             certificate_file,
             private_key_file,
             "--suppress-reload",
@@ -185,9 +190,7 @@ def test_install_ssl_with_reload_suppressed(mock_webapp, file_with_content):
     mock_webapp.return_value.reload.assert_not_called()
 
 
-def test_reload(mock_webapp):
-    domain_name = "foo.bar.baz"
-
+def test_reload(mock_webapp, domain_name):
     result = runner.invoke(app, ["reload", "-d", domain_name])
 
     assert f"{domain_name} has been reloaded" in result.stdout
