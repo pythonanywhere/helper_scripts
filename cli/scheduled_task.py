@@ -1,6 +1,9 @@
+from typing import List
+
 import typer
 
-from pythonanywhere.task import Task
+from pythonanywhere.scripts_commons import get_task_from_id
+from pythonanywhere.task import Task, TaskList
 
 app = typer.Typer()
 
@@ -56,9 +59,40 @@ def create(
     task.create_schedule()
 
 
-@app.command()
-def delete():
-    raise NotImplementedError
+delete_app = typer.Typer()
+app.add_typer(
+    delete_app, name="delete", help="Delete scheduled task(s) by id or nuke'em all."
+)
+
+
+@delete_app.command("nuke", help="Delete all scheduled tasks.")
+def delete_all_tasks(
+    force: bool = typer.Option(
+        False, "-f", "--force", help="Turns off user confirmation before deleting tasks"
+    ),
+):
+    if not force:
+        user_response = typer.confirm(
+            "This will irrevocably delete all your tasks, proceed?"
+        )
+        if not user_response:
+            return None
+
+    for task in TaskList().tasks:
+        task.delete_schedule()
+
+
+@delete_app.command(
+    "id",
+    help="""\b
+    Delete one or more scheduled tasks by id.
+    ID_NUMBERS may be acquired with `pa scheduled-task list`
+    """,
+)
+def delete_task_by_id(id_numbers: List[int] = typer.Argument(...)):
+    for task_id in id_numbers:
+        task = get_task_from_id(task_id, no_exit=True)
+        task.delete_schedule()
 
 
 @app.command()
