@@ -92,8 +92,9 @@ class TestFilesPathPost(TestFiles):
             url=existing_file_url,
             status=200,
         )
+        content = "content".encode()
 
-        result = Files().path_post(existing_file_path, "new contents\n", as_string=True)
+        result = Files().path_post(existing_file_path, content)
 
         assert result == 200
 
@@ -105,9 +106,9 @@ class TestFilesPathPost(TestFiles):
             url=new_file_url,
             status=201,
         )
+        content = "content".encode()
 
-        with tempfile.NamedTemporaryFile() as ntf:
-            result = Files().path_post(new_file_path, ntf.name, as_string=False)
+        result = Files().path_post(new_file_path, content)
 
         assert result == 201
 
@@ -119,25 +120,15 @@ class TestFilesPathPost(TestFiles):
             url=url_with_invalid_path,
             status=404,
         )
+        content = "content".encode()
 
         with pytest.raises(Exception) as e:
-            Files().path_post(invalid_path, "contents", as_string=True)
+            Files().path_post(invalid_path, content)
 
         expected_error_msg = (
             f"POST to upload contents to {url_with_invalid_path} failed, got <Response [404]>"
         )
         assert str(e.value) == expected_error_msg
-
-    @patch("os.path.isfile")
-    def test_raises_if_source_is_not_a_file_when_not_using_string(self, mock_isfile):
-        mock_isfile.return_value = False
-        dest_filepath = urljoin(self.home_dir_path, "README.txt")
-        valid_endpoint = urljoin(self.base_url, f"path{dest_filepath}")
-
-        with pytest.raises(Exception) as e:
-            Files().path_post(valid_endpoint, "/xyz/zyx", as_string=False)
-
-        assert str(e.value) == "Source should be an existing file or a string"
 
     def test_raises_when_no_contents_provided(self, api_token, api_responses):
         valid_path = f"{self.home_dir_path}/README.txt"
@@ -152,7 +143,7 @@ class TestFilesPathPost(TestFiles):
         )
 
         with pytest.raises(Exception) as e:
-            Files().path_post(valid_path, None, as_string=True)
+            Files().path_post(valid_path, None)
 
         expected_error_msg = (
             f"POST to upload contents to {valid_url} failed, got <Response [400]>: "

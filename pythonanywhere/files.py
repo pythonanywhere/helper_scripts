@@ -10,7 +10,7 @@ from pythonanywhere.snakesay import snakesay
 logger = logging.getLogger(name=__name__)
 
 
-class Path:
+class PAPath:
     """Class providing interface for interacting with PythonAnywhere user files.
     """
 
@@ -33,8 +33,19 @@ class Path:
         except Exception as e:
             logger.warning(snakesay(str(e)))
 
-    def upload(self):
-        pass
+    def upload(self, content):
+        try:
+            result = self.api.path_post(self.path, content)
+        except Exception as e:
+            logger.warning(snakesay(str(e)))
+            return None
+
+        msg = {
+            200: f"{self.path} successfully updated!",
+            201: f"Content successfully uploaded to {self.path}!"
+        }[result]
+
+        logger.info(snakesay(msg))
 
     def share(self):
         pass
