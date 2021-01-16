@@ -3,6 +3,7 @@ Provides a class `Path` which should be used by helper scripts
 providing features for programmatic handling of user's files."""
 
 import logging
+from urllib.parse import urljoin
 
 from pythonanywhere.api.files_api import Files
 from pythonanywhere.snakesay import snakesay
@@ -22,9 +23,16 @@ class PAPath:
         user_url = self.api.base_url.replace("/api/v0", "")
         return f"{user_url}{self.path[1:]}"
 
+    def _make_pa_url(self, path):
+        return urljoin(self.api.base_url.split("api")[0], path)
+
     def contents(self):
-        content = self.api.path_get(self.path)
-        return content if type(content) == dict else content.decode("utf-8")
+        try:
+            content = self.api.path_get(self.path)
+            return content if type(content) == dict else content.decode("utf-8")
+        except Exception as e:
+            logger.warning(snakesay(str(e)))
+            return None
 
     def delete(self):
         try:
@@ -54,8 +62,9 @@ class PAPath:
         url = self.api.sharing_get(self.path)
         if url:
             logger.info(snakesay(f"{self.path} is shared at {url}"))
-            return url
-        logger.info(snakesay(f"{self.path} has not been shared."))
+            return self._make_pa_url(url)
+
+        logger.info(snakesay(f"{self.path} has not been shared"))
         return ""
 
     def share(self):
@@ -67,7 +76,7 @@ class PAPath:
 
         msg = {200: "was already", 201: "successfully"}[code]
         logger.info(snakesay(f"{self.path} {msg} shared at {shared_url}"))
-        return shared_url
+        return self._make_pa_url(shared_url)
 
     def unshare(self):
         already_shared = self.get_sharing_url()
