@@ -5,7 +5,7 @@ from unittest.mock import call
 import pytest
 
 from pythonanywhere.api.base import get_api_endpoint
-from pythonanywhere.files import Path
+from pythonanywhere.files import PAPath
 from tests.test_api_files import TestFiles
 
 
@@ -15,7 +15,7 @@ class TestPathRepr(TestFiles):
         path = self.home_dir_path
 
         user_path = self.base_url.replace('/api/v0', '')
-        assert Path(path).__repr__() == f"{user_path}{path[1:]}"
+        assert PAPath(path).__repr__() == f"{user_path}{path[1:]}"
 
 
 @pytest.mark.files
@@ -25,7 +25,7 @@ class TestPathContents(TestFiles):
         mock_path_get = mocker.patch("pythonanywhere.api.files_api.Files.path_get")
         mock_path_get.return_value = self.readme_contents
 
-        result = Path(path).contents()
+        result = PAPath(path).contents()
 
         assert mock_path_get.call_args == call(path)
         assert result == self.readme_contents.decode()
@@ -34,7 +34,7 @@ class TestPathContents(TestFiles):
         mock_path_get = mocker.patch("pythonanywhere.api.files_api.Files.path_get")
         mock_path_get.return_value = self.default_home_dir_files
 
-        result = Path(self.home_dir_path).contents()
+        result = PAPath(self.home_dir_path).contents()
 
         assert result == self.default_home_dir_files
 
@@ -43,7 +43,7 @@ class TestPathContents(TestFiles):
         mock_path_get.side_effect = Exception("error msg")
 
         with pytest.raises(Exception) as e:
-            Path('/home/different_user').contents()
+            PAPath('/home/different_user').contents()
 
         assert str(e.value) == "error msg"
 
@@ -57,7 +57,7 @@ class TestPathDelete(TestFiles):
         mock_info = mocker.patch("pythonanywhere.files.logger.info")
         path = "/valid/path"
 
-        Path(path).delete()
+        PAPath(path).delete()
 
         assert mock_delete.call_args == call(path)
         assert mock_snake.call_args == call(f"{path} deleted!")
@@ -70,6 +70,53 @@ class TestPathDelete(TestFiles):
         mock_warning = mocker.patch("pythonanywhere.files.logger.warning")
         undeletable_path = "/home/"
 
-        Path(undeletable_path).delete()
+        PAPath(undeletable_path).delete()
 
         assert mock_snake.call_args == call("error msg")
+
+
+@pytest.mark.files
+class TestPathUpload(TestFiles):
+    def test_informs_about_successful_upload_of_a_file(self, mocker):
+        mock_post = mocker.patch("pythonanywhere.api.files_api.Files.path_post")
+        mock_post.return_value = 201
+        mock_snake = mocker.patch("pythonanywhere.files.snakesay")
+        mock_info = mocker.patch("pythonanywhere.files.logger.info")
+        destination_path = "/home/user/"
+        content = "content".encode()
+
+        PAPath(destination_path).upload(content)
+
+        assert mock_post.call_args == call(destination_path, content)
+        assert mock_snake.call_args == call(f"Content successfully uploaded to {destination_path}!")
+        assert mock_info.call_args == call(mock_snake.return_value)
+
+    def test_informs_about_successful_update_of_existing_file_with_provided_stream(self, mocker):
+        mock_post = mocker.patch("pythonanywhere.api.files_api.Files.path_post")
+        mock_post.return_value = 200
+        mock_snake = mocker.patch("pythonanywhere.files.snakesay")
+        mock_info = mocker.patch("pythonanywhere.files.logger.info")
+        destination_path = "/home/user/"
+        content = "content".encode()
+
+        PAPath(destination_path).upload(content)
+
+        assert mock_post.call_args == call(destination_path, content)
+        assert mock_snake.call_args == call(f"{destination_path} successfully updated!")
+        assert mock_info.call_args == call(mock_snake.return_value)
+
+
+    def test_warns_when_file_has_not_been_uploaded(self, mocker):
+        mock_post = mocker.patch("pythonanywhere.api.files_api.Files.path_post")
+        mock_post.side_effect = Exception("sth went wrong")
+        mock_warning = mocker.patch("pythonanywhere.files.logger.warning")
+        mock_snake = mocker.patch("pythonanywhere.files.snakesay")
+        mock_info = mocker.patch("pythonanywhere.files.logger.info")
+        destination_path = "wrong/path"
+        content = "content".encode()
+
+        PAPath(destination_path).upload(content)
+
+        assert mock_post.call_args == call(destination_path, content)
+        assert mock_snake.call_args == call("sth went wrong")
+        assert mock_warning.call_args == call(mock_snake.return_value)

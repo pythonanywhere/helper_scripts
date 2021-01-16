@@ -70,10 +70,10 @@ class Files:
             f"GET to fetch contents of {url} failed, got {result}{self._error_msg(result)}"
         )
 
-    def path_post(self, dest_path, source, as_string=False):
+    def path_post(self, dest_path, content):
         """Uploads contents of `source` to `dest_path` which should be a valid absolute path
         of a file available to a PythonAnywhere user. If `dest_path` contains directories which
-        don't exist yet they will be created.
+        don't exist yet, they will be created.
 
         With `as_string` optional keyword set to `True`, method interprets `source` as string
         containing file contents, otherwise `source` is expected to be a valid path to e file.
@@ -82,13 +82,6 @@ class Files:
         or 201 if file from `dest_path` has been created with those contents."""
 
         url = f"{self.path_endpoint}{dest_path}"
-
-        if as_string:
-            content = source
-        else:
-            if not path.isfile(source):
-                raise Exception("Source should be an existing file or a string")
-            content = open(source, "rb")
 
         result = call_api(url, "POST", files={"content": content})
 
