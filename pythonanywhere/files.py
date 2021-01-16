@@ -20,11 +20,15 @@ class PAPath:
         self.api = Files()
 
     def __repr__(self):
-        user_url = self.api.base_url.replace("/api/v0", "")
-        return f"{user_url}{self.path[1:]}"
+        return self.url 
 
     def _make_pa_url(self, path):
         return urljoin(self.api.base_url.split("api")[0], path)
+
+    @property
+    def url(self):
+        files_base = self.api.base_url.replace("/api/v0", "")
+        return f"{files_base[:-1]}{self.path}"
 
     def contents(self):
         try:
