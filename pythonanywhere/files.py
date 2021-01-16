@@ -30,6 +30,7 @@ class PAPath:
         files_base = self.api.base_url.replace("/api/v0", "")
         return f"{files_base[:-1]}{self.path}"
 
+    @property
     def contents(self):
         try:
             content = self.api.path_get(self.path)

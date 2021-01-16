@@ -46,7 +46,7 @@ class TestPAPathContents(TestFiles):
         mock_path_get = mocker.patch("pythonanywhere.api.files_api.Files.path_get")
         mock_path_get.return_value = self.readme_contents
 
-        result = PAPath(path).contents()
+        result = PAPath(path).contents
 
         assert mock_path_get.call_args == call(path)
         assert result == self.readme_contents.decode()
@@ -55,7 +55,7 @@ class TestPAPathContents(TestFiles):
         mock_path_get = mocker.patch("pythonanywhere.api.files_api.Files.path_get")
         mock_path_get.return_value = self.default_home_dir_files
 
-        result = PAPath(self.home_dir_path).contents()
+        result = PAPath(self.home_dir_path).contents
 
         assert result == self.default_home_dir_files
 
@@ -65,7 +65,7 @@ class TestPAPathContents(TestFiles):
         mock_snake = mocker.patch("pythonanywhere.files.snakesay")
         mock_warning = mocker.patch("pythonanywhere.files.logger.warning")
 
-        result = PAPath('/home/different_user').contents()
+        result = PAPath('/home/different_user').contents
 
         assert mock_snake.call_args == call("error msg")
         assert mock_warning.call_args == call(mock_snake.return_value)
