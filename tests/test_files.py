@@ -13,16 +13,22 @@ from tests.test_api_files import TestFiles
 @pytest.mark.files
 class TestPAPathInit(TestFiles):
     def test_instantiates_correctly(self, mocker):
-        pa_path = PAPath('path')
+        pa_path = PAPath("path")
 
-        assert pa_path.path == 'path'
+        assert pa_path.path == "path"
         assert type(pa_path.api) == Files
 
-    def test_repr_contains_correct_pythonanywhere_resource_url_for_instantiated_path(self):
+    def test_url_property_contains_correct_pythonanywhere_resource_url_for_instantiated_path(self):
         path = self.home_dir_path
 
-        user_path = self.base_url.replace('/api/v0', '')
-        assert PAPath(path).__repr__() == f"{user_path}{path[1:]}"
+        url = PAPath(path).__repr__()
+
+        assert url == f"{self.base_url.replace('/api/v0', '')}{path[1:]}"
+
+    def test_repr_returns_url_property_value(self, mocker):
+        mock_url = mocker.patch("pythonanywhere.files.PAPath.url")
+
+        assert PAPath("path").__repr__() == mock_url
 
     def test_make_pa_url_contains_pa_site_address(self, mocker):
         mock_urljoin = mocker.patch("pythonanywhere.files.urljoin")
