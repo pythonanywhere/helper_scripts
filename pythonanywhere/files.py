@@ -39,6 +39,14 @@ class PAPath:
             logger.warning(snakesay(str(e)))
             return None
 
+    @property
+    def tree(self):
+        try:
+            return self.api.tree_get(self.path)
+        except Exception as e:
+            logger.warning(snakesay(str(e)))
+            return None
+
     def delete(self):
         try:
             self.api.path_delete(self.path)
@@ -90,11 +98,7 @@ class PAPath:
             if result == 204:
                 logger.info(snakesay(f"{self.path} is no longer shared!"))
                 return True
-            logger.info(snakesay(f"Could not unshare {self.path}... :("))
+            logger.warning(snakesay(f"Could not unshare {self.path}... :("))
             return False
         logger.info(snakesay(f"{self.path} is not being shared, no need to stop sharing..."))
         return True
-
-    def tree(self):
-        pass
-
