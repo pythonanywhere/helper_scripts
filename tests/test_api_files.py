@@ -336,7 +336,6 @@ class TestFilesTreeGet(TestFiles):
         expected_error_msg = (
             f"GET to {url} failed, got <Response [400]>: {invalid_path} is not a directory"
         )
-        print(e.value)
         assert str(e.value) == expected_error_msg
 
     def test_raises_when_path_does_not_exist(self, api_token, api_responses):
@@ -356,5 +355,4 @@ class TestFilesTreeGet(TestFiles):
         expected_error_msg = (
             f"GET to {url} failed, got <Response [400]>: {invalid_path} does not exist"
         )
-        print(e.value)
         assert str(e.value) == expected_error_msg
