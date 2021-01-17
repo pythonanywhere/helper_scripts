@@ -1,5 +1,5 @@
 """User interface for interacting with PythonAnywhere files.
-Provides a class `Path` which should be used by helper scripts
+Provides a class `PAPath` which should be used by helper scripts
 providing features for programmatic handling of user's files."""
 
 import logging
@@ -12,8 +12,29 @@ logger = logging.getLogger(name=__name__)
 
 
 class PAPath:
-    """Class providing interface for interacting with PythonAnywhere user files.
-    """
+    """Class providing interface for interacting with PythonAnywhere
+    user files.
+
+    Class should be instantiated with a path to an existing
+    PythonAnywhere file or directory that user has access to or to an
+    available destination path for a file that would be uploaded.
+
+    To get PythonAnywhere url for given path use
+    :property:`PAPath.url`, to get its contents use
+    :property:`PAPath.contents` or :property:`PAPath.tree` for a list
+    of regular paths, when given path is directory.
+
+    To perform actions on path pointing to an existing PythonAnywhere
+    file/directory, use following methods:
+    - :method:`PAPath.delete` to delete file/directory
+    - :method:`PAPath.upload` to overwrite file contents
+    - :method:`PAPath.share` to start sharing a file
+    - :method:`PAPath.unshare` to stop sharing a file
+    - :method:`PAPath.get_sharing_url` to check if file is already
+    shared and get its sharing url
+
+    When path does not represent existing PythonAnywhere file, it can
+    be created with :method:`PAPath.upload`."""
 
     def __init__(self, path):
         self.path = path
@@ -22,16 +43,37 @@ class PAPath:
     def __repr__(self):
         return self.url 
 
-    def _make_pa_url(self, path):
+    def _make_sharing_url(self, path):
         return urljoin(self.api.base_url.split("api")[0], path)
 
     @property
     def url(self):
+        """Returns url to PythonAnywhere for `self.path`.  Does not
+        perform any checks (url might not point to an existing file)."""
+
         files_base = self.api.base_url.replace("/api/v0", "")
         return f"{files_base[:-1]}{self.path}"
 
     @property
     def contents(self):
+        """When `self.path` points to a PythonAnywhere user
+        directiory, returns a dictionary of its files and directories,
+        where file/directory names are keys and values contain
+        information about type and API endpoint.  Otherwise (when
+        `self.path` points to a file) contents of the file are
+        returned as bytes.
+
+        >>> PAPath('/home/username').contents
+        >>> {'.bashrc': {'type': 'file',
+            'url': 'https://www.pythonanywhere.com/api/v0/user/username/files/path/home/username/.bashrc'},
+            '.local': {'type': 'directory',
+            'url': 'https://www.pythonanywhere.com/api/v0/user/username/files/path/home/username/.local'},
+            ... }
+
+        >>> PAPath('/home/username/README.txt').contents
+        >>> b"some README.txt contents..."
+        """
+
         try:
             content = self.api.path_get(self.path)
             return content if type(content) == dict else content.decode("utf-8")
@@ -41,6 +83,14 @@ class PAPath:
 
     @property
     def tree(self):
+        """Returns list of regular directories and files for
+        `self.path`.  'Regular' means non dotfiles nor symlinks.
+        Result is trimmed to 1000 items.
+
+        >>> PAPath('/home/username').tree
+        >>> ['/home/username/README.txt']
+        """
+
         try:
             return self.api.tree_get(self.path)
         except Exception as e:
@@ -48,6 +98,9 @@ class PAPath:
             return None
 
     def delete(self):
+        """Returns `True` when `self.path` successfully deleted on
+        PythonAnywhere, `False` otherwise."""
+
         try:
             self.api.path_delete(self.path)
             logger.info(snakesay(f"{self.path} deleted!"))
@@ -57,6 +110,11 @@ class PAPath:
             return False
 
     def upload(self, content):
+        """Returns `True` when provided `content` successfully
+        uploaded to `self.path`.  If `self.path` already existed on
+        PythonAnywhere, it will be overwritten by the `content`.
+        When upload is not successful, returns `False`."""
+
         try:
             result = self.api.path_post(self.path, content)
         except Exception as e:
@@ -72,15 +130,21 @@ class PAPath:
         return True
 
     def get_sharing_url(self):
+        """Returns PythonAnywhere sharing url for `self.path` if file
+        is shared, empty string otherwise."""
+
         url = self.api.sharing_get(self.path)
         if url:
             logger.info(snakesay(f"{self.path} is shared at {url}"))
-            return self._make_pa_url(url)
+            return self._make_sharing_url(url)
 
         logger.info(snakesay(f"{self.path} has not been shared"))
         return ""
 
     def share(self):
+        """Returns PythonAnywhere sharing link for `self.path` or an
+        empty string when share not successful."""
+
         try:
             code, shared_url = self.api.sharing_post(self.path)
         except Exception as e:
@@ -89,9 +153,12 @@ class PAPath:
 
         msg = {200: "was already", 201: "successfully"}[code]
         logger.info(snakesay(f"{self.path} {msg} shared at {shared_url}"))
-        return self._make_pa_url(shared_url)
+        return self._make_sharing_url(shared_url)
 
     def unshare(self):
+        """Returns `True` when file unshared or has not been shared,
+        `False` otherwise."""
+
         already_shared = self.get_sharing_url()
         if already_shared:
             result = self.api.sharing_delete(self.path)
