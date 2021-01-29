@@ -128,6 +128,7 @@ class TestDeleteAllTasks:
         assert mock_logger.call_args == call(set_info=True)
 
 
+@pytest.mark.clischeduledelete
 class TestDeleteTaskById:
     def test_deletes_one_task(self, mocker):
         mock_task_from_id = mocker.patch("cli.schedule.get_task_from_id")
@@ -181,6 +182,7 @@ def task_from_id(mocker):
     yield task
 
 
+@pytest.mark.clischeduleget
 class TestGet:
     def test_logs_all_task_specs_using_tabulate(self, mocker, task_from_id):
         mock_tabulate = mocker.patch("cli.schedule.tabulate")
@@ -250,7 +252,6 @@ class TestGet:
     def test_complains_when_no_id_provided(self):
         result = runner.invoke(app, ["get", "--command"])
         assert "Missing argument 'id'" in result.stdout
-
 
 class TestList:
     def test_logs_table_with_correct_headers_and_values(self, mocker, task_list):
