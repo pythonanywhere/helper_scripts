@@ -273,3 +273,76 @@ class TestList:
         assert mock_tabulate.call_count == 0
         assert wrong_format not in tabulate_formats
         assert "Table format has to be one of" in result.stdout
+
+
+@pytest.mark.clischeduleupdate
+class TestUpdate:
+    def test_enables_task_and_sets_porcelain(self, mocker):
+        mock_task_from_id = mocker.patch("cli.schedule.get_task_from_id")
+
+        runner.invoke(app, ["update", "42", "--enable", "--porcelain"])
+
+        assert mock_task_from_id.call_args == call(42)
+        assert mock_task_from_id.return_value.method_calls == [
+            call.update_schedule({"enabled": True}, porcelain=True)
+        ]
+
+    def test_turns_off_snakesay(self, mocker):
+        mock_logger = mocker.patch("cli.schedule.get_logger")
+
+        runner.invoke(app, ["update", "42", "--quiet"])
+
+        assert mock_logger.return_value.setLevel.call_count == 0
+
+    def test_warns_when_task_update_schedule_raises(self, mocker):
+        mock_logger = mocker.patch("cli.schedule.get_logger")
+        mock_task_from_id = mocker.patch("cli.schedule.get_task_from_id")
+        mock_task_from_id.return_value.update_schedule.side_effect = Exception("error")
+        mock_snake = mocker.patch("cli.schedule.snakesay")
+
+        runner.invoke(app, ["update", "42", "--disable"])
+
+        assert mock_snake.call_args == call("error")
+        assert mock_logger.return_value.warning.call_args == call(mock_snake.return_value)
+
+    def test_ensures_proper_daily_params(self, mocker):
+        mock_task_from_id = mocker.patch("cli.schedule.get_task_from_id")
+
+        result = runner.invoke(app, ["update", "42", "--hourly"])
+
+        assert mock_task_from_id.return_value.update_schedule.call_args == call(
+            {"interval": "hourly"}, porcelain=False
+        )
+
+    def test_ensures_proper_hourly_params(self, mocker):
+        mock_task_from_id = mocker.patch("cli.schedule.get_task_from_id")
+        mock_datetime = mocker.patch("cli.schedule.datetime")
+
+        runner.invoke(app, ["update", "42", "--daily"])
+
+        assert mock_task_from_id.return_value.update_schedule.call_args == call(
+            {"interval": "daily", "hour": mock_datetime.now.return_value.hour},
+            porcelain=False
+        )
+
+    def test_validates_minute(self):
+        result = runner.invoke(app, ["update", "42", "--minute", "88"])
+        assert "88 is not in the valid range of 0 to 59" in result.stdout
+
+    def test_validates_hour(self):
+        result = runner.invoke(app, ["update", "42", "--daily", "--hour", "33"])
+        assert "33 is not in the valid range of 0 to 23" in result.stdout
+
+    def test_complains_when_no_id_provided(self):
+        result = runner.invoke(app, ["update"])
+        assert "Missing argument 'id'" in result.stdout
+
+    def test_exits_early_when_nothing_to_update(self, mocker):
+        mock_logger = mocker.patch("cli.schedule.get_logger").return_value
+        mock_snakesay = mocker.patch("cli.schedule.snakesay")
+
+        result = runner.invoke(app, ["update", "42"])
+
+        assert mock_snakesay.call_args == call("Nothing to update!")
+        assert mock_logger.warning.call_args == call(mock_snakesay.return_value)
+        assert result.exit_code == 1

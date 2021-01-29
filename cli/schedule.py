@@ -1,3 +1,6 @@
+import logging
+import sys
+from datetime import datetime
 from typing import List
 
 import typer
@@ -232,5 +235,104 @@ def list_(
 
 
 @app.command()
-def update():
-    raise NotImplementedError
+def update(
+    task_id: int = typer.Argument(..., metavar="id"),
+    command: str = typer.Option(
+        None,
+        "-c",
+        "--command",
+        help="Changes command to COMMAND (multiword commands should be quoted)"
+    ),
+    hour: int = typer.Option(
+        None,
+        "-o",
+        "--hour",
+        min=0,
+        max=23,
+        help="Changes hour to HOUR (in 24h format)"
+    ),
+    minute: int = typer.Option(
+        None,
+        "-m",
+        "--minute",
+        min=0,
+        max=59,
+        help="Changes minute to MINUTE"
+    ),
+    disable: bool = typer.Option(False, "-d", "--disable", help="Disables task"),
+    enable: bool = typer.Option(False, "-e", "--enable", help="Enables task"),
+    toggle_enabled: bool = typer.Option(
+        False, "-t", "--toggle-enabled", help="Toggles enable/disable state"
+    ),
+    daily: bool = typer.Option(
+        False,
+        "-a",
+        "--daily",
+        help=(
+            "Switches interval to daily "
+            "(when --hour is not provided, sets it automatically to current hour)"
+        )
+    ),
+    hourly: bool = typer.Option(
+        False,
+        "-u",
+        "--hourly",
+        help="Switches interval to hourly (takes precedence over --hour, i.e. sets hour to None)"
+    ),
+    quiet: bool = typer.Option(False, "-q", "--quiet", help="Turns off messages"),
+    porcelain: bool = typer.Option(
+        False, "-p", "--porcelain", help="Prints message in easy-to-parse format"
+    ),
+):
+    """Update a scheduled task.
+
+    Note that logfile name will change after updating the task but it won't be
+    created until first execution of the task.
+    To change interval from hourly to daily use --daily flag and provide --hour.
+    When --daily flag is not accompanied with --hour, new hour for the task
+    will be automatically set to current hour.
+    When changing interval from daily to hourly --hour flag is ignored.
+
+    Example:
+    Change command for a scheduled task 42:
+
+        pa schedule update 42 --command "echo new command"
+
+    Change interval of the task 42 from hourly to daily to be run at 10 am:
+
+        pa schedule update 42 --hour 10
+
+    Change interval of the task 42 from daily to hourly and set new minute:
+
+        pa schedule update 42 --minute 13 --hourly"""
+
+    kwargs = {k: v for k, v in locals().items() if k != "task_id"}
+    logger = get_logger()
+
+    porcelain = kwargs.pop("porcelain")
+    if not kwargs.pop("quiet"):
+        logger.setLevel(logging.INFO)
+
+    if not any(kwargs.values()):
+        msg = "Nothing to update!"
+        logger.warning(msg if porcelain else snakesay(msg))
+        sys.exit(1)
+
+    if kwargs.pop("hourly"):
+        kwargs["interval"] = "hourly"
+    if kwargs.pop("daily"):
+        kwargs["hour"] = kwargs["hour"] if kwargs["hour"] else datetime.now().hour
+        kwargs["interval"] = "daily"
+
+    task = get_task_from_id(task_id)
+
+    enable_opt = [k for k in ["toggle_enabled", "disable", "enable"] if kwargs.pop(k)]
+    params = {k: v for k, v in kwargs.items() if v}
+    if enable_opt:
+        lookup = {"toggle_enabled": not task.enabled, "disable": False, "enable": True}
+        params.update({"enabled": lookup[enable_opt[0]]})
+
+    try:
+        task.update_schedule(params, porcelain=porcelain)
+    except Exception as e:
+        logger.warning(snakesay(str(e)))
