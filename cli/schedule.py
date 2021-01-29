@@ -43,16 +43,17 @@ def create(
     Example:
       Create a daily task to be run at 13:15:
 
-        pa scheduled-task create --command "echo foo" --hour 13 --minute 15
+        pa schedule create --command "echo foo" --hour 13 --minute 15
 
       Create an inactive hourly task to be run 27 minutes past every hour:
 
-        pa scheduled-task create --command "echo bar" --minute 27 --disabled
+        pa schedule create --command "echo bar" --minute 27 --disabled
 
     Note:
       Once task is created its behavior may be altered later on with
-      `pa scheduled-task update` or deleted with `pa scheduled-task delete`
+      `pa schedule update` or deleted with `pa schedule delete`
       commands."""
+
     task = Task.to_be_created(
         command=command, hour=hour, minute=minute, disabled=disabled
     )
@@ -86,7 +87,7 @@ def delete_all_tasks(
     "id",
     help="""\b
     Delete one or more scheduled tasks by id.
-    ID_NUMBERS may be acquired with `pa scheduled-task list`
+    ID_NUMBERS may be acquired with `pa schedule list`
     """,
 )
 def delete_task_by_id(id_numbers: List[int] = typer.Argument(...)):

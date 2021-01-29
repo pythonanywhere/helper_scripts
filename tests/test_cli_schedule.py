@@ -3,26 +3,26 @@ from unittest.mock import call, Mock
 import pytest
 from typer.testing import CliRunner
 
-from cli.scheduled_task import app, delete_app
+from cli.schedule import app, delete_app
 
 runner = CliRunner()
 
 
 @pytest.fixture
 def task_list(mocker):
-    mock_task_list = mocker.patch("cli.scheduled_task.TaskList")
+    mock_task_list = mocker.patch("cli.schedule.TaskList")
     mock_task_list.return_value.tasks = [Mock(task_id=1), Mock(task_id=2)]
     return mock_task_list
 
 
 @pytest.fixture
 def mock_confirm(mocker):
-    return mocker.patch("cli.scheduled_task.typer.confirm")
+    return mocker.patch("cli.schedule.typer.confirm")
 
 
 class TestCreate:
     def test_calls_all_stuff_in_right_order(self, mocker):
-        mock_task_to_be_created = mocker.patch("cli.scheduled_task.Task.to_be_created")
+        mock_task_to_be_created = mocker.patch("cli.schedule.Task.to_be_created")
 
         runner.invoke(
             app,
@@ -92,7 +92,7 @@ class TestDeleteAllTasks:
 
 class TestDeleteTaskById:
     def test_deletes_one_task(self, mocker):
-        mock_task_from_id = mocker.patch("cli.scheduled_task.get_task_from_id")
+        mock_task_from_id = mocker.patch("cli.schedule.get_task_from_id")
 
         runner.invoke(delete_app, ["id", "42"])
 
@@ -100,7 +100,7 @@ class TestDeleteTaskById:
         assert mock_task_from_id.return_value.method_calls == [call.delete_schedule()]
 
     def test_deletes_some_tasks(self, mocker):
-        mock_task_from_id = mocker.patch("cli.scheduled_task.get_task_from_id")
+        mock_task_from_id = mocker.patch("cli.schedule.get_task_from_id")
 
         runner.invoke(delete_app, ["id", "24", "42"])
 
