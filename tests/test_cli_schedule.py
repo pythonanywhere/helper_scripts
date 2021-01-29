@@ -1,3 +1,4 @@
+import getpass
 from unittest.mock import call, Mock
 
 import pytest
@@ -112,3 +113,92 @@ class TestDeleteTaskById:
             call.delete_schedule(),
             call.delete_schedule(),
         ]
+
+
+@pytest.fixture()
+def task_from_id(mocker):
+    user = getpass.getuser()
+    specs = {
+        "can_enable": False,
+        "command": "echo foo",
+        "enabled": True,
+        "expiry": "2999-01-13",
+        "hour": 10,
+        "interval": "daily",
+        "logfile": f"/user/{user}/files/foo",
+        "minute": 23,
+        "printable_time": "10:23",
+        "task_id": 42,
+        "username": user,
+    }
+    task = mocker.patch("cli.schedule.get_task_from_id")
+    for spec, value in specs.items():
+        setattr(task.return_value, spec, value)
+    yield task
+
+
+class TestGet:
+    def test_logs_all_task_specs_using_tabulate(self, mocker, task_from_id):
+        mock_tabulate = mocker.patch("cli.schedule.tabulate")
+        mock_snakesay = mocker.patch("cli.schedule.snakesay")
+        mock_logger = mocker.patch("cli.schedule.get_logger").return_value
+
+        runner.invoke(app, ["get", "42"])
+
+        assert task_from_id.call_args == call(42)
+        assert mock_snakesay.call_count == 0
+        assert mock_tabulate.call_args == call(
+            [
+                ["command", "echo foo"],
+                ["enabled", True],
+                ["expiry", "2999-01-13"],
+                ["hour", 10],
+                ["interval", "daily"],
+                ["logfile", f"/user/{getpass.getuser()}/files/foo"],
+                ["minute", 23],
+                ["printable_time", "10:23"],
+            ],
+            tablefmt="simple",
+        )
+        assert mock_logger.info.call_args_list == [
+            call("Task 42 specs: "),
+            call(mock_tabulate.return_value)
+        ]
+
+    def test_logs_all_task_specs_using_snakesay(self, mocker, task_from_id):
+        mock_tabulate = mocker.patch("cli.schedule.tabulate")
+        mock_snakesay = mocker.patch("cli.schedule.snakesay")
+        mock_logger = mocker.patch("cli.schedule.get_logger").return_value
+
+        runner.invoke(app, ["get", "42", "--snakesay"])
+
+        assert task_from_id.call_args == call(42)
+        snake_args = (
+            "Task 42 specs: <command>: echo foo, <enabled>: True, <expiry>: 2999-01-13, "
+            f"<hour>: 10, <interval>: daily, <logfile>: /user/{getpass.getuser()}/files/foo, "
+            "<minute>: 23, <printable_time>: 10:23"
+        )
+        assert mock_snakesay.call_args == call(snake_args)
+        assert mock_tabulate.call_count == 0
+        assert mock_logger.info.call_args == call(mock_snakesay.return_value)
+
+    def test_logs_requested_task_spec(self, mocker, task_from_id):
+        mock_tabulate = mocker.patch("cli.schedule.tabulate")
+
+        runner.invoke(app, ["get", "42", "--command"])
+
+        assert task_from_id.call_args == call(42)
+        assert mock_tabulate.call_args == call([["command", "echo foo"]], tablefmt="simple")
+
+    def test_logs_only_value_of_requested_task_spec(self, mocker, task_from_id):
+        mock_tabulate = mocker.patch("cli.schedule.tabulate")
+        mock_snakesay = mocker.patch("cli.schedule.snakesay")
+        mock_logger = mocker.patch("cli.schedule.get_logger")
+
+        runner.invoke(app, ["get", "42", "--printable-time", "--no-spec"])
+
+        assert mock_tabulate.call_count == 0
+        assert mock_snakesay.call_count == 0
+        assert task_from_id.call_args == call(42)
+        assert mock_logger.call_args == call(set_info=True)
+        assert mock_logger.return_value.info.call_args == call("10:23")

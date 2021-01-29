@@ -1,8 +1,10 @@
 from typing import List
 
 import typer
+from tabulate import tabulate
 
-from pythonanywhere.scripts_commons import get_task_from_id
+from pythonanywhere.scripts_commons import get_logger, get_task_from_id
+from pythonanywhere.snakesay import snakesay
 from pythonanywhere.task import Task, TaskList
 
 app = typer.Typer()
@@ -97,8 +99,93 @@ def delete_task_by_id(id_numbers: List[int] = typer.Argument(...)):
 
 
 @app.command()
-def describe():
-    raise NotImplementedError
+def get(
+    task_id: int = typer.Argument(..., metavar="id"),
+    command: bool = typer.Option(
+        False, "-c", "--command", help="Prints task's command"
+    ),
+    enabled: bool = typer.Option(
+        False, "-e", "--enabled", help="Prints task's enabled status (True or False)"
+    ),
+    expiry: bool = typer.Option(
+        False, "-x", "--expiry", help="Prints task's expiry date"
+    ),
+    minute: bool = typer.Option(
+        False, "-m", "--minute", help="Prints task's scheduled minute"
+    ),
+    hour: bool = typer.Option(
+        False, "-o", "--hour", help="Prints task's scheduled hour (if daily)"
+    ),
+    interval: bool = typer.Option(
+        False, "-i", "--interval", help="Prints task's frequency (daily or hourly)"
+    ),
+    logfile: bool = typer.Option(
+        False, "-l", "--logfile", help="Prints task's current log file path"
+    ),
+    printable_time: bool = typer.Option(
+        False, "-p", "--printable-time", help="Prints task's scheduled time"
+    ),
+    no_spec: bool = typer.Option(
+        False, "-n", "--no-spec", help="Prints only values without spec names"
+    ),
+    snake: bool = typer.Option(
+        False, "-s", "--snakesay", help="Turns on snakesay... because why not"
+    )
+):
+    """Get scheduled task's specs.
+
+    Available specs are: command, enabled, interval, hour, minute, printable-time,
+    logfile, expiry. If no option specified, script will output all mentioned specs.
+
+    Note that logfile query provides path for current (last) logfile. There may be
+    several logfiles for each task.
+    If task has been updated (e.g. by `pa_update_scheduled_task.py` script) logfile
+    name has been changed too, but the file will not be created until first execution
+    of the task. Thus getting logfile path via API call does not necessarily mean the
+    file exists on the server yet.
+
+    Note:
+    Task ID may be found using pa schedule list command.
+
+    Example:
+    Get all specs for task with id 42:
+
+        pa schedule get 42
+
+    Get only logfile name for task with id 42:
+
+        pa schedule get 42 --logfile --no-spec"""
+
+    kwargs = {k: v for k, v in locals().items() if k != "task_id"}
+    logger = get_logger(set_info=True)
+
+    task = get_task_from_id(task_id)
+
+    print_snake = kwargs.pop("snake")
+    print_only_values = kwargs.pop("no_spec")
+
+    specs = (
+        {spec: getattr(task, spec) for spec in kwargs if kwargs[spec]}
+        if any([val for val in kwargs.values()])
+        else {spec: getattr(task, spec) for spec in kwargs}
+    )
+
+    if specs.get("logfile"):
+        specs.update({"logfile": task.logfile.replace(f"/user/{task.user}/files", "")})
+
+    intro = f"Task {task_id} specs: "
+    if print_only_values:
+        specs = "\n".join([str(val) for val in specs.values()])
+        logger.info(specs)
+    elif print_snake:
+        specs = [f"<{spec}>: {value}" for spec, value in specs.items()]
+        specs.sort()
+        logger.info(snakesay(intro + ", ".join(specs)))
+    else:
+        table = [[spec, val] for spec, val in specs.items()]
+        table.sort(key=lambda x: x[0])
+        logger.info(intro)
+        logger.info(tabulate(table, tablefmt="simple"))
 
 
 @app.command("list")
