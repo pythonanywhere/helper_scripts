@@ -11,7 +11,7 @@ app = typer.Typer()
 
 
 @app.command()
-def create(
+def set(
     command: str = typer.Option(
         ..., "-c", "--command", help="Task's command to be scheduled"
     ),
@@ -45,11 +45,11 @@ def create(
     Example:
       Create a daily task to be run at 13:15:
 
-        pa schedule create --command "echo foo" --hour 13 --minute 15
+        pa schedule set --command "echo foo" --hour 13 --minute 15
 
       Create an inactive hourly task to be run 27 minutes past every hour:
 
-        pa schedule create --command "echo bar" --minute 27 --disabled
+        pa schedule set --command "echo bar" --minute 27 --disabled
 
     Note:
       Once task is created its behavior may be altered later on with

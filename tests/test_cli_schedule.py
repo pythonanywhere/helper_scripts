@@ -21,14 +21,14 @@ def mock_confirm(mocker):
     return mocker.patch("cli.schedule.typer.confirm")
 
 
-class TestCreate:
+class TestSet:
     def test_calls_all_stuff_in_right_order(self, mocker):
         mock_task_to_be_created = mocker.patch("cli.schedule.Task.to_be_created")
 
         runner.invoke(
             app,
             [
-                "create",
+                "set",
                 "--command",
                 "echo foo",
                 "--hour",
@@ -46,13 +46,13 @@ class TestCreate:
         ]
 
     def test_validates_minutes(self):
-        result = runner.invoke(app, ["create", "-c", "echo foo", "-h", "8", "-m", "66"])
+        result = runner.invoke(app, ["set", "-c", "echo foo", "-h", "8", "-m", "66"])
 
         assert "Invalid value" in result.stdout
         assert "66 is not in the valid range of 0 to 59" in result.stdout
 
     def test_validates_hours(self):
-        result = runner.invoke(app, ["create", "-c", "echo foo", "-h", "66", "-m", "1"])
+        result = runner.invoke(app, ["set", "-c", "echo foo", "-h", "66", "-m", "1"])
         assert "Invalid value" in result.stdout
         assert "66 is not in the valid range of 0 to 23" in result.stdout
 
