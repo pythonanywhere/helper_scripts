@@ -3,7 +3,7 @@ from typing import List
 import typer
 from tabulate import tabulate
 
-from pythonanywhere.scripts_commons import get_logger, get_task_from_id
+from pythonanywhere.scripts_commons import get_logger, get_task_from_id, tabulate_formats
 from pythonanywhere.snakesay import snakesay
 from pythonanywhere.task import Task, TaskList
 
@@ -194,9 +194,41 @@ def get(
         logger.info(tabulate(table, tablefmt="simple"))
 
 
+def tablefmt_callback(value: str):
+    if value not in tabulate_formats:
+        raise typer.BadParameter(f"Table format has to be one of: {', '.join(tabulate_formats)}")
+    return value
+
+
 @app.command("list")
-def list_():
-    raise NotImplementedError
+def list_(
+    tablefmt: str = typer.Option(
+        "simple", "-f", "--format", help="Table format", callback=tablefmt_callback
+    )
+):
+    """Get list of user's scheduled tasks as a table with columns:
+    id, interval, at (hour:minute/minute past), status (enabled/disabled), command.
+
+    Note:
+    This script provides an overview of all tasks. Once a task id is
+    known and some specific data is required it's more convenient to get
+    it using `pa schedule get` command instead of parsing the table.
+    """
+
+    logger = get_logger(set_info=True)
+
+    headers = "id", "interval", "at", "status", "command"
+    attrs = "task_id", "interval", "printable_time", "enabled", "command"
+
+    def stringify_values(task, attr):
+        value = getattr(task, attr)
+        if attr == "enabled":
+            value = "enabled" if value else "disabled"
+        return value
+
+    table = [[stringify_values(task, attr) for attr in attrs] for task in TaskList().tasks]
+    msg = tabulate(table, headers, tablefmt=tablefmt) if table else snakesay("No scheduled tasks")
+    logger.info(msg)
 
 
 @app.command()

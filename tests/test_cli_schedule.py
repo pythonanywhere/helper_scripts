@@ -5,16 +5,34 @@ import pytest
 from typer.testing import CliRunner
 
 from cli.schedule import app, delete_app
+from pythonanywhere.scripts_commons import tabulate_formats
 
 runner = CliRunner()
 
 
 @pytest.fixture
 def task_list(mocker):
+    username = getpass.getuser()
+    specs1 = {
+        "can_enable": False,
+        "command": "echo foo",
+        "enabled": True,
+        "expiry": None,
+        "extend_url": f"/user/{username}/schedule/task/42/extend",
+        "hour": 16,
+        "task_id": 42,
+        "interval": "daily",
+        "logfile": "/user/{username}/files/var/log/tasklog-126708-daily-at-1600-echo_foo.log",
+        "minute": 0,
+        "printable_time": "16:00",
+        "url": f"/api/v0/user/{username}/schedule/42",
+        "user": username,
+    }
+    specs2 = {**specs1}
+    specs2.update({"task_id": 43, "enabled": False})
     mock_task_list = mocker.patch("cli.schedule.TaskList")
-    mock_task_list.return_value.tasks = [Mock(task_id=1), Mock(task_id=2)]
+    mock_task_list.return_value.tasks = [Mock(**specs1), Mock(**specs2)]
     return mock_task_list
-
 
 @pytest.fixture
 def mock_confirm(mocker):
@@ -213,3 +231,45 @@ class TestGet:
         assert task_from_id.call_args == call(42)
         assert mock_logger.call_args == call(set_info=True)
         assert mock_logger.return_value.info.call_args == call("10:23")
+@pytest.mark.clischedulelist
+class TestList:
+    def test_logs_table_with_correct_headers_and_values(self, mocker, task_list):
+        mock_logger = mocker.patch("cli.schedule.get_logger")
+        mock_tabulate = mocker.patch("cli.schedule.tabulate")
+
+        result = runner.invoke(app, ["list", "--format", "orgtbl"])
+
+        headers = "id", "interval", "at", "status", "command"
+        attrs = "task_id", "interval", "printable_time", "enabled", "command"
+        table = [[getattr(task, attr) for attr in attrs] for task in task_list.return_value.tasks]
+        table = [
+            ["enabled" if spec == True else "disabled" if spec == False else spec for spec in row]
+            for row in table
+        ]
+        assert mock_logger.call_args == call(set_info=True)
+        assert task_list.call_count == 1
+        assert mock_tabulate.call_args == call(table, headers, tablefmt="orgtbl")
+        assert mock_logger.return_value.info.call_args == call(mock_tabulate.return_value)
+
+    def test_snakesays_when_no_scheduled_tasks(self, mocker):
+        mock_logger = mocker.patch("cli.schedule.get_logger").return_value
+        mock_tabulate = mocker.patch("cli.schedule.tabulate")
+        mock_snakesay = mocker.patch("cli.schedule.snakesay")
+        mock_tasks = mocker.patch("cli.schedule.TaskList")
+        mock_tasks.return_value.tasks = []
+
+        runner.invoke(app, ["list"])
+
+        assert mock_tabulate.call_count == 0
+        assert mock_snakesay.call_args == call("No scheduled tasks")
+        assert mock_logger.info.call_args == call(mock_snakesay.return_value)
+
+    def test_warns_when_wrong_format_provided(self, mocker, task_list):
+        mock_tabulate = mocker.patch("cli.schedule.tabulate")
+        wrong_format = "excel"
+
+        result = runner.invoke(app, ["list", "--format", "excel"])
+
+        assert mock_tabulate.call_count == 0
+        assert wrong_format not in tabulate_formats
+        assert "Table format has to be one of" in result.stdout
