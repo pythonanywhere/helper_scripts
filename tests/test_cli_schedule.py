@@ -23,6 +23,7 @@ def mock_confirm(mocker):
 
 class TestSet:
     def test_calls_all_stuff_in_right_order(self, mocker):
+        mock_logger = mocker.patch("cli.schedule.get_logger")
         mock_task_to_be_created = mocker.patch("cli.schedule.Task.to_be_created")
 
         runner.invoke(
@@ -38,6 +39,7 @@ class TestSet:
             ],
         )
 
+        assert mock_logger.call_args == call(set_info=True)
         assert mock_task_to_be_created.call_args == call(
             command="echo foo", hour=8, minute=10, disabled=False
         )
@@ -73,12 +75,7 @@ class TestDeleteAllTasks:
     def test_exits_when_user_changes_mind(self, task_list, mock_confirm):
         mock_confirm.return_value = False
 
-        runner.invoke(
-            delete_app,
-            [
-                "nuke",
-            ],
-        )
+        runner.invoke(delete_app, ["nuke"])
 
         assert task_list.call_count == 0
 
@@ -89,6 +86,13 @@ class TestDeleteAllTasks:
         assert task_list.call_count == 1
         for task in task_list.return_value.tasks:
             assert task.method_calls == [call.delete_schedule()]
+
+    def test_sets_logging_to_info(self, mocker):
+        mock_logger = mocker.patch("cli.schedule.get_logger")
+
+        runner.invoke(delete_app, ["nuke"])
+
+        assert mock_logger.call_args == call(set_info=True)
 
 
 class TestDeleteTaskById:
@@ -113,6 +117,13 @@ class TestDeleteTaskById:
             call.delete_schedule(),
             call.delete_schedule(),
         ]
+
+    def test_sets_logging_to_info(self, mocker):
+        mock_logger = mocker.patch("cli.schedule.get_logger")
+
+        runner.invoke(delete_app, ["id", "24", "42"])
+
+        assert mock_logger.call_args == call(set_info=True)
 
 
 @pytest.fixture()
