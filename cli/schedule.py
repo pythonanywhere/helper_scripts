@@ -59,12 +59,15 @@ def set(
       `pa schedule update` or deleted with `pa schedule delete`
       commands."""
 
-    get_logger(set_info=True)
+    logger = get_logger(set_info=True)
 
     task = Task.to_be_created(
         command=command, hour=hour, minute=minute, disabled=disabled
     )
-    task.create_schedule()
+    try:
+        task.create_schedule()
+    except Exception as e:
+        logger.warning(snakesay(str(e)))
 
 
 delete_app = typer.Typer()

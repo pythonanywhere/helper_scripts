@@ -77,6 +77,21 @@ class TestSet:
         assert "Invalid value" in result.stdout
         assert "66 is not in the valid range of 0 to 23" in result.stdout
 
+    def test_logs_warning_when_create_schedule_raises(self, mocker):
+        mock_logger = mocker.patch("cli.schedule.get_logger").return_value
+        mock_snakesay = mocker.patch("cli.schedule.snakesay")
+        mock_task_to_be_created = mocker.patch("cli.schedule.Task.to_be_created")
+        error_msg = (
+            "POST to set new task via API failed, got <Response [403]>: "
+            '{"detail":"You have reached your maximum number of scheduled tasks"}'
+        )
+        mock_task_to_be_created.return_value.create_schedule.side_effect = Exception(error_msg)
+
+        runner.invoke(app, ["set", "--command", "echo foo", "--minute", "13"])
+
+        assert mock_snakesay.call_args == call(error_msg)
+        assert mock_logger.warning.call_args == call(mock_snakesay.return_value)
+
 
 @pytest.mark.clischeduledeleteall
 class TestDeleteAllTasks:
@@ -239,6 +254,7 @@ class TestGet:
     def test_complains_when_no_id_provided(self):
         result = runner.invoke(app, ["get", "--command"])
         assert "Missing argument 'id'" in result.stdout
+
 
 @pytest.mark.clischedulelist
 class TestList:
