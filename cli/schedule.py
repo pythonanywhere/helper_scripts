@@ -70,7 +70,7 @@ app.add_typer(
 )
 
 
-@delete_app.command("nuke", help="Delete all scheduled tasks.")
+@delete_app.command("all", help="Delete all scheduled tasks.")
 def delete_all_tasks(
     force: bool = typer.Option(
         False, "-f", "--force", help="Turns off user confirmation before deleting tasks"

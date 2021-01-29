@@ -63,7 +63,7 @@ class TestDeleteAllTasks:
     def test_deletes_all_tasks_with_user_permission(self, task_list, mock_confirm):
         mock_confirm.return_value = True
 
-        runner.invoke(delete_app, ["nuke"])
+        runner.invoke(delete_app, ["all"])
 
         assert mock_confirm.call_args == call(
             "This will irrevocably delete all your tasks, proceed?"
@@ -75,12 +75,12 @@ class TestDeleteAllTasks:
     def test_exits_when_user_changes_mind(self, task_list, mock_confirm):
         mock_confirm.return_value = False
 
-        runner.invoke(delete_app, ["nuke"])
+        runner.invoke(delete_app, ["all"])
 
         assert task_list.call_count == 0
 
     def test_deletes_all_tasks_when_forced(self, task_list, mock_confirm):
-        runner.invoke(delete_app, ["nuke", "--force"])
+        runner.invoke(delete_app, ["all", "--force"])
 
         assert mock_confirm.call_count == 0
         assert task_list.call_count == 1
@@ -90,7 +90,7 @@ class TestDeleteAllTasks:
     def test_sets_logging_to_info(self, mocker):
         mock_logger = mocker.patch("cli.schedule.get_logger")
 
-        runner.invoke(delete_app, ["nuke"])
+        runner.invoke(delete_app, ["all"])
 
         assert mock_logger.call_args == call(set_info=True)
 
