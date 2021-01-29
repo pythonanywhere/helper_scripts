@@ -56,6 +56,8 @@ def set(
       `pa schedule update` or deleted with `pa schedule delete`
       commands."""
 
+    get_logger(set_info=True)
+
     task = Task.to_be_created(
         command=command, hour=hour, minute=minute, disabled=disabled
     )
@@ -74,6 +76,8 @@ def delete_all_tasks(
         False, "-f", "--force", help="Turns off user confirmation before deleting tasks"
     ),
 ):
+    get_logger(set_info=True)
+
     if not force:
         user_response = typer.confirm(
             "This will irrevocably delete all your tasks, proceed?"
@@ -93,6 +97,8 @@ def delete_all_tasks(
     """,
 )
 def delete_task_by_id(id_numbers: List[int] = typer.Argument(...)):
+    get_logger(set_info=True)
+
     for task_id in id_numbers:
         task = get_task_from_id(task_id, no_exit=True)
         task.delete_schedule()
