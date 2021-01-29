@@ -39,6 +39,7 @@ def mock_confirm(mocker):
     return mocker.patch("cli.schedule.typer.confirm")
 
 
+@pytest.mark.clischeduleset
 class TestSet:
     def test_calls_all_stuff_in_right_order(self, mocker):
         mock_logger = mocker.patch("cli.schedule.get_logger")
@@ -77,6 +78,7 @@ class TestSet:
         assert "66 is not in the valid range of 0 to 23" in result.stdout
 
 
+@pytest.mark.clischeduledeleteall
 class TestDeleteAllTasks:
     def test_deletes_all_tasks_with_user_permission(self, task_list, mock_confirm):
         mock_confirm.return_value = True
@@ -113,6 +115,7 @@ class TestDeleteAllTasks:
         assert mock_logger.call_args == call(set_info=True)
 
 
+@pytest.mark.clischeduledelete
 class TestDeleteTaskById:
     def test_deletes_one_task(self, mocker):
         mock_task_from_id = mocker.patch("cli.schedule.get_task_from_id")
@@ -166,6 +169,7 @@ def task_from_id(mocker):
     yield task
 
 
+@pytest.mark.clischeduleget
 class TestGet:
     def test_logs_all_task_specs_using_tabulate(self, mocker, task_from_id):
         mock_tabulate = mocker.patch("cli.schedule.tabulate")
@@ -231,6 +235,11 @@ class TestGet:
         assert task_from_id.call_args == call(42)
         assert mock_logger.call_args == call(set_info=True)
         assert mock_logger.return_value.info.call_args == call("10:23")
+
+    def test_complains_when_no_id_provided(self):
+        result = runner.invoke(app, ["get", "--command"])
+        assert "Missing argument 'id'" in result.stdout
+
 @pytest.mark.clischedulelist
 class TestList:
     def test_logs_table_with_correct_headers_and_values(self, mocker, task_list):
