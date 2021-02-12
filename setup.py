@@ -27,7 +27,7 @@ setup(
         "Programming Language :: Python :: 3.6",
     ],
     keywords="pythonanywhere api cloud web hosting",
-    packages=["pythonanywhere", "pythonanywhere.api"],
+    packages=["cli", "pythonanywhere", "pythonanywhere.api"],
     install_requires=["docopt", "python-dateutil", "requests", "schema", "tabulate", "typer"],
     extras_require={},
     python_requires=">=3.6",
