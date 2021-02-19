@@ -8,9 +8,10 @@
 - adds static files config
 
 Usage:
-  pa_autoconfigure_django.py <git-repo-url> [--domain=<domain> --python=<python-version>] [--nuke]
+  pa_autoconfigure_django.py <git-repo-url> [--branch=<branch> --domain=<domain> --python=<python-version>] [--nuke]
 
 Options:
+  --branch=<branch>         Branch name in case of multiple branches   [default: None]
   --domain=<domain>         Domain name, eg www.mydomain.com   [default: your-username.pythonanywhere.com]
   --python=<python-version> Python version, eg "3.8"    [default: 3.6]
   --nuke                    *Irrevocably* delete any existing web app config on this domain. Irrevocably.
@@ -23,11 +24,12 @@ from pythonanywhere.snakesay import snakesay
 from pythonanywhere.utils import ensure_domain
 
 
-def main(repo_url, domain, python_version, nuke):
+def main(repo_url, branch, domain, python_version, nuke):
     domain = ensure_domain(domain)
     project = DjangoProject(domain, python_version)
     project.sanity_checks(nuke=nuke)
     project.download_repo(repo_url, nuke=nuke),
+    project.ensure_branch(branch),
     project.create_virtualenv(nuke=nuke)
     project.create_webapp(nuke=nuke)
     project.add_static_file_mappings()
@@ -44,4 +46,10 @@ def main(repo_url, domain, python_version, nuke):
 
 if __name__ == '__main__':
     arguments = docopt(__doc__)
-    main(arguments['<git-repo-url>'], arguments['--domain'], arguments['--python'], nuke=arguments.get('--nuke'))
+    main(
+        arguments['<git-repo-url>'],
+        arguments['--branch'],
+        arguments['--domain'],
+        arguments['--python'],
+        nuke=arguments.get('--nuke')
+    )

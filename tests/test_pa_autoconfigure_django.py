@@ -13,11 +13,12 @@ class TestMain:
 
     def test_calls_all_stuff_in_right_order(self):
         with patch('scripts.pa_autoconfigure_django.DjangoProject') as mock_DjangoProject:
-            main('repo.url', 'www.domain.com', 'python.version', nuke='nuke option')
+            main('repo.url', 'foo', 'www.domain.com', 'python.version',  nuke='nuke option')
         assert mock_DjangoProject.call_args == call('www.domain.com', 'python.version')
         assert mock_DjangoProject.return_value.method_calls == [
             call.sanity_checks(nuke='nuke option'),
             call.download_repo('repo.url', nuke='nuke option'),
+            call.ensure_branch("foo"),
             call.create_virtualenv(nuke='nuke option'),
             call.create_webapp(nuke='nuke option'),
             call.add_static_file_mappings(),
@@ -40,7 +41,7 @@ class TestMain:
         with patch('scripts.pa_autoconfigure_django.DjangoProject.update_wsgi_file'):
             with patch('scripts.pa_autoconfigure_django.DjangoProject.start_bash'):
                 with patch('pythonanywhere.api.webapp.call_api'):
-                    main(repo, domain, running_python_version, nuke=False)
+                    main(repo, "None", domain, running_python_version, nuke=False)
 
         expected_django_version = '3.0.6'
         expected_virtualenv = virtualenvs_folder / domain

@@ -39,7 +39,6 @@ def mock_confirm(mocker):
     return mocker.patch("cli.schedule.typer.confirm")
 
 
-@pytest.mark.clischeduleset
 class TestSet:
     def test_calls_all_stuff_in_right_order(self, mocker):
         mock_logger = mocker.patch("cli.schedule.get_logger")
@@ -93,7 +92,6 @@ class TestSet:
         assert mock_logger.warning.call_args == call(mock_snakesay.return_value)
 
 
-@pytest.mark.clischeduledeleteall
 class TestDeleteAllTasks:
     def test_deletes_all_tasks_with_user_permission(self, task_list, mock_confirm):
         mock_confirm.return_value = True
@@ -130,7 +128,6 @@ class TestDeleteAllTasks:
         assert mock_logger.call_args == call(set_info=True)
 
 
-@pytest.mark.clischeduledelete
 class TestDeleteTaskById:
     def test_deletes_one_task(self, mocker):
         mock_task_from_id = mocker.patch("cli.schedule.get_task_from_id")
@@ -184,7 +181,6 @@ def task_from_id(mocker):
     yield task
 
 
-@pytest.mark.clischeduleget
 class TestGet:
     def test_logs_all_task_specs_using_tabulate(self, mocker, task_from_id):
         mock_tabulate = mocker.patch("cli.schedule.tabulate")
@@ -256,7 +252,6 @@ class TestGet:
         assert "Missing argument 'id'" in result.stdout
 
 
-@pytest.mark.clischedulelist
 class TestList:
     def test_logs_table_with_correct_headers_and_values(self, mocker, task_list):
         mock_logger = mocker.patch("cli.schedule.get_logger")
@@ -300,7 +295,6 @@ class TestList:
         assert "Table format has to be one of" in result.stdout
 
 
-@pytest.mark.clischeduleupdate
 class TestUpdate:
     def test_enables_task_and_sets_porcelain(self, mocker):
         mock_task_from_id = mocker.patch("cli.schedule.get_task_from_id")
