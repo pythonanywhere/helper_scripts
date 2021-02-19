@@ -11,12 +11,35 @@ from .project import Project
 
 
 class DjangoProject(Project):
-
     def download_repo(self, repo, nuke):
         if nuke and self.project_path.exists():
             shutil.rmtree(str(self.project_path))
         subprocess.check_call(['git', 'clone', repo, str(self.project_path)])
 
+    def ensure_branch(self, branch):
+        output = subprocess.check_output(
+            ["git", "-C", str(self.project_path), "branch", "-r"]
+        ).decode().rstrip().split("\n")
+        branches = [x.strip().replace("origin/", "") for x in output if "->" not in x]
+        if branch == "None" and len(branches) == 1:
+            return
+        if branch == "None":
+            shutil.rmtree(str(self.project_path))
+            raise SanityException(
+                "There are many branches in your repo. "
+                "You need to specify which branch to use by adding "
+                "--branch=<branch> option to the command."
+            )
+        if branch not in branches:
+            shutil.rmtree(str(self.project_path))
+            raise SanityException(f"You do not have a {branch} branch in your repo")
+        #
+        current_branch = subprocess.check_output(
+            ["git", "-C", str(self.project_path), "rev-parse", "--abbrev-ref HEAD"]
+        ).decode().strip()
+
+        if current_branch != branch:
+            subprocess.check_call(["git", "-C", str(self.project_path), "checkout", branch])
 
     def create_virtualenv(self, django_version=None, nuke=False):
         self.virtualenv.create(nuke=nuke)

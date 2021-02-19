@@ -36,7 +36,7 @@ class TestDownloadRepo:
         mock_subprocess.check_call.side_effect = lambda *_, **__: Path(project.project_path).mkdir()
 
         project.download_repo("repo", nuke=True)
-        assert "old-thing.txt" not in project.project_path.iterdir()
+        assert (project.project_path / "old-thing.txt") not in project.project_path.iterdir()
 
     def test_nuke_option_ignores_directory_doesnt_exist(self, mock_subprocess, fake_home, virtualenvs_folder):
         project = DjangoProject("www.a.domain.com", "py.version")
@@ -45,6 +45,92 @@ class TestDownloadRepo:
         project.download_repo("repo", nuke=True)  # should not raise
 
         assert project.project_path.is_dir()
+
+
+class TestEnsureBranch:
+    def test_checks_happy_path_with_one_branch(self, mock_subprocess, fake_home, virtualenvs_folder):
+        project = DjangoProject("www.a.domain.com", "py.version")
+        mock_subprocess.check_output.side_effect = [
+            b"  origin/HEAD -> origin/bar\n  origin/bar\n", b"bar\n"
+        ]
+        project.ensure_branch("None")  # should not raise
+
+    def test_checks_if_branch_exists(self, mock_subprocess, fake_home, virtualenvs_folder):
+        project = DjangoProject("www.a.domain.com", "py.version")
+        mock_subprocess.check_output.side_effect = [
+            b"  origin/HEAD -> origin/bar\n  origin/foo\n  origin/bar\n  origin/baz\n", b"bar\n"
+        ]
+        project.ensure_branch("foo")  # should not raise
+
+    def test_checks_if_branch_exists(self, mock_subprocess, fake_home, virtualenvs_folder):
+        project = DjangoProject("www.a.domain.com", "py.version")
+        mock_subprocess.check_output.side_effect = [
+            b"  origin/HEAD -> origin/bar\n  origin/foo\n  origin/bar\n  origin/baz\n", b"bar\n"
+        ]
+
+        project.ensure_branch("foo")  # should not raise
+
+    def test_deletes_directory_if_branch_does_not_exist(self, mock_subprocess, fake_home, virtualenvs_folder):
+        project = DjangoProject("www.a.domain.com", "py.version")
+        project.project_path.mkdir()
+        mock_subprocess.check_output.return_value = b"  origin/HEAD -> origin/bar\n  origin/bar\n  origin/baz\n"
+
+        with pytest.raises(SanityException):
+            project.ensure_branch("foo")
+
+        assert not project.project_path.exists()
+
+    def test_program_raises_if_branch_does_not_exist(self, mock_subprocess, fake_home, virtualenvs_folder):
+        project = DjangoProject("www.a.domain.com", "py.version")
+        project.project_path.mkdir()
+        mock_subprocess.check_output.return_value = b"  origin/HEAD -> origin/bar\n  origin/bar\n  origin/baz\n"
+
+        with pytest.raises(SanityException) as e:
+            project.ensure_branch("foo")
+
+        assert "You do not have a foo branch in your repo" in str(e.value)
+
+    def test_deletes_directory_if_multiple_branches(self,  mock_subprocess, fake_home, virtualenvs_folder):
+        project = DjangoProject("www.a.domain.com", "py.version")
+        project.project_path.mkdir()
+        mock_subprocess.check_output.return_value = b"  origin/HEAD -> origin/bar\n  origin/foo\n  origin/bar\n  origin/baz\n"
+
+        with pytest.raises(SanityException) as e:
+            project.ensure_branch("None")
+
+        assert not project.project_path.exists()
+
+    def test_raises_if_multiple_branches(self,  mock_subprocess, fake_home, virtualenvs_folder):
+        project = DjangoProject("www.a.domain.com", "py.version")
+        project.project_path.mkdir()
+        mock_subprocess.check_output.return_value = b"  origin/HEAD -> origin/bar\n  origin/foo\n  origin/bar\n  origin/baz\n"
+
+        with pytest.raises(SanityException) as e:
+            project.ensure_branch("None")
+
+        assert "There are many branches in your repo." in str(e.value)
+
+    def test_checkouts_branch_if_not_current_head(self,  mock_subprocess, fake_home, virtualenvs_folder):
+        project = DjangoProject("www.a.domain.com", "py.version")
+        mock_subprocess.check_output.side_effect = [
+            b"  origin/HEAD -> origin/bar\n  origin/foo\n  origin/bar\n  origin/baz\n", b"bar\n"
+        ]
+
+        project.ensure_branch("baz")
+
+        assert mock_subprocess.check_call.call_args == call(
+            ["git", "-C", str(project.project_path), "checkout", "baz"]
+        )
+
+    def test_does_not_checkouts_branch_if_current_head(self,  mock_subprocess, fake_home, virtualenvs_folder):
+        project = DjangoProject("www.a.domain.com", "py.version")
+        mock_subprocess.check_output.side_effect = [
+            b"  origin/HEAD -> origin/bar\n  origin/foo\n  origin/bar\n  origin/baz\n", b"bar\n"
+        ]
+
+        project.ensure_branch("bar")
+
+        assert mock_subprocess.check_call.call_count == 0
 
 
 class TestDetectDjangoVersion:
