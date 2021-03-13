@@ -62,25 +62,17 @@ def _format_tree(data, current):
     filler     = "    "
 
     formatted = []
-    following = []
+    level_tracker = set()
 
     for idx, entry in enumerate(reversed(data)):
         entry = re.sub(r"/$", "\0", entry.replace(current, ""))
         chunks = [cc for cc in entry.split('/') if cc]
         item = chunks[-1].replace("\0", "/")
-
         level = len(chunks) - 1
-        following = [ll for ll in following if ll <= level]
-
-        indent = ""
-        for lvl in range(level):
-            indent += connector if lvl in following else filler
-        indent += last_child if level not in following else next_child
-
-        if level not in following:
-            following.append(level)
-
-        formatted.append(indent + item)
+        indents = [connector if lvl in level_tracker else filler for lvl in range(level)]
+        indents.append(last_child if level not in level_tracker else next_child)
+        level_tracker.add(level)
+        formatted.append("".join(indents) + item)
 
     return "\n".join(reversed(formatted))
 
@@ -91,10 +83,9 @@ def tree(path: str = typer.Argument(..., help="Path to PythonAnywhere file or di
     tree = PAPath(path).tree
 
     if tree is not None:
-        formatted_tree = _format_tree(tree, path)
         print(f"{path}:")
         print(".")
-        print(formatted_tree)
+        print(_format_tree(tree, path))
 
 
 @app.command()
