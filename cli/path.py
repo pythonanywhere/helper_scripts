@@ -64,7 +64,7 @@ def _format_tree(data, current):
     formatted = []
     level_tracker = set()
 
-    for idx, entry in enumerate(reversed(data)):
+    for entry in reversed(data):
         entry = re.sub(r"/$", "\0", entry.replace(current, ""))
         chunks = [cc for cc in entry.split('/') if cc]
         item = chunks[-1].replace("\0", "/")
