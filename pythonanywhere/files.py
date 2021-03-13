@@ -41,7 +41,7 @@ class PAPath:
         self.api = Files()
 
     def __repr__(self):
-        return self.url 
+        return self.url
 
     def _make_sharing_url(self, path):
         return urljoin(self.api.base_url.split("api")[0], path)

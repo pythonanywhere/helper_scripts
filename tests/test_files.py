@@ -34,7 +34,7 @@ class TestPAPathInit(TestFiles):
         mock_urljoin = mocker.patch("pythonanywhere.files.urljoin")
         pa_path = PAPath('path')
 
-        url = pa_path._make_sharing_url('rest')
+        pa_path._make_sharing_url('rest')
 
         assert mock_urljoin.call_args == call(pa_path.api.base_url.split("api")[0], 'rest')
 
@@ -125,6 +125,7 @@ class TestPAPathDelete():
         PAPath(undeletable_path).delete()
 
         assert mock_snake.call_args == call("error msg")
+        assert mock_warning.call_args == call(mock_snake.return_value)
 
 
 @pytest.mark.files
@@ -142,7 +143,7 @@ class TestPAPathUpload():
         assert mock_post.call_args == call(destination_path, content)
         assert mock_snake.call_args == call(f"Content successfully uploaded to {destination_path}!")
         assert mock_info.call_args == call(mock_snake.return_value)
-        assert result == True
+        assert result is True
 
     def test_informs_about_successful_update_of_existing_file_with_provided_stream(self, mocker):
         mock_post = mocker.patch("pythonanywhere.api.files_api.Files.path_post")
@@ -157,15 +158,13 @@ class TestPAPathUpload():
         assert mock_post.call_args == call(destination_path, content)
         assert mock_snake.call_args == call(f"{destination_path} successfully updated!")
         assert mock_info.call_args == call(mock_snake.return_value)
-        assert result == True
-
+        assert result is True
 
     def test_warns_when_file_has_not_been_uploaded(self, mocker):
         mock_post = mocker.patch("pythonanywhere.api.files_api.Files.path_post")
         mock_post.side_effect = Exception("sth went wrong")
         mock_warning = mocker.patch("pythonanywhere.files.logger.warning")
         mock_snake = mocker.patch("pythonanywhere.files.snakesay")
-        mock_info = mocker.patch("pythonanywhere.files.logger.info")
         destination_path = "wrong/path"
         content = "content".encode()
 
@@ -174,7 +173,7 @@ class TestPAPathUpload():
         assert mock_post.call_args == call(destination_path, content)
         assert mock_snake.call_args == call("sth went wrong")
         assert mock_warning.call_args == call(mock_snake.return_value)
-        assert result == False
+        assert result is False
 
 
 @pytest.mark.files
@@ -269,7 +268,7 @@ class TestPAPathShare():
             f"{path_to_unshare} is not being shared, no need to stop sharing..."
         )
         assert mock_info.call_args == call(mock_snake.return_value)
-        assert result == True
+        assert result is True
 
     def test_path_successfully_unshared(self, mocker):
         mock_sharing_get = mocker.patch("pythonanywhere.api.files_api.Files.sharing_get")
@@ -286,7 +285,7 @@ class TestPAPathShare():
         assert mock_sharing_delete.call_args == call(path_to_shared_file)
         assert mock_snake.call_args == call(f"{path_to_shared_file} is no longer shared!")
         assert mock_info.call_args == call(mock_snake.return_value)
-        assert result == True
+        assert result is True
 
     def test_warns_if_unshare_not_successful(self, mocker):
         mock_sharing_get = mocker.patch("pythonanywhere.api.files_api.Files.sharing_get")
@@ -303,4 +302,4 @@ class TestPAPathShare():
         assert mock_sharing_delete.call_args == call(path_to_shared_file)
         assert mock_snake.call_args == call(f"Could not unshare {path_to_shared_file}... :(")
         assert mock_warning.call_args == call(mock_snake.return_value)
-        assert result == False
+        assert result is False
