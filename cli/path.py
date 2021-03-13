@@ -87,7 +87,7 @@ def _format_tree(data, current):
 
 @app.command()
 def tree(path: str = typer.Argument(..., help="Path to PythonAnywhere file or directory")):
-    path = sanitize_path(path)
+    path = standarize_path(path)
     tree = PAPath(path).tree
 
     if tree is not None:
