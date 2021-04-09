@@ -203,3 +203,21 @@ class TestUpload:
 
         assert mock_path.return_value.upload.called
         assert result.exit_code == 1
+
+
+class TestDelete:
+    def test_exits_with_success_when_successful_delete(self, mock_path):
+        mock_path.return_value.delete.return_value = True
+
+        result = runner.invoke(app, ["delete", "~/hello.txt"])
+
+        assert mock_path.return_value.delete.called
+        assert result.exit_code == 0
+
+    def test_exits_with_error_when_unsuccessful_delete(self, mock_path):
+        mock_path.return_value.delete.return_value = False
+
+        result = runner.invoke(app, ["delete", "~/hello.txt"])
+
+        assert mock_path.return_value.delete.called
+        assert result.exit_code == 1
