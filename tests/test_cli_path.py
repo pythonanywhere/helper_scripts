@@ -188,6 +188,10 @@ class TestTree:
 class TestUpload:
     file = NamedTemporaryFile()
 
+    def test_creates_pa_path_with_provided_path(self, mock_path, home_dir):
+        runner.invoke(app, ["upload", "~/hello.txt", "-c", self.file.name])
+        mock_path.assert_called_once_with(f"{home_dir}/hello.txt")
+
     def test_exits_with_success_when_successful_upload(self, mock_path):
         mock_path.return_value.upload.return_value = True
 
@@ -206,6 +210,10 @@ class TestUpload:
 
 
 class TestDelete:
+    def test_creates_pa_path_with_provided_path(self, mock_path, home_dir):
+        runner.invoke(app, ["delete", "~/hello.txt"])
+        mock_path.assert_called_once_with(f"{home_dir}/hello.txt")
+
     def test_exits_with_success_when_successful_delete(self, mock_path):
         mock_path.return_value.delete.return_value = True
 
@@ -220,4 +228,72 @@ class TestDelete:
         result = runner.invoke(app, ["delete", "~/hello.txt"])
 
         assert mock_path.return_value.delete.called
+        assert result.exit_code == 1
+
+
+class TestShare:
+    def test_creates_pa_path_with_provided_path(self, mock_path, home_dir):
+        runner.invoke(app, ["share", "~/hello.txt"])
+        mock_path.assert_called_once_with(f"{home_dir}/hello.txt")
+
+    def test_exits_with_success_and_prints_sharing_url_when_successful_share(self, mock_path):
+        mock_path.return_value.share.return_value = "link"
+
+        result = runner.invoke(app, ["share", "~/hello.txt"])
+
+        assert "link" in result.stdout
+        assert mock_path.return_value.share.called
+        assert not mock_path.return_value.get_sharing_url.called
+        assert result.exit_code == 0
+
+    def test_exits_with_error_when_unsuccessful_share(self, mock_path):
+        mock_path.return_value.share.return_value = ""
+
+        result = runner.invoke(app, ["share", "~/hello.txt"])
+
+        assert mock_path.return_value.share.called
+        assert not mock_path.return_value.get_sharing_url.called
+        assert result.stdout == ""
+        assert result.exit_code == 1
+
+    def test_exits_with_success_and_prints_sharing_url_when_path_already_shared(self, mock_path):
+        mock_path.return_value.get_sharing_url.return_value = "link"
+
+        result = runner.invoke(app, ["share", "--check", "~/hello.txt"])
+
+        assert mock_path.return_value.get_sharing_url.called
+        assert not mock_path.return_value.share.called
+        assert "link" in result.stdout
+        assert result.exit_code == 0
+
+    def test_exits_with_error_when_path_was_not_shared(self, mock_path):
+        mock_path.return_value.get_sharing_url.return_value = ""
+
+        result = runner.invoke(app, ["share", "--check", "~/hello.txt"])
+
+        assert mock_path.return_value.get_sharing_url.called
+        assert not mock_path.return_value.share.called
+        assert result.stdout == ""
+        assert result.exit_code == 1
+
+
+class TestUnshare:
+    def test_creates_pa_path_with_provided_path(self, mock_path, home_dir):
+        runner.invoke(app, ["unshare", "~/hello.txt"])
+        mock_path.assert_called_once_with(f"{home_dir}/hello.txt")
+
+    def test_exits_with_success_when_successful_unshare_or_file_not_shared(self, mock_path):
+        mock_path.return_value.unshare.return_value = True
+
+        result = runner.invoke(app, ["unshare", "~/hello.txt"])
+
+        assert mock_path.return_value.unshare.called
+        assert result.exit_code == 0
+
+    def test_exits_with_error_when_unsuccessful_unshare(self, mock_path):
+        mock_path.return_value.unshare.return_value = False
+
+        result = runner.invoke(app, ["unshare", "~/hello.txt"])
+
+        assert mock_path.return_value.unshare.called
         assert result.exit_code == 1

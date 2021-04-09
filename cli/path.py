@@ -126,10 +126,25 @@ def delete(
 
 
 @app.command()
-def share(path: str = typer.Argument(..., help="Path to PythonAnywhere file or directory")):
-    pass
+def share(
+    path: str = typer.Argument(..., help="Path to PythonAnywhere file to be shared"),
+    check: bool = typer.Option(False, "-c", "--check", help="Check sharing status")
+):
+    path = standarize_path(path)
+    pa_path = PAPath(path)
+
+    link = pa_path.get_sharing_url() if check else pa_path.share()
+
+    if not link:
+        sys.exit(1)
+    typer.echo(link)
 
 
 @app.command()
-def unshare(path: str = typer.Argument(..., help="Path to PythonAnywhere file or directory")):
-    pass
+def unshare(path: str = typer.Argument(..., help="Path to PythonAnywhere file to be unshared")):
+    path = standarize_path(path)
+    pa_path = PAPath(path)
+
+    success = pa_path.unshare()
+
+    sys.exit(0 if success else 1)
