@@ -69,6 +69,7 @@ def _format_tree(data, current):
         chunks = [cc for cc in entry.split('/') if cc]
         item = chunks[-1].replace("\0", "/")
         level = len(chunks) - 1
+        level_tracker = set([lvl for lvl in level_tracker if lvl <= level])
         indents = [connector if lvl in level_tracker else filler for lvl in range(level)]
         indents.append(last_child if level not in level_tracker else next_child)
         level_tracker.add(level)
