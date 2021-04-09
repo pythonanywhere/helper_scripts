@@ -114,8 +114,15 @@ def upload(
 
 
 @app.command()
-def delete(path: str = typer.Argument(..., help="Path to PythonAnywhere file or directory")):
-    pass
+def delete(
+    path: str = typer.Argument(..., help="Path to PythonAnywhere file or directory to be deleted"),
+):
+    path = standarize_path(path)
+    pa_path = PAPath(path)
+
+    success = pa_path.delete()
+
+    sys.exit(0 if success else 1)
 
 
 @app.command()
