@@ -77,14 +77,10 @@ class Files:
         )
 
     def path_post(self, dest_path, content):
-        """Uploads contents of `source` to `dest_path` which should be
+        """Uploads contents of `content` to `dest_path` which should be
         a valid absolute path of a file available to a PythonAnywhere
         user.  If `dest_path` contains directories which don't exist
         yet, they will be created.
-
-        With `as_string` optional keyword set to `True`, method
-        interprets `source` as string containing file contents,
-        otherwise `source` is expected to be a valid path to e file.
 
         Returns 200 if existing file on PythonAnywhere has been
         updated with `source` contents, or 201 if file from

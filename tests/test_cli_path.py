@@ -1,4 +1,5 @@
 import getpass
+from tempfile import NamedTemporaryFile
 from textwrap import dedent
 
 import pytest
@@ -182,3 +183,23 @@ class TestTree:
 
             """)
         assert result.stdout == expected
+
+
+class TestUpload:
+    file = NamedTemporaryFile()
+
+    def test_exits_with_success_when_successful_upload(self, mock_path):
+        mock_path.return_value.upload.return_value = True
+
+        result = runner.invoke(app, ["upload", "~/hello.txt", "-c", self.file.name])
+
+        assert mock_path.return_value.upload.called
+        assert result.exit_code == 0
+
+    def test_exits_with_error_when_unsuccessful_upload(self, mock_path):
+        mock_path.return_value.upload.return_value = False
+
+        result = runner.invoke(app, ["upload", "~/hello.txt", "-c", self.file.name])
+
+        assert mock_path.return_value.upload.called
+        assert result.exit_code == 1

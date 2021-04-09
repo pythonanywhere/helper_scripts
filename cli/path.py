@@ -90,8 +90,27 @@ def tree(path: str = typer.Argument(..., help="Path to PythonAnywhere file or di
 
 
 @app.command()
-def upload(path: str = typer.Argument(..., help="Path to PythonAnywhere file or directory")):
-    pass
+def upload(
+    path: str = typer.Argument(
+        ...,
+        help=(
+            "Full path of FILE where CONTENTS should be uploaded to -- "
+            "Warning: if FILE already exists, it's contents will be overwritten"
+        )
+    ),
+    file: typer.FileBinaryRead = typer.Option(
+        ...,
+        "-c",
+        "--contents",
+        help="Path to exisitng file or stdin stream that should be uploaded to PATH"
+    ),
+):
+    path = standarize_path(path)
+    pa_path = PAPath(path)
+
+    success = pa_path.upload(file)
+
+    sys.exit(0 if success else 1)
 
 
 @app.command()
