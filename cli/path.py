@@ -47,12 +47,12 @@ def get(
     if sort_reverse or sort_by_type:
         data.sort(key=lambda x: x.type if sort_by_type else x.name, reverse=sort_reverse)
 
-    print(f"{path}:")
+    typer.echo(f"{path}:")
     for name, type_ in data:
         if item == "every":
-            print(f"{type_[0].upper()}  {name}")
+            typer.echo(f"{type_[0].upper()}  {name}")
         elif type_ == item:
-            print(f"   {name}")
+            typer.echo(f"   {name}")
 
 
 def _format_tree(data, current):
@@ -84,9 +84,9 @@ def tree(path: str = typer.Argument(..., help="Path to PythonAnywhere file or di
     tree = PAPath(path).tree
 
     if tree is not None:
-        print(f"{path}:")
-        print(".")
-        print(_format_tree(tree, path))
+        typer.echo(f"{path}:")
+        typer.echo(".")
+        typer.echo(_format_tree(tree, path))
 
 
 @app.command()
