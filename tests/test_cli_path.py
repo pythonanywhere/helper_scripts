@@ -131,29 +131,37 @@ class TestTree:
             f'{home_dir}/README.txt',
             f'{home_dir}/dir_one/',
             f'{home_dir}/dir_one/bar.txt',
-            f'{home_dir}/dir_one/foo.txt',
             f'{home_dir}/dir_one/nested_one/',
             f'{home_dir}/dir_one/nested_one/foo.txt',
             f'{home_dir}/dir_one/nested_two/',
+            f'{home_dir}/empty/',
             f'{home_dir}/dir_two/',
-            f'{home_dir}/file.py'
+            f'{home_dir}/dir_two/quux',
+            f'{home_dir}/dir_two/baz/',
+            f'{home_dir}/dir_three/',
+            f'{home_dir}/dir_three/last.txt',
         ]
 
         result = runner.invoke(app, ["tree", "~"])
 
+        print(result.stdout)
         expected = dedent(f"""\
             {home_dir}:
             .
             ├── README.txt
             ├── dir_one/
             │   ├── bar.txt
-            │   ├── foo.txt
             │   ├── nested_one/
             │   │   └── foo.txt
             │   └── nested_two/
+            ├── empty/
             ├── dir_two/
-            └── file.py
-            """)
+            │   ├── quux
+            │   └── baz/
+            └── dir_three/
+                └── last.txt
+        """)
+
         assert result.stdout == expected
 
     def test_does_not_print_tree_when_path_is_incorrect(self, mock_path):
