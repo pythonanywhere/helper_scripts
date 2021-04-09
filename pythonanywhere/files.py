@@ -2,13 +2,14 @@
 Provides a class `PAPath` which should be used by helper scripts
 providing features for programmatic handling of user's files."""
 
+import getpass
 import logging
 from urllib.parse import urljoin
 
 from pythonanywhere.api.files_api import Files
 from pythonanywhere.snakesay import snakesay
 
-logger = logging.getLogger(name=__name__)
+logger = logging.getLogger("pythonanywhere")
 
 
 class PAPath:
@@ -37,7 +38,7 @@ class PAPath:
     be created with :method:`PAPath.upload`."""
 
     def __init__(self, path):
-        self.path = path
+        self.path = self._standarize_path(path)
         self.api = Files()
 
     def __repr__(self):
@@ -45,6 +46,10 @@ class PAPath:
 
     def _make_sharing_url(self, path):
         return urljoin(self.api.base_url.split("api")[0], path)
+
+    def _standarize_path(self, path):
+        return path.replace("~", f"/home/{getpass.getuser()}") if path.startswith("~") else path
+
 
     @property
     def url(self):
@@ -135,10 +140,12 @@ class PAPath:
 
         url = self.api.sharing_get(self.path)
         if url:
-            logger.info(snakesay(f"{self.path} is shared at {url}"))
-            return self._make_sharing_url(url)
+            sharing_url = self._make_sharing_url(url)
+            logger.info(snakesay(f"{self.path} is shared at {sharing_url}"))
+            return sharing_url
 
         logger.info(snakesay(f"{self.path} has not been shared"))
+
         return ""
 
     def share(self):
@@ -146,14 +153,15 @@ class PAPath:
         empty string when share not successful."""
 
         try:
-            code, shared_url = self.api.sharing_post(self.path)
+            code, url = self.api.sharing_post(self.path)
         except Exception as e:
             logger.warning(snakesay(str(e)))
             return ""
 
         msg = {200: "was already", 201: "successfully"}[code]
-        logger.info(snakesay(f"{self.path} {msg} shared at {shared_url}"))
-        return self._make_sharing_url(shared_url)
+        sharing_url = self._make_sharing_url(url)
+        logger.info(snakesay(f"{self.path} {msg} shared at {sharing_url}"))
+        return sharing_url
 
     def unshare(self):
         """Returns `True` when file unshared or has not been shared,

@@ -34,6 +34,7 @@ def task_list(mocker):
     mock_task_list.return_value.tasks = [Mock(**specs1), Mock(**specs2)]
     return mock_task_list
 
+
 @pytest.fixture
 def mock_confirm(mocker):
     return mocker.patch("cli.schedule.typer.confirm")
