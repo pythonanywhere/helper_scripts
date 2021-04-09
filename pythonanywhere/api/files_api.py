@@ -3,7 +3,6 @@ files.  *Don't use* `Files` :class: in helper scripts, use
 `pythonanywhere.files.Path` class instead."""
 
 import getpass
-from os import path
 from urllib.parse import urljoin
 
 from pythonanywhere.api.base import call_api, get_api_endpoint

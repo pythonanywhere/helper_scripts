@@ -42,23 +42,17 @@ def mock_file_path(mock_path):
 
 
 class TestGet:
-    def test_replaces_tilde_in_path(self, mock_path, home_dir):
-        runner.invoke(app, ["get", '~'])
-
-        mock_path.assert_called_once_with(home_dir)
-
-    def test_exits_early_when_no_contents_for_given_path(self, mock_path, mocker):
-        mock_exit = mocker.patch("cli.path.sys.exit")
+    def test_exits_early_when_no_contents_for_given_path(self, mock_path):
         mock_path.return_value.contents = None
 
-        runner.invoke(app, ["get", '~/nonexistent.file'])
+        result = runner.invoke(app, ["get", '~/nonexistent.file'])
 
-        mock_exit.assert_called_once_with(1)
+        assert result.exit_code == 1
 
     def test_prints_file_contents_and_exits_when_path_is_file(self, mock_file_path, home_dir):
         result = runner.invoke(app, ["get", "~/some-file"])
 
-        mock_file_path.assert_called_once_with(f"{home_dir}/some-file")
+        mock_file_path.assert_called_once_with("~/some-file")
         assert "file contents\n" == result.stdout
 
     def test_prints_api_contents_and_exits_when_raw_option_set(self, mock_homedir_path):
@@ -67,6 +61,8 @@ class TestGet:
         assert "'.bashrc': {'type': 'file', 'url': 'bashrc_file_url'}" in result.stdout
 
     def test_lists_only_directories_when_dirs_option_set(self, mock_homedir_path, home_dir):
+        mock_homedir_path.return_value.path = home_dir
+
         result = runner.invoke(app, ["get", "~", "--dirs"])
 
         assert result.stdout.startswith(home_dir)
@@ -77,6 +73,8 @@ class TestGet:
                 assert item in result.stdout
 
     def test_lists_only_files_when_files_option_set(self, mock_homedir_path, home_dir):
+        mock_homedir_path.return_value.path = home_dir
+
         result = runner.invoke(app, ["get", "~", "--files"])
 
         assert result.stdout.startswith(home_dir)
@@ -86,12 +84,14 @@ class TestGet:
             elif value['type'] == 'directory':
                 assert item not in result.stdout
 
-    def test_reverses_directory_content_list_when_reverse_option_set(self, mock_homedir_path):
+    def test_reverses_directory_content_list_when_reverse_option_set(self, mock_homedir_path, home_dir):
+        mock_homedir_path.return_value.path = home_dir
+
         result = runner.invoke(app, ["get", "~", "--reverse"])
 
         expected = dedent(
-            """\
-            /home/piotr:
+            f"""\
+            {home_dir}:
             D  dir_two
             F  b_file
             F  a_file
@@ -103,12 +103,14 @@ class TestGet:
 
         assert expected == result.stdout
 
-    def test_sorts_directory_content_list_by_type_when_type_option_set(self, mock_homedir_path):
+    def test_sorts_directory_content_list_by_type_when_type_option_set(self, mock_homedir_path, home_dir):
+        mock_homedir_path.return_value.path = home_dir
+
         result = runner.invoke(app, ["get", "~", "--type"])
 
         expected = dedent(
-            """\
-            /home/piotr:
+            f"""\
+            {home_dir}:
             D  a_dir
             D  dir_two
             F  .bashrc
@@ -128,6 +130,7 @@ class TestGet:
 
 class TestTree:
     def test_prints_formatted_tree_when_successfull_api_call(self, mock_path, home_dir):
+        mock_path.return_value.path = home_dir
         mock_path.return_value.tree = [
             f'{home_dir}/README.txt',
             f'{home_dir}/dir_one/',
@@ -145,7 +148,6 @@ class TestTree:
 
         result = runner.invoke(app, ["tree", "~"])
 
-        print(result.stdout)
         expected = dedent(f"""\
             {home_dir}:
             .
@@ -171,8 +173,10 @@ class TestTree:
         result = runner.invoke(app, ["tree", "/wrong/path"])
 
         assert result.stdout == ""
+        assert result.exit_code == 1
 
     def test_prints_tree_for_empty_directory(self, mock_path, home_dir):
+        mock_path.return_value.path = f"{home_dir}/empty_dir"
         mock_path.return_value.tree = []
 
         result = runner.invoke(app, ["tree", "~/empty_dir"])
@@ -190,7 +194,7 @@ class TestUpload:
 
     def test_creates_pa_path_with_provided_path(self, mock_path, home_dir):
         runner.invoke(app, ["upload", "~/hello.txt", "-c", self.file.name])
-        mock_path.assert_called_once_with(f"{home_dir}/hello.txt")
+        mock_path.assert_called_once_with("~/hello.txt")
 
     def test_exits_with_success_when_successful_upload(self, mock_path):
         mock_path.return_value.upload.return_value = True
@@ -212,7 +216,7 @@ class TestUpload:
 class TestDelete:
     def test_creates_pa_path_with_provided_path(self, mock_path, home_dir):
         runner.invoke(app, ["delete", "~/hello.txt"])
-        mock_path.assert_called_once_with(f"{home_dir}/hello.txt")
+        mock_path.assert_called_once_with("~/hello.txt")
 
     def test_exits_with_success_when_successful_delete(self, mock_path):
         mock_path.return_value.delete.return_value = True
@@ -234,12 +238,19 @@ class TestDelete:
 class TestShare:
     def test_creates_pa_path_with_provided_path(self, mock_path, home_dir):
         runner.invoke(app, ["share", "~/hello.txt"])
-        mock_path.assert_called_once_with(f"{home_dir}/hello.txt")
+        mock_path.assert_called_once_with("~/hello.txt")
 
-    def test_exits_with_success_and_prints_sharing_url_when_successful_share(self, mock_path):
+    def test_exits_with_success_when_successful_share(self, mocker, mock_path):
+        result = runner.invoke(app, ["share", "~/hello.txt"])
+
+        assert mock_path.return_value.share.called
+        assert not mock_path.return_value.get_sharing_url.called
+        assert result.exit_code == 0
+
+    def test_exits_with_success_and_prints_sharing_url_when_successful_share_and_porcelain_flag(self, mock_path):
         mock_path.return_value.share.return_value = "link"
 
-        result = runner.invoke(app, ["share", "~/hello.txt"])
+        result = runner.invoke(app, ["share", "--porcelain", "~/hello.txt"])
 
         assert "link" in result.stdout
         assert mock_path.return_value.share.called
@@ -256,10 +267,17 @@ class TestShare:
         assert result.stdout == ""
         assert result.exit_code == 1
 
-    def test_exits_with_success_and_prints_sharing_url_when_path_already_shared(self, mock_path):
+    def test_exits_with_success_when_path_already_shared(self, mock_path):
+        result = runner.invoke(app, ["share", "--check", "~/hello.txt"])
+
+        assert mock_path.return_value.get_sharing_url.called
+        assert not mock_path.return_value.share.called
+        assert result.exit_code == 0
+
+    def test_exits_with_success_and_prints_sharing_url_when_path_already_shared_and_porcelain_flag(self, mock_path):
         mock_path.return_value.get_sharing_url.return_value = "link"
 
-        result = runner.invoke(app, ["share", "--check", "~/hello.txt"])
+        result = runner.invoke(app, ["share", "--check", "--porcelain", "~/hello.txt"])
 
         assert mock_path.return_value.get_sharing_url.called
         assert not mock_path.return_value.share.called
@@ -280,7 +298,7 @@ class TestShare:
 class TestUnshare:
     def test_creates_pa_path_with_provided_path(self, mock_path, home_dir):
         runner.invoke(app, ["unshare", "~/hello.txt"])
-        mock_path.assert_called_once_with(f"{home_dir}/hello.txt")
+        mock_path.assert_called_once_with("~/hello.txt")
 
     def test_exits_with_success_when_successful_unshare_or_file_not_shared(self, mock_path):
         mock_path.return_value.unshare.return_value = True

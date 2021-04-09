@@ -1,6 +1,6 @@
-import getpass
 import re
 import sys
+from typing import Tuple
 
 from collections import namedtuple
 from pprint import pprint
@@ -8,30 +8,37 @@ from pprint import pprint
 import typer
 
 from pythonanywhere.files import PAPath
+from pythonanywhere.scripts_commons import get_logger
 
 app = typer.Typer()
 
 
-def standarize_path(path):
-    return path.replace("~", f"/home/{getpass.getuser()}") if path.startswith("~") else path
+def setup(path: str, quiet: bool) -> Tuple[str, PAPath]:
+    logger = get_logger(set_info=True)
+    if quiet:
+        logger.disabled = True
+    return PAPath(path)
 
 
 @app.command()
 def get(
-    path: str          = typer.Argument(..., help="Path to PythonAnywhere file or directory"),
-    only_files: bool   = typer.Option(False, "-f", "--files",   help="List only files"),
-    only_dirs: bool    = typer.Option(False, "-d", "--dirs",    help="List only directories"),
-    sort_by_type: bool = typer.Option(False, "-t", "--type",    help="Sort by type"),
+    path: str = typer.Argument(..., help="Path to PythonAnywhere file or directory"),
+    only_files: bool = typer.Option(False, "-f", "--files", help="List only files"),
+    only_dirs: bool = typer.Option(False, "-d", "--dirs", help="List only directories"),
+    sort_by_type: bool = typer.Option(False, "-t", "--type", help="Sort by type"),
     sort_reverse: bool = typer.Option(False, "-r", "--reverse", help="Sort in reverse order"),
-    raw: bool          = typer.Option(False, "-a", "--raw",     help="Print API response (if PATH is file that's the only option)"),
+    raw: bool = typer.Option(
+        False, "-a", "--raw", help="Print API response (if PATH is file that's the only option)"
+    ),
+    quiet: bool = typer.Option(False, "-q", "--quiet", help="Disable additional logging"),
 ):
     """
     Get contents of PATH.
     If PATH points to a directory, show list of it's contents.
     If PATH points to a file, print it's contents.
     """
-    path = standarize_path(path)
-    contents = PAPath(path).contents
+    pa_path = setup(path, quiet)
+    contents = pa_path.contents
 
     if contents is None:
         sys.exit(1)
@@ -47,7 +54,7 @@ def get(
     if sort_reverse or sort_by_type:
         data.sort(key=lambda x: x.type if sort_by_type else x.name, reverse=sort_reverse)
 
-    typer.echo(f"{path}:")
+    typer.echo(f"{pa_path.path}:")
     for name, type_ in data:
         if item == "every":
             typer.echo(f"{type_[0].upper()}  {name}")
@@ -79,14 +86,19 @@ def _format_tree(data, current):
 
 
 @app.command()
-def tree(path: str = typer.Argument(..., help="Path to PythonAnywhere file or directory")):
-    path = standarize_path(path)
-    tree = PAPath(path).tree
+def tree(
+    path: str = typer.Argument(..., help="Path to PythonAnywhere file or directory"),
+    quiet: bool = typer.Option(False, "-q", "--quiet", help="Disable additional logging")
+):
+    pa_path = setup(path, quiet)
+    tree = pa_path.tree
 
     if tree is not None:
-        typer.echo(f"{path}:")
+        typer.echo(f"{pa_path.path}:")
         typer.echo(".")
-        typer.echo(_format_tree(tree, path))
+        typer.echo(_format_tree(tree, pa_path.path))
+    else:
+        sys.exit(1)
 
 
 @app.command()
@@ -104,47 +116,44 @@ def upload(
         "--contents",
         help="Path to exisitng file or stdin stream that should be uploaded to PATH"
     ),
+    quiet: bool = typer.Option(False, "-q", "--quiet", help="Disable additional logging")
 ):
-    path = standarize_path(path)
-    pa_path = PAPath(path)
-
+    pa_path = setup(path, quiet)
     success = pa_path.upload(file)
-
     sys.exit(0 if success else 1)
 
 
 @app.command()
 def delete(
     path: str = typer.Argument(..., help="Path to PythonAnywhere file or directory to be deleted"),
+    quiet: bool = typer.Option(False, "-q", "--quiet", help="Disable additional logging")
 ):
-    path = standarize_path(path)
-    pa_path = PAPath(path)
-
+    pa_path = setup(path, quiet)
     success = pa_path.delete()
-
     sys.exit(0 if success else 1)
 
 
 @app.command()
 def share(
     path: str = typer.Argument(..., help="Path to PythonAnywhere file to be shared"),
-    check: bool = typer.Option(False, "-c", "--check", help="Check sharing status")
+    check: bool = typer.Option(False, "-c", "--check", help="Check sharing status"),
+    porcelain: bool = typer.Option(False, "-p", "--porcelain", help="Return sharing url in easy-to-parse format"),
+    quiet: bool = typer.Option(False, "-q", "--quiet", help="Disable logging"),
 ):
-    path = standarize_path(path)
-    pa_path = PAPath(path)
-
+    pa_path = setup(path, quiet or porcelain)
     link = pa_path.get_sharing_url() if check else pa_path.share()
 
     if not link:
         sys.exit(1)
-    typer.echo(link)
+    if porcelain:
+        typer.echo(link)
 
 
 @app.command()
-def unshare(path: str = typer.Argument(..., help="Path to PythonAnywhere file to be unshared")):
-    path = standarize_path(path)
-    pa_path = PAPath(path)
-
+def unshare(
+    path: str = typer.Argument(..., help="Path to PythonAnywhere file to be unshared"),
+    quiet: bool = typer.Option(False, "-q", "--quiet", help="Disable additional logging")
+):
+    pa_path = setup(path, quiet)
     success = pa_path.unshare()
-
     sys.exit(0 if success else 1)
