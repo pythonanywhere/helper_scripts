@@ -22,18 +22,19 @@ def setup(path: str, quiet: bool) -> Tuple[str, PAPath]:
 
 @app.command()
 def get(
-    path: str = typer.Argument(..., help="Path to PythonAnywhere file or directory"),
-    only_files: bool = typer.Option(False, "-f", "--files", help="List only files"),
-    only_dirs: bool = typer.Option(False, "-d", "--dirs", help="List only directories"),
-    sort_by_type: bool = typer.Option(False, "-t", "--type", help="Sort by type"),
-    sort_reverse: bool = typer.Option(False, "-r", "--reverse", help="Sort in reverse order"),
+    path: str = typer.Argument(..., help="Path to PythonAnywhere file or directory."),
+    only_files: bool = typer.Option(False, "-f", "--files", help="List only files."),
+    only_dirs: bool = typer.Option(False, "-d", "--dirs", help="List only directories."),
+    sort_by_type: bool = typer.Option(False, "-t", "--type", help="Sort by type."),
+    sort_reverse: bool = typer.Option(False, "-r", "--reverse", help="Sort in reverse order."),
     raw: bool = typer.Option(
-        False, "-a", "--raw", help="Print API response (if PATH is file that's the only option)"
+        False, "-a", "--raw", help="Print API response (has effect only for directories)."
     ),
-    quiet: bool = typer.Option(False, "-q", "--quiet", help="Disable additional logging"),
+    quiet: bool = typer.Option(False, "-q", "--quiet", help="Disable additional logging."),
 ):
     """
     Get contents of PATH.
+
     If PATH points to a directory, show list of it's contents.
     If PATH points to a file, print it's contents.
     """
@@ -73,7 +74,7 @@ def _format_tree(data, current):
 
     for entry in reversed(data):
         entry = re.sub(r"/$", "\0", entry.replace(current, ""))
-        chunks = [cc for cc in entry.split('/') if cc]
+        chunks = [cc for cc in entry.split("/") if cc]
         item = chunks[-1].replace("\0", "/")
         level = len(chunks) - 1
         level_tracker = set([lvl for lvl in level_tracker if lvl <= level])
@@ -87,9 +88,10 @@ def _format_tree(data, current):
 
 @app.command()
 def tree(
-    path: str = typer.Argument(..., help="Path to PythonAnywhere file or directory"),
-    quiet: bool = typer.Option(False, "-q", "--quiet", help="Disable additional logging")
+    path: str = typer.Argument(..., help="Path to PythonAnywhere directory."),
+    quiet: bool = typer.Option(False, "-q", "--quiet", help="Disable additional logging.")
 ):
+    """Show preview of directory contents at PATH in tree-like format (2 levels deep)."""
     pa_path = setup(path, quiet)
     tree = pa_path.tree
 
@@ -103,21 +105,20 @@ def tree(
 
 @app.command()
 def upload(
-    path: str = typer.Argument(
-        ...,
-        help=(
-            "Full path of FILE where CONTENTS should be uploaded to -- "
-            "Warning: if FILE already exists, it's contents will be overwritten"
-        )
-    ),
+    path: str = typer.Argument(..., help=("Full path of FILE where CONTENTS should be uploaded to.")),
     file: typer.FileBinaryRead = typer.Option(
         ...,
         "-c",
         "--contents",
-        help="Path to exisitng file or stdin stream that should be uploaded to PATH"
+        help="Path to exisitng file or stdin stream that should be uploaded to PATH."
     ),
-    quiet: bool = typer.Option(False, "-q", "--quiet", help="Disable additional logging")
+    quiet: bool = typer.Option(False, "-q", "--quiet", help="Disable additional logging.")
 ):
+    """
+    Upload CONTENTS to file at PATH.
+
+    If PATH points to an existing file, it will be overwritten.
+    """
     pa_path = setup(path, quiet)
     success = pa_path.upload(file)
     sys.exit(0 if success else 1)
@@ -125,9 +126,15 @@ def upload(
 
 @app.command()
 def delete(
-    path: str = typer.Argument(..., help="Path to PythonAnywhere file or directory to be deleted"),
-    quiet: bool = typer.Option(False, "-q", "--quiet", help="Disable additional logging")
+    path: str = typer.Argument(..., help="Path to PythonAnywhere file or directory to be deleted."),
+    quiet: bool = typer.Option(False, "-q", "--quiet", help="Disable additional logging.")
 ):
+    """
+    Delete file or directory at PATH.
+
+    If PATH points to a user owned directory all its contents will be
+    deleted recursively.
+    """
     pa_path = setup(path, quiet)
     success = pa_path.delete()
     sys.exit(0 if success else 1)
@@ -135,11 +142,12 @@ def delete(
 
 @app.command()
 def share(
-    path: str = typer.Argument(..., help="Path to PythonAnywhere file to be shared"),
-    check: bool = typer.Option(False, "-c", "--check", help="Check sharing status"),
-    porcelain: bool = typer.Option(False, "-p", "--porcelain", help="Return sharing url in easy-to-parse format"),
-    quiet: bool = typer.Option(False, "-q", "--quiet", help="Disable logging"),
+    path: str = typer.Argument(..., help="Path to PythonAnywhere file."),
+    check: bool = typer.Option(False, "-c", "--check", help="Check sharing status."),
+    porcelain: bool = typer.Option(False, "-p", "--porcelain", help="Return sharing url in easy-to-parse format."),
+    quiet: bool = typer.Option(False, "-q", "--quiet", help="Disable logging."),
 ):
+    """Create a sharing link to a file at PATH or check its sharing status."""
     pa_path = setup(path, quiet or porcelain)
     link = pa_path.get_sharing_url() if check else pa_path.share()
 
@@ -151,9 +159,10 @@ def share(
 
 @app.command()
 def unshare(
-    path: str = typer.Argument(..., help="Path to PythonAnywhere file to be unshared"),
-    quiet: bool = typer.Option(False, "-q", "--quiet", help="Disable additional logging")
+    path: str = typer.Argument(..., help="Path to PythonAnywhere file."),
+    quiet: bool = typer.Option(False, "-q", "--quiet", help="Disable additional logging.")
 ):
+    """Disable sharing link for a file at PATH."""
     pa_path = setup(path, quiet)
     success = pa_path.unshare()
     sys.exit(0 if success else 1)

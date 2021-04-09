@@ -32,11 +32,11 @@ class TestPAPathInit(TestFiles):
 
     def test_make_sharing_url_contains_pa_site_address(self, mocker):
         mock_urljoin = mocker.patch("pythonanywhere.files.urljoin")
-        pa_path = PAPath('path')
+        pa_path = PAPath("path")
 
-        pa_path._make_sharing_url('rest')
+        pa_path._make_sharing_url("rest")
 
-        assert mock_urljoin.call_args == call(pa_path.api.base_url.split("api")[0], 'rest')
+        assert mock_urljoin.call_args == call(pa_path.api.base_url.split("api")[0], "rest")
 
     def test_sanitizes_path(self):
         pa_path = PAPath("~")
@@ -70,7 +70,7 @@ class TestPAPathContents(TestFiles):
         mock_snake = mocker.patch("pythonanywhere.files.snakesay")
         mock_warning = mocker.patch("pythonanywhere.files.logger.warning")
 
-        result = PAPath('/home/different_user').contents
+        result = PAPath("/home/different_user").contents
 
         assert mock_snake.call_args == call("error msg")
         assert mock_warning.call_args == call(mock_snake.return_value)
