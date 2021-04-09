@@ -45,7 +45,7 @@ class TestGet:
     def test_exits_early_when_no_contents_for_given_path(self, mock_path):
         mock_path.return_value.contents = None
 
-        result = runner.invoke(app, ["get", '~/nonexistent.file'])
+        result = runner.invoke(app, ["get", "~/nonexistent.file"])
 
         assert result.exit_code == 1
 
@@ -67,9 +67,9 @@ class TestGet:
 
         assert result.stdout.startswith(home_dir)
         for item, value in mock_homedir_path.return_value.contents.items():
-            if value['type'] == 'file':
+            if value["type"] == "file":
                 assert item not in result.stdout
-            elif value['type'] == 'directory':
+            elif value["type"] == "directory":
                 assert item in result.stdout
 
     def test_lists_only_files_when_files_option_set(self, mock_homedir_path, home_dir):
@@ -79,9 +79,9 @@ class TestGet:
 
         assert result.stdout.startswith(home_dir)
         for item, value in mock_homedir_path.return_value.contents.items():
-            if value['type'] == 'file':
+            if value["type"] == "file":
                 assert item in result.stdout
-            elif value['type'] == 'directory':
+            elif value["type"] == "directory":
                 assert item not in result.stdout
 
     def test_reverses_directory_content_list_when_reverse_option_set(self, mock_homedir_path, home_dir):
@@ -132,18 +132,18 @@ class TestTree:
     def test_prints_formatted_tree_when_successfull_api_call(self, mock_path, home_dir):
         mock_path.return_value.path = home_dir
         mock_path.return_value.tree = [
-            f'{home_dir}/README.txt',
-            f'{home_dir}/dir_one/',
-            f'{home_dir}/dir_one/bar.txt',
-            f'{home_dir}/dir_one/nested_one/',
-            f'{home_dir}/dir_one/nested_one/foo.txt',
-            f'{home_dir}/dir_one/nested_two/',
-            f'{home_dir}/empty/',
-            f'{home_dir}/dir_two/',
-            f'{home_dir}/dir_two/quux',
-            f'{home_dir}/dir_two/baz/',
-            f'{home_dir}/dir_three/',
-            f'{home_dir}/dir_three/last.txt',
+            f"{home_dir}/README.txt",
+            f"{home_dir}/dir_one/",
+            f"{home_dir}/dir_one/bar.txt",
+            f"{home_dir}/dir_one/nested_one/",
+            f"{home_dir}/dir_one/nested_one/foo.txt",
+            f"{home_dir}/dir_one/nested_two/",
+            f"{home_dir}/empty/",
+            f"{home_dir}/dir_two/",
+            f"{home_dir}/dir_two/quux",
+            f"{home_dir}/dir_two/baz/",
+            f"{home_dir}/dir_three/",
+            f"{home_dir}/dir_three/last.txt",
         ]
 
         result = runner.invoke(app, ["tree", "~"])

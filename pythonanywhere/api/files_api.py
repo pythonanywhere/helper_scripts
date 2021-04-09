@@ -122,7 +122,7 @@ class Files:
 
         url = self.sharing_endpoint
 
-        result = call_api(url, "POST", json={'path': path})
+        result = call_api(url, "POST", json={"path": path})
 
         if result.ok:
             return result.status_code, result.json()["url"]
