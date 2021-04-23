@@ -47,9 +47,9 @@ class PAPath:
     def _make_sharing_url(self, path):
         return urljoin(self.api.base_url.split("api")[0], path)
 
-    def _standarize_path(self, path):
+    @staticmethod
+    def _standarize_path(path):
         return path.replace("~", f"/home/{getpass.getuser()}") if path.startswith("~") else path
-
 
     @property
     def url(self):
@@ -81,7 +81,7 @@ class PAPath:
 
         try:
             content = self.api.path_get(self.path)
-            return content if type(content) == dict else content.decode("utf-8")
+            return content if isinstance(content, dict) else content.decode("utf-8")
         except Exception as e:
             logger.warning(snakesay(str(e)))
             return None
