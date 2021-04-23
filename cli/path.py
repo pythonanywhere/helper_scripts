@@ -1,6 +1,5 @@
 import re
 import sys
-from typing import Tuple
 
 from collections import namedtuple
 from pprint import pprint
@@ -13,7 +12,7 @@ from pythonanywhere.scripts_commons import get_logger
 app = typer.Typer()
 
 
-def setup(path: str, quiet: bool) -> Tuple[str, PAPath]:
+def setup(path: str, quiet: bool) -> PAPath:
     logger = get_logger(set_info=True)
     if quiet:
         logger.disabled = True
@@ -44,7 +43,7 @@ def get(
     if contents is None:
         sys.exit(1)
 
-    if raw or type(contents) == str:
+    if raw or isinstance(contents, str):
         {dict: pprint, str: print}[type(contents)](contents)
         sys.exit()
 
