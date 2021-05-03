@@ -9,7 +9,7 @@ with (here / "README.md").open(encoding="utf-8") as f:
 
 setup(
     name="pythonanywhere",
-    version="0.9.6",
+    version="0.9.7",
     description="PythonAnywhere helper tools for users",
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -28,7 +28,15 @@ setup(
     ],
     keywords="pythonanywhere api cloud web hosting",
     packages=["cli", "pythonanywhere", "pythonanywhere.api"],
-    install_requires=["docopt", "python-dateutil", "requests", "schema", "tabulate", "typer"],
+    install_requires=[
+        "docopt",
+        "packaging",
+        "python-dateutil",
+        "requests",
+        "schema",
+        "tabulate",
+        "typer",
+    ],
     extras_require={},
     python_requires=">=3.6",
     package_data={},
