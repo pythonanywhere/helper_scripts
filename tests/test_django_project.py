@@ -226,6 +226,7 @@ def more_nested_submodule():
     subprocess.check_call(["git", "submodule", "update", "--init", "--recursive"])
 
 
+@pytest.mark.slowtest
 class TestFindDjangoFiles:
     def test_non_nested(self, fake_home, non_nested_submodule, virtualenvs_folder):
         project = DjangoProject("mydomain.com", "python.version")
