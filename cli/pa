@@ -18,4 +18,4 @@ app.add_typer(webapp.app, name="webapp", help="Everything for web apps")
 
 
 if __name__ == "__main__":
-    app()
+    app(prog_name="pa")
