@@ -134,14 +134,15 @@ class PAPath:
         logger.info(snakesay(msg))
         return True
 
-    def get_sharing_url(self):
+    def get_sharing_url(self, quiet=False):
         """Returns PythonAnywhere sharing url for `self.path` if file
         is shared, empty string otherwise."""
 
         url = self.api.sharing_get(self.path)
         if url:
             sharing_url = self._make_sharing_url(url)
-            logger.info(snakesay(f"{self.path} is shared at {sharing_url}"))
+            if not quiet:
+                logger.info(snakesay(f"{self.path} is shared at {sharing_url}"))
             return sharing_url
 
         logger.info(snakesay(f"{self.path} has not been shared"))
@@ -167,7 +168,7 @@ class PAPath:
         """Returns `True` when file unshared or has not been shared,
         `False` otherwise."""
 
-        already_shared = self.get_sharing_url()
+        already_shared = self.get_sharing_url(quiet=True)
         if already_shared:
             result = self.api.sharing_delete(self.path)
             if result == 204:
