@@ -3,42 +3,58 @@
 [![PyPI](https://img.shields.io/pypi/v/pythonanywhere)](https://pypi.org/project/pythonanywhere/)
 [![Downloads](https://pepy.tech/badge/pythonanywhere)](https://pepy.tech/project/pythonanywhere)
 
-# PythonAnywhere helper scripts
+# PythonAnywhere cli tool
 
-These scripts are designed to be run from PythonAnywhere consoles
+`pa` is a single command to manage PythonAnywhere services. 
+
+It is designed to be run from PythonAnywhere consoles, but many subcommands could be executed directly 
+from the local machine (see [usage](#Usage) below). 
 
 ## Installing
+### On PythonAnywhere
+In PythonAnywhere bash console run: 
 
-    pip3.6 install --user pythonanywhere
+    pip3.9 install --user pythonanywhere
 
-If there is no `python3.6` on your PythonAnywhere account, 
-you should contact [support@pythonanywhere.com](mailto:support@pythonanywhere.com) and ask for an upgrade. 
-    
+If there is no `python3.9` on your PythonAnywhere account, 
+you should upgrade your account to the new system image.
+See [here](https://help.pythonanywhere.com/pages/ChangingSystemImage) how to do it.
+`pa` works with python 3.6, 3.7 and 3.8, but we recommend using the latest system image 
+
+### On your local machine
+Install `pythonanywhere` package from [PyPI](https://pypi.org/project/pythonanywhere/). 
+We recommend using `pipx` if you want to use it only as a cli tool or the virtual environment 
+if you want to use a programmatic interface in your own code.
+
 ## Usage
 
 There are two ways to use that package. You can just run the scripts or use underlying api wrappers directly in your scripts.
 
-There are scripts provided for dealing with web apps: 
+### Command line interface
 
-* [pa_autoconfigure_django.py](https://github.com/pythonanywhere/helper_scripts/blob/master/scripts/pa_autoconfigure_django.py)
-* [pa_create_webapp_with_virtualenv.py](https://github.com/pythonanywhere/helper_scripts/blob/master/scripts/pa_create_webapp_with_virtualenv.py)
-* [pa_delete_webapp_logs.py](https://github.com/pythonanywhere/helper_scripts/blob/master/scripts/pa_delete_webapp_logs.py)
-* [pa_install_webapp_letsencrypt_ssl.py](https://github.com/pythonanywhere/helper_scripts/blob/master/scripts/pa_install_webapp_letsencrypt_ssl.py)
-* [pa_install_webapp_ssl.py](https://github.com/pythonanywhere/helper_scripts/blob/master/scripts/pa_install_webapp_ssl.py)
-* [pa_reload_webapp.py](https://github.com/pythonanywhere/helper_scripts/blob/master/scripts/pa_reload_webapp.py)
-* [pa_start_django_webapp_with_virtualenv.py](https://github.com/pythonanywhere/helper_scripts/blob/master/scripts/pa_start_django_webapp_with_virtualenv.py)
+### Running `pa` on your local machine
 
-and scheduled tasks:
+`pa` expects the presence of some environmental variables that are provided when you run your code in PythonAnywere console.
+You need to provide them if you run `pa` on your local machine.
 
-* [pa_create_scheduled_task.py](https://github.com/pythonanywhere/helper_scripts/blob/master/scripts/pa_create_scheduled_task.py)
-* [pa_delete_scheduled_task.py](https://github.com/pythonanywhere/helper_scripts/blob/master/scripts/pa_delete_scheduled_task.py)
-* [pa_get_scheduled_tasks_list.py](https://github.com/pythonanywhere/helper_scripts/blob/master/scripts/pa_get_scheduled_tasks_list.py)
-* [pa_get_scheduled_task_specs.py](https://github.com/pythonanywhere/helper_scripts/blob/master/scripts/pa_get_scheduled_task_specs.py)
-* [pa_update_scheduled_task.py](https://github.com/pythonanywhere/helper_scripts/blob/master/scripts/pa_update_scheduled_task.py)
+`API_TOKEN` You need to set it to allow `pa` to connect to [PythonAnywere API](https://help.pythonanywhere.com/pages/API). 
+To get an API token log into PythonAnywhere, and go to the “Account” page using the link at the top right. 
+Click on the “API token” tab and click the “Create a new API token” button to get your token.
 
-Run any of them with `--help` flag to get information about usage.   
+`PYTHONANYWHERE_SITE` is used to connect to PythonAnywhere API and defaults to `www.pythonanywhere.com`, 
+but you may need to set it to `eu.pythonanywhere.com` if you use our EU site.   
 
-See the [blog post](https://blog.pythonanywhere.com/155/)
+If your username on PythonAnywhere is different from the username on your local machine, 
+you may need to set `USER` for the environment you run `pa` in.   
+
+### Programmatic usage in your code
+
+Take a look at [`pythonanywhere.task`](https://github.com/pythonanywhere/helper_scripts/blob/master/pythonanywhere/task.py) 
+module and docstrings of `pythonanywhere.task.Task` class and its methods.   
+
+### Legacy scripts
+
+Legacy [scripts](https://github.com/pythonanywhere/helper_scripts/blob/master/legacy.md) (separate for each action) are still available.
 
 ## Contributing
 
