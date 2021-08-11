@@ -21,8 +21,8 @@ you should upgrade your account to the newest system image.
 See [here](https://help.pythonanywhere.com/pages/ChangingSystemImage) how to do that.
 `pa` works with python 3.6, 3.7 and 3.8, but we recommend using the latest system image.
 
-### On your local machine
-Install `pythonanywhere` package from [PyPI](https://pypi.org/project/pythonanywhere/). 
+### On your own machine
+Install the `pythonanywhere` package from [PyPI](https://pypi.org/project/pythonanywhere/). 
 We recommend using `pipx` if you want to use it only as a cli tool, or a virtual environment 
 if you want to use a programmatic interface in your own code.
 
@@ -38,8 +38,8 @@ There are two ways to use the package. You can just run the scripts or use the u
 You need to provide them if you run `pa` on your local machine.
 
 `API_TOKEN` -- you need to set this to allow `pa` to connect to the [PythonAnywere API](https://help.pythonanywhere.com/pages/API). 
-To get an API token log, into PythonAnywhere and go to the “Account” page using the link at the top right. 
-Click on the "API token" tab, and click the “Create a new API token” button to get your token.
+To get an API token, log into PythonAnywhere and go to the "Account" page using the link at the top right. 
+Click on the "API token" tab, and click the "Create a new API token" button to get your token.
 
 `PYTHONANYWHERE_SITE` is used to connect to PythonAnywhere API and defaults to `www.pythonanywhere.com`, 
 but you may need to set it to `eu.pythonanywhere.com` if you use our EU site.   
