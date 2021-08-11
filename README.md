@@ -34,7 +34,7 @@ There are two ways to use the package. You can just run the scripts or use the u
 
 ### Running `pa` on your local machine
 
-`pa` expects the presence of some environment variables that are provided when you run your code in PythonAnywere console.
+`pa` expects the presence of some environment variables that are provided when you run your code in a PythonAnywere console.
 You need to provide them if you run `pa` on your local machine.
 
 `API_TOKEN` -- you need to set this to allow `pa` to connect to the [PythonAnywere API](https://help.pythonanywhere.com/pages/API). 
