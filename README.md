@@ -8,7 +8,7 @@
 `pa` is a single command to manage PythonAnywhere services. 
 
 It is designed to be run from PythonAnywhere consoles, but many subcommands can be executed directly 
-from the local machine (see [usage](#Usage) below). 
+from your own machine (see [usage](#Usage) below). 
 
 ## Installing
 ### On PythonAnywhere
