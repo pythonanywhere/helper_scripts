@@ -3,7 +3,11 @@ import os
 import requests
 
 PYTHON_VERSIONS = {
-    "3.6": "python36", "3.7": "python37", "3.8": "python38", "3.9": "python39",
+    "3.6": "python36",
+    "3.7": "python37",
+    "3.8": "python38",
+    "3.9": "python39",
+    "3.10": "python310",
 }
 
 
