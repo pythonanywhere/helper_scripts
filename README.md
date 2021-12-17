@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/pythonanywhere/helper_scripts.svg?branch=master)](https://travis-ci.org/pythonanywhere/helper_scripts)
+![Build Status](https://github.com/pythonanywhere/helper_scripts/actions/workflows/tests.yaml/badge.svg)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![PyPI](https://img.shields.io/pypi/v/pythonanywhere)](https://pypi.org/project/pythonanywhere/)
 [![Downloads](https://pepy.tech/badge/pythonanywhere)](https://pepy.tech/project/pythonanywhere)
