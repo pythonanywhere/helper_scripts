@@ -70,12 +70,12 @@ class TestSet:
         result = runner.invoke(app, ["set", "-c", "echo foo", "-h", "8", "-m", "66"])
 
         assert "Invalid value" in result.stdout
-        assert "66 is not in the valid range of 0 to 59" in result.stdout
+        assert "66 is not in the range 0<=x<=59" in result.stdout
 
     def test_validates_hours(self):
         result = runner.invoke(app, ["set", "-c", "echo foo", "-h", "66", "-m", "1"])
         assert "Invalid value" in result.stdout
-        assert "66 is not in the valid range of 0 to 23" in result.stdout
+        assert "66 is not in the range 0<=x<=23" in result.stdout
 
     def test_logs_warning_when_create_schedule_raises(self, mocker):
         mock_logger = mocker.patch("cli.schedule.get_logger").return_value
@@ -347,11 +347,11 @@ class TestUpdate:
 
     def test_validates_minute(self):
         result = runner.invoke(app, ["update", "42", "--minute", "88"])
-        assert "88 is not in the valid range of 0 to 59" in result.stdout
+        assert "88 is not in the range 0<=x<=59" in result.stdout
 
     def test_validates_hour(self):
         result = runner.invoke(app, ["update", "42", "--daily", "--hour", "33"])
-        assert "33 is not in the valid range of 0 to 23" in result.stdout
+        assert "33 is not in the range 0<=x<=23" in result.stdout
 
     def test_complains_when_no_id_provided(self):
         result = runner.invoke(app, ["update"])
