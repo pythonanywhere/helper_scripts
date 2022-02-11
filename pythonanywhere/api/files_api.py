@@ -5,13 +5,13 @@ files.  *Don't use* `Files` :class: in helper scripts, use
 import getpass
 from urllib.parse import urljoin
 
-from pythonanywhere.api.base import call_api, get_api_endpoint
+from pythonanywhere_core.base import call_api, get_api_endpoint
 
 
 class Files:
     """ Interface for PythonAnywhere files API.
 
-    Uses `pythonanywhere.api.base` :method: `get_api_endpoint` to
+    Uses `pythonanywhere_core.base` :method: `get_api_endpoint` to
     create url, which is stored in a class variable `Files.base_url`,
     then calls `call_api` with appropriate arguments to execute files
     action.

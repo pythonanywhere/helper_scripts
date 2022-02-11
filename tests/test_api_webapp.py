@@ -6,7 +6,7 @@ from urllib.parse import urlencode
 from dateutil.tz import tzutc
 import pytest
 import responses
-from pythonanywhere.api.base import PYTHON_VERSIONS, get_api_endpoint
+from pythonanywhere_core.base import PYTHON_VERSIONS, get_api_endpoint
 from pythonanywhere.api.webapp import Webapp
 from pythonanywhere.exceptions import SanityException
 

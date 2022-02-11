@@ -4,8 +4,8 @@ from pathlib import Path
 from textwrap import dedent
 
 from dateutil.parser import parse
+from pythonanywhere_core.base import PYTHON_VERSIONS, call_api, get_api_endpoint
 
-from pythonanywhere.api.base import PYTHON_VERSIONS, call_api, get_api_endpoint
 from pythonanywhere.exceptions import SanityException
 from pythonanywhere.snakesay import snakesay
 

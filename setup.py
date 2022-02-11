@@ -33,6 +33,7 @@ setup(
         "docopt",
         "packaging",
         "python-dateutil",
+        "pythonanywhere_core",
         "requests",
         "schema",
         "tabulate",

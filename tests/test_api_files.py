@@ -1,13 +1,11 @@
 import getpass
 import json
-import tempfile
-from unittest.mock import patch
 from urllib.parse import urljoin
 
 import pytest
 import responses
+from pythonanywhere_core.base import get_api_endpoint
 
-from pythonanywhere.api.base import get_api_endpoint
 from pythonanywhere.api.files_api import Files
 
 
