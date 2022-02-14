@@ -39,7 +39,7 @@ def fake_home(local_pip_cache):
     os.environ["HOME"] = str(tempdir)
     yield tempdir
     os.environ["HOME"] = old_home
-    shutil.rmtree(str(tempdir))
+    shutil.rmtree(str(tempdir), ignore_errors=True)
 
     new_stuff = set(Path(old_home).iterdir()) - old_home_contents
     if new_stuff:
@@ -62,7 +62,7 @@ def virtualenvs_folder():
         os.environ["WORKON_HOME"] = old_workon
     else:
         del os.environ["WORKON_HOME"]
-    shutil.rmtree(str(tempdir))
+    shutil.rmtree(str(tempdir), ignore_errors=True)
 
     if actual_virtualenvs.is_dir():
         new_envs = set(actual_virtualenvs.iterdir()) - set(old_virtualenvs)
