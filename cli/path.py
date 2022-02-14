@@ -1,3 +1,4 @@
+import json
 import re
 import sys
 
@@ -44,7 +45,7 @@ def get(
         sys.exit(1)
 
     if raw or isinstance(contents, str):
-        {dict: pprint, str: print}[type(contents)](contents)
+        {dict: lambda x: print(json.dumps(x)), str: print}[type(contents)](contents)
         sys.exit()
 
     NameToType = namedtuple("NameToType", ["name", "type"])

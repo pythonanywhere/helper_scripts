@@ -58,7 +58,7 @@ class TestGet:
     def test_prints_api_contents_and_exits_when_raw_option_set(self, mock_homedir_path):
         result = runner.invoke(app, ["get", "~", "--raw"])
 
-        assert "'.bashrc': {'type': 'file', 'url': 'bashrc_file_url'}" in result.stdout
+        assert '".bashrc": {"type": "file", "url": "bashrc_file_url"}' in result.stdout
 
     def test_lists_only_directories_when_dirs_option_set(self, mock_homedir_path, home_dir):
         mock_homedir_path.return_value.path = home_dir
