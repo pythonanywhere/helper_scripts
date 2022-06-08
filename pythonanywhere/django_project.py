@@ -11,6 +11,9 @@ from .project import Project
 
 
 class DjangoProject(Project):
+    def django_version_newer_or_equal_than(self, this_version):
+        return version.parse(self.virtualenv.get_version("django")) >= version.parse(this_version)
+
     def download_repo(self, repo, nuke):
         if nuke and self.project_path.exists():
             shutil.rmtree(str(self.project_path))
@@ -94,7 +97,7 @@ class DjangoProject(Project):
             f'ALLOWED_HOSTS = [{self.domain!r}]'
         )
 
-        new_django = version.parse(self.virtualenv.get_version("django")) >= version.parse("3.1")
+        new_django = self.django_version_newer_or_equal_than("3.1")
 
         if re.search(r'^MEDIA_ROOT\s*=', settings, flags=re.MULTILINE) is None:
             new_settings += "\nMEDIA_URL = '/media/'"

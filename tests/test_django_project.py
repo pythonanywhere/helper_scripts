@@ -14,6 +14,34 @@ from pythonanywhere.django_project import DjangoProject
 from pythonanywhere.exceptions import SanityException
 
 
+@pytest.fixture
+def project_with_mock_virtualenv(virtualenvs_folder):
+    project = DjangoProject("mydomain.com", "python.version")
+    project.virtualenv.create = Mock()
+    project.virtualenv.pip_install = Mock()
+    yield project
+
+
+class TestDjangoVersionNewerThan:
+    def test_returns_true_if_django_version_is_newer_than_provided_version(
+            self, project_with_mock_virtualenv
+    ):
+        project_with_mock_virtualenv.virtualenv.get_version = Mock(return_value="9.9.9")
+        assert project_with_mock_virtualenv.django_version_newer_or_equal_than("1.1.1") is True
+
+    def test_returns_true_when_django_version_is_the_same_as_provided_version(
+            self, project_with_mock_virtualenv
+    ):
+        project_with_mock_virtualenv.virtualenv.get_version = Mock(return_value="9.9.9")
+        assert project_with_mock_virtualenv.django_version_newer_or_equal_than("9.9.9") is True
+
+    def test_returns_false_when_django_version_is_older_than_provided_version(
+            self, project_with_mock_virtualenv
+    ):
+        project_with_mock_virtualenv.virtualenv.get_version = Mock(return_value="9.9.9")
+        assert project_with_mock_virtualenv.django_version_newer_or_equal_than("10.1.1") is False
+
+
 class TestDownloadRepo:
     @pytest.mark.slowtest
     def test_actually_downloads_repo(self, fake_home, virtualenvs_folder):
@@ -144,14 +172,6 @@ class TestDetectDjangoVersion:
         requirements_txt = project.project_path / "requirements.txt"
         requirements_txt.touch()
         assert project.detect_requirements() == f"-r {requirements_txt.resolve()}"
-
-
-@pytest.fixture
-def project_with_mock_virtualenv(virtualenvs_folder):
-    project = DjangoProject("mydomain.com", "python.version")
-    project.virtualenv.create = Mock()
-    project.virtualenv.pip_install = Mock()
-    yield project
 
 
 class TestCreateVirtualenv:
@@ -286,7 +306,7 @@ class TestUpdateSettingsFile:
     def test_adds_STATIC_and_MEDIA_config_to_settings_with_old_django(self, virtualenvs_folder):
         project = DjangoProject("mydomain.com", "python.version")
         project.settings_path = Path(tempfile.NamedTemporaryFile().name)
-        project.virtualenv.get_version = Mock(return_value="1.0")
+        project.virtualenv.get_version = Mock(return_value="3.0")
 
         with project.settings_path.open("w") as f:
             f.write(
@@ -338,7 +358,7 @@ class TestUpdateSettingsFile:
     def test_adds_domain_to_ALLOWED_HOSTS(self, virtualenvs_folder):
         project = DjangoProject("mydomain.com", "python.version")
         project.settings_path = Path(tempfile.NamedTemporaryFile().name)
-        project.virtualenv.get_version = Mock(return_value="1.0")
+        project.virtualenv.get_version = Mock(return_value="3.0")
 
         with project.settings_path.open("w") as f:
             f.write(
@@ -361,7 +381,7 @@ class TestUpdateSettingsFile:
     def test_only_adds_MEDIA_URL_if_its_not_already_there(self, virtualenvs_folder):
         project = DjangoProject("mydomain.com", "python.version")
         project.settings_path = Path(tempfile.NamedTemporaryFile().name)
-        project.virtualenv.get_version = Mock(return_value="1.0")
+        project.virtualenv.get_version = Mock(return_value="3.0")
 
         with project.settings_path.open("w") as f:
             f.write(
@@ -386,7 +406,7 @@ class TestUpdateSettingsFile:
     def test_only_adds_STATIC_ROOT_if_its_not_already_there(self, virtualenvs_folder):
         project = DjangoProject("mydomain.com", "python.version")
         project.settings_path = Path(tempfile.NamedTemporaryFile().name)
-        project.virtualenv.get_version = Mock(return_value="1.0")
+        project.virtualenv.get_version = Mock(return_value="3.0")
 
         with project.settings_path.open("w") as f:
             f.write(
@@ -411,7 +431,7 @@ class TestUpdateSettingsFile:
     def test_only_adds_MEDIA_ROOT_if_its_not_already_there(self, virtualenvs_folder):
         project = DjangoProject("mydomain.com", "python.version")
         project.settings_path = Path(tempfile.NamedTemporaryFile().name)
-        project.virtualenv.get_version = Mock(return_value="1.0")
+        project.virtualenv.get_version = Mock(return_value="3.0")
 
         with project.settings_path.open("w") as f:
             f.write(
