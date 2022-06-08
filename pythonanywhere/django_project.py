@@ -54,24 +54,25 @@ class DjangoProject(Project):
             packages = f'django=={django_version}'
         self.virtualenv.pip_install(packages)
 
-
     def detect_requirements(self):
         requirements_txt = self.project_path / 'requirements.txt'
         if requirements_txt.exists():
             return f'-r {requirements_txt.resolve()}'
         return 'django'
 
-
-
     def run_startproject(self, nuke):
         print(snakesay('Starting Django project'))
         if nuke and self.project_path.exists():
             shutil.rmtree(str(self.project_path))
         self.project_path.mkdir()
+
+        new_django = self.django_version_newer_or_equal_than("4.0")
+        django_admin_executable = "django-admin" if new_django else "django-admin.py"
+
         subprocess.check_call([
-            str(Path(self.virtualenv.path) / 'bin/django-admin.py'),
-            'startproject',
-            'mysite',
+            str(Path(self.virtualenv.path) / "bin" / django_admin_executable),
+            "startproject",
+            "mysite",
             str(self.project_path),
         ])
 

@@ -198,15 +198,31 @@ class TestCreateVirtualenv:
 class TestRunStartproject:
     def test_creates_folder(self, mock_subprocess, fake_home, virtualenvs_folder):
         project = DjangoProject("mydomain.com", "python.version")
+        project.virtualenv.get_version = Mock(return_value="1.0")
         project.run_startproject(nuke=False)
         assert (fake_home / "mydomain.com").is_dir()
 
-    def test_calls_startproject(self, mock_subprocess, fake_home, virtualenvs_folder):
+    def test_calls_startproject_for_older_django(self, mock_subprocess, fake_home, virtualenvs_folder):
         project = DjangoProject("mydomain.com", "python.version")
+        project.virtualenv.get_version = Mock(return_value="3.9")
         project.run_startproject(nuke=False)
         assert mock_subprocess.check_call.call_args == call(
             [
                 str(Path(project.virtualenv.path / "bin/django-admin.py")),
+                "startproject",
+                "mysite",
+                str(fake_home / "mydomain.com"),
+            ]
+        )
+
+
+    def test_calls_startproject_for_newer_django(self, mock_subprocess, fake_home, virtualenvs_folder):
+        project = DjangoProject("mydomain.com", "python.version")
+        project.virtualenv.get_version = Mock(return_value="4.0")
+        project.run_startproject(nuke=False)
+        assert mock_subprocess.check_call.call_args == call(
+            [
+                str(Path(project.virtualenv.path / "bin/django-admin")),
                 "startproject",
                 "mysite",
                 str(fake_home / "mydomain.com"),
@@ -218,6 +234,7 @@ class TestRunStartproject:
         (fake_home / project.domain).mkdir()
         old_file = fake_home / project.domain / "old_file.py"
         old_file.write_text("old stuff")
+        project.virtualenv.get_version = Mock(return_value="1.0")
 
         project.run_startproject(nuke=True)
 
@@ -225,6 +242,7 @@ class TestRunStartproject:
 
     def test_nuke_option_handles_directory_not_existing(self, mock_subprocess, fake_home, virtualenvs_folder):
         project = DjangoProject("mydomain.com", "python.version")
+        project.virtualenv.get_version = Mock(return_value="1.0")
         project.run_startproject(nuke=True)  # should not raise
 
 
