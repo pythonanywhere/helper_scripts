@@ -3,7 +3,6 @@ import re
 import sys
 
 from collections import namedtuple
-from pprint import pprint
 
 import typer
 
