@@ -1,6 +1,7 @@
 python-dateutil==2.8.1
 click==8.0.3
 docopt==0.6.2
+importlib-metadata==4.8.3
 packaging
 psutil==5.7.0
 pytest==6.2.5
