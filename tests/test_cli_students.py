@@ -22,6 +22,7 @@ def mock_students_delete(mock_students):
     return mock_students.return_value.delete
 
 
+@pytest.mark.students
 class TestGet:
     def test_exits_early_with_error_when_api_does_not_return_expected_list(
             self, mock_students_get
@@ -90,6 +91,7 @@ class TestGet:
         assert "two\nthree\none" in result.stdout
 
 
+@pytest.mark.students
 class TestDelete:
     def test_exits_with_success_when_provided_student_removed(self, mock_students_delete):
         mock_students_delete.return_value = True
@@ -108,6 +110,7 @@ class TestDelete:
         assert result.exit_code == 1
 
 
+@pytest.mark.students
 class TestHolidays:
     def test_exits_with_success_when_all_students_removed(
             self, mock_students_get, mock_students_delete
