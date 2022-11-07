@@ -97,7 +97,7 @@ class Task:
         task.command = command
         task.hour = hour
         task.minute = minute
-        task.interval = "daily" if hour else "hourly"
+        task.interval = "daily" if hour is not None else "hourly"
         task.enabled = not disabled
         return task
 
@@ -138,7 +138,7 @@ class Task:
             "interval": self.interval,
             "minute": self.minute,
         }
-        if self.hour:
+        if self.hour is not None:
             params["hour"] = self.hour
 
         self.update_specs(self.schedule.create(params))

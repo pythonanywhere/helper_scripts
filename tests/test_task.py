@@ -93,6 +93,19 @@ class TestTaskCreateSchedule:
         assert mock_create.call_args == call(
             {"command": "echo foo", "hour": 16, "minute": 0, "enabled": True, "interval": "daily"}
         )
+    def test_creates_daily_midnight_task(self, mocker, task_specs):
+        mock_create = mocker.patch("pythonanywhere.api.schedule.Schedule.create")
+        mock_create.return_value = task_specs
+        mock_update_specs = mocker.patch("pythonanywhere.task.Task.update_specs")
+        task = Task.to_be_created(command="echo foo", hour=0, minute=0, disabled=False)
+
+        task.create_schedule()
+
+        assert mock_update_specs.call_args == call(task_specs)
+        assert mock_create.call_count == 1
+        assert mock_create.call_args == call(
+            {"command": "echo foo", "hour": 0, "minute": 0, "enabled": True, "interval": "daily"}
+        )
 
 
 @pytest.mark.tasks
