@@ -25,7 +25,7 @@ def mock_update_wsgi_file(mocker):
 
 @pytest.fixture
 def mock_call_api(mocker):
-    return mocker.patch("pythonanywhere.api.webapp.call_api")
+    return mocker.patch("pythonanywhere_core.webapp.call_api")
 
 
 @pytest.fixture

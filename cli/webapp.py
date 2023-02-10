@@ -4,10 +4,10 @@ from enum import Enum
 from pathlib import Path
 
 import typer
+from pythonanywhere_core.webapp import Webapp
+from snakesay import snakesay
 
-from pythonanywhere.api.webapp import Webapp
 from pythonanywhere.project import Project
-from pythonanywhere.snakesay import snakesay
 from pythonanywhere.utils import ensure_domain
 
 app = typer.Typer(no_args_is_help=True)

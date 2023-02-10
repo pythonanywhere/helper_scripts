@@ -31,7 +31,7 @@ class TestMain:
     ):
         running_python_version = ".".join(python_version().split(".")[:2])
         with patch("scripts.pa_start_django_webapp_with_virtualenv.DjangoProject.update_wsgi_file"):
-            with patch("pythonanywhere.api.webapp.call_api"):
+            with patch("pythonanywhere_core.webapp.call_api"):
                 main("mydomain.com", "2.2.12", running_python_version, nuke=False)
 
         django_version = (
@@ -57,7 +57,7 @@ class TestMain:
     def test_nuke_option_lets_you_run_twice(self, fake_home, virtualenvs_folder, api_token):
 
         with patch("scripts.pa_start_django_webapp_with_virtualenv.DjangoProject.update_wsgi_file"):
-            with patch("pythonanywhere.api.webapp.call_api"):
+            with patch("pythonanywhere_core.webapp.call_api"):
                 running_python_version = ".".join(python_version().split(".")[:2])
                 old_django_version = "2.2.12"
                 new_django_version = "3.0.6"

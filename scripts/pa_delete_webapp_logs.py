@@ -14,9 +14,9 @@ Options:
 """
 
 from docopt import docopt
+from pythonanywhere_core.webapp import Webapp
+from snakesay import snakesay
 
-from pythonanywhere.api.webapp import Webapp
-from pythonanywhere.snakesay import snakesay
 from pythonanywhere.utils import ensure_domain
 
 

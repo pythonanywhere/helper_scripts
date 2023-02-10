@@ -6,8 +6,9 @@ import getpass
 import logging
 from urllib.parse import urljoin
 
+from snakesay import snakesay
+
 from pythonanywhere.api.files_api import Files
-from pythonanywhere.snakesay import snakesay
 
 logger = logging.getLogger("pythonanywhere")
 

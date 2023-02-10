@@ -19,8 +19,9 @@ from docopt import docopt
 import getpass
 from textwrap import dedent
 
+from snakesay import snakesay
+
 from pythonanywhere.project import Project
-from pythonanywhere.snakesay import snakesay
 from pythonanywhere.utils import ensure_domain
 
 

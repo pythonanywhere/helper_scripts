@@ -17,10 +17,10 @@ Note:
   the table."""
 
 from docopt import docopt
+from snakesay import snakesay
 from tabulate import tabulate
 
 from pythonanywhere.scripts_commons import ScriptSchema, get_logger
-from pythonanywhere.snakesay import snakesay
 from pythonanywhere.task import TaskList
 
 

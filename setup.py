@@ -36,6 +36,7 @@ setup(
         "pythonanywhere_core",
         "requests",
         "schema",
+        "snakesay",
         "tabulate",
         "typer",
     ],
@@ -49,7 +50,6 @@ setup(
         ]
     },
     scripts=[
-        "pythonanywhere/snakesay.py",
         "scripts/pa_autoconfigure_django.py",
         "scripts/pa_create_scheduled_task.py",
         "scripts/pa_create_webapp_with_virtualenv.py",

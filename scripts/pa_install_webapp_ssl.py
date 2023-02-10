@@ -15,12 +15,12 @@ Options:
                         -- this happens by default, use this option to suppress it.
 """
 
-from docopt import docopt
 import os
 import sys
 
-from pythonanywhere.api.webapp import Webapp
-from pythonanywhere.snakesay import snakesay
+from docopt import docopt
+from pythonanywhere_core.webapp import Webapp
+from snakesay import snakesay
 
 
 def main(domain_name, certificate_file, private_key_file, suppress_reload):

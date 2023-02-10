@@ -40,7 +40,7 @@ class TestMain:
         domain = 'mydomain.com'
         with patch('scripts.pa_autoconfigure_django.DjangoProject.update_wsgi_file'):
             with patch('scripts.pa_autoconfigure_django.DjangoProject.start_bash'):
-                with patch('pythonanywhere.api.webapp.call_api'):
+                with patch('pythonanywhere_core.webapp.call_api'):
                     main(
                         repo_url=repo,
                         branch="master",

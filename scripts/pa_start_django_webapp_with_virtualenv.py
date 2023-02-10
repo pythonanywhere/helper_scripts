@@ -13,8 +13,8 @@ Options:
 """
 
 from docopt import docopt
+from snakesay import snakesay
 
-from pythonanywhere.snakesay import snakesay
 from pythonanywhere.django_project import DjangoProject
 from pythonanywhere.utils import ensure_domain
 

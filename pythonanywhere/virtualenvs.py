@@ -2,7 +2,7 @@ import os
 import subprocess
 from pathlib import Path
 
-from pythonanywhere.snakesay import snakesay
+from snakesay import snakesay
 
 
 class Virtualenv:

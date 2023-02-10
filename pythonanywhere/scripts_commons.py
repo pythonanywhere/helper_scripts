@@ -4,8 +4,8 @@ import logging
 import sys
 
 from schema import And, Or, Schema, SchemaError, Use
+from snakesay import snakesay
 
-from pythonanywhere.snakesay import snakesay
 from pythonanywhere.task import Task
 
 logger = logging.getLogger(__name__)

@@ -2,9 +2,10 @@ from unittest.mock import call, patch, Mock
 import pytest
 from pathlib import Path
 
+from pythonanywhere_core.webapp import Webapp
+
 from pythonanywhere.project import Project
 from pythonanywhere.exceptions import SanityException
-from pythonanywhere.api.webapp import Webapp
 from pythonanywhere.virtualenvs import Virtualenv
 
 

@@ -1,6 +1,7 @@
 from pathlib import Path
 
-from pythonanywhere.api.webapp import Webapp
+from pythonanywhere_core.webapp import Webapp
+
 from pythonanywhere.virtualenvs import Virtualenv
 
 class Project:

@@ -10,8 +10,8 @@ Options:
 
 from docopt import docopt
 
-from pythonanywhere.api.webapp import Webapp
-from pythonanywhere.snakesay import snakesay
+from pythonanywhere_core.webapp import Webapp
+from snakesay import snakesay
 
 
 def main(domain_name):

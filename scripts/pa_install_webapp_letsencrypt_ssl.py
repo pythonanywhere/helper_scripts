@@ -17,8 +17,8 @@ from os.path import expanduser
 import os
 import sys
 
-from pythonanywhere.api.webapp import Webapp
-from pythonanywhere.snakesay import snakesay
+from pythonanywhere_core.webapp import Webapp
+from snakesay import snakesay
 
 
 def main(domain_name, suppress_reload):

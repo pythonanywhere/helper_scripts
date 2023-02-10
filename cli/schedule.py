@@ -4,10 +4,10 @@ from datetime import datetime
 from typing import List
 
 import typer
+from snakesay import snakesay
 from tabulate import tabulate
 
 from pythonanywhere.scripts_commons import get_logger, get_task_from_id, tabulate_formats
-from pythonanywhere.snakesay import snakesay
 from pythonanywhere.task import Task, TaskList
 
 app = typer.Typer(no_args_is_help=True)

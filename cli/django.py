@@ -1,9 +1,9 @@
 #!/usr/bin/python3
 
 import typer
+from snakesay import snakesay
 
 from pythonanywhere.django_project import DjangoProject
-from pythonanywhere.snakesay import snakesay
 from pythonanywhere.utils import ensure_domain
 
 app = typer.Typer(no_args_is_help=True)

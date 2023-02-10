@@ -4,8 +4,9 @@ providing features for programmatic handling of scheduled task."""
 
 import logging
 
+from snakesay import snakesay
+
 from pythonanywhere.api.schedule import Schedule
-from pythonanywhere.snakesay import snakesay
 
 logger = logging.getLogger(name=__name__)
 

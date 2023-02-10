@@ -4,9 +4,9 @@ import shutil
 import subprocess
 
 from packaging import version
+from snakesay import snakesay
 
 from pythonanywhere.exceptions import SanityException
-from pythonanywhere.snakesay import snakesay
 from .project import Project
 
 

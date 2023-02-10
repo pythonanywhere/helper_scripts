@@ -48,9 +48,9 @@ import logging
 from datetime import datetime
 
 from docopt import docopt
+from snakesay import snakesay
 
 from pythonanywhere.scripts_commons import ScriptSchema, get_logger, get_task_from_id
-from pythonanywhere.snakesay import snakesay
 
 
 def main(*, task_id, **kwargs):
