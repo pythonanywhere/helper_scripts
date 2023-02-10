@@ -12,7 +12,7 @@ class TestVirtualenv:
         assert v.path == Path(virtualenvs_folder) / "domain.com"
 
     def test_create_uses_bash_and_sources_virtualenvwrapper(self, mock_subprocess, virtualenvs_folder):
-        v = Virtualenv("domain.com", "3.6")
+        v = Virtualenv("domain.com", "3.7")
         v.create(nuke=False)
         args, kwargs = mock_subprocess.check_call.call_args
         command_list = args[0]
@@ -20,15 +20,15 @@ class TestVirtualenv:
         assert command_list[2].startswith("source virtualenvwrapper.sh && mkvirtualenv")
 
     def test_create_calls_mkvirtualenv_with_python_version_and_domain(self, mock_subprocess, virtualenvs_folder):
-        v = Virtualenv("domain.com", "3.6")
+        v = Virtualenv("domain.com", "3.7")
         v.create(nuke=False)
         args, kwargs = mock_subprocess.check_call.call_args
         command_list = args[0]
         bash_command = command_list[2]
-        assert "mkvirtualenv --python=python3.6 domain.com" in bash_command
+        assert "mkvirtualenv --python=python3.7 domain.com" in bash_command
 
     def test_nuke_option_deletes_virtualenv(self, mock_subprocess, virtualenvs_folder):
-        v = Virtualenv("domain.com", "3.6")
+        v = Virtualenv("domain.com", "3.7")
         v.create(nuke=True)
         args, kwargs = mock_subprocess.check_call.call_args
         command_list = args[0]
@@ -36,7 +36,7 @@ class TestVirtualenv:
         assert command_list[2].startswith("source virtualenvwrapper.sh && rmvirtualenv domain.com")
 
     def test_install_pip_installs_each_package(self, mock_subprocess, virtualenvs_folder):
-        v = Virtualenv("domain.com", "3.6")
+        v = Virtualenv("domain.com", "3.7")
         v.create(nuke=False)
         v.pip_install("package1 package2==1.1.2")
         args, kwargs = mock_subprocess.check_call.call_args_list[-1]

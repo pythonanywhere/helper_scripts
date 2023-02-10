@@ -14,12 +14,12 @@ from your own machine (see [usage](#Usage) below).
 ### On PythonAnywhere
 In a PythonAnywhere Bash console, run: 
 
-    pip3.9 install --user pythonanywhere
+    pip3.10 install --user pythonanywhere
 
 If there is no `python3.9` on your PythonAnywhere account, 
 you should upgrade your account to the newest system image.
 See [here](https://help.pythonanywhere.com/pages/ChangingSystemImage) how to do that.
-`pa` works with python 3.6, 3.7 and 3.8, but we recommend using the latest system image.
+`pa` works with python 3.7, 3.8 and 3.9, but we recommend using the latest system image.
 
 ### On your own machine
 Install the `pythonanywhere` package from [PyPI](https://pypi.org/project/pythonanywhere/). 
@@ -61,7 +61,7 @@ Some legacy [scripts](https://github.com/pythonanywhere/helper_scripts/blob/mast
 Pull requests are welcome!  You'll find tests in the [tests](https://github.com/pythonanywhere/helper_scripts/blob/master/tests) folder...
 
     # prep your dev environment
-    mkvirtualenv --python=python3.6 helper_scripts
+    mkvirtualenv --python=python3.10 helper_scripts
     pip install -r requirements.txt
     pip install -e .
 

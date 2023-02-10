@@ -1,4 +1,4 @@
-#!/usr/bin/python3.6
+#!/usr/bin/python3.7
 """Create a new Django webapp with a virtualenv.  Defaults to
 your free domain, the latest version of Django and Python 3.6
 
@@ -8,7 +8,7 @@ Usage:
 Options:
   --domain=<domain>         Domain name, eg www.mydomain.com   [default: your-username.pythonanywhere.com]
   --django=<django-version> Django version, eg "1.8.4"  [default: latest]
-  --python=<python-version> Python version, eg "2.7"    [default: 3.6]
+  --python=<python-version> Python version, eg "2.7"    [default: 3.7]
   --nuke                    *Irrevocably* delete any existing web app config on this domain. Irrevocably.
 """
 

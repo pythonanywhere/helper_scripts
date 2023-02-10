@@ -1,4 +1,4 @@
-#!/usr/bin/python3.6
+#!/usr/bin/python3.7
 """Deletes webapp logs.
 
 - gets list of logs via api

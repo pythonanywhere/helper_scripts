@@ -19,10 +19,10 @@ def autoconfigure(
         help="Domain name, eg www.mydomain.com",
     ),
     python_version: str = typer.Option(
-        "3.6",
+        "3.7",
         "-p",
         "--python-version",
-        help="Python version, eg '3.8'",
+        help="Python version, eg '3.9'",
     ),
     nuke: bool = typer.Option(
         False,

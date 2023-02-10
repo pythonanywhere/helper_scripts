@@ -1,4 +1,4 @@
-#!/usr/bin/python3.6
+#!/usr/bin/python3.7
 """Create a web app with a virtualenv
 
 - creates a simple hello world web app
@@ -11,7 +11,7 @@ Usage:
 
 Options:
   --domain=<domain>         Domain name, eg www.mydomain.com   [default: your-username.pythonanywhere.com]
-  --python=<python-version> Python version, eg "3.8"    [default: 3.6]
+  --python=<python-version> Python version, eg "3.8"    [default: 3.7]
   --nuke                    *Irrevocably* delete any existing web app config on this domain. Irrevocably.
 """
 
