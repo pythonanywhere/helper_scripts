@@ -4,7 +4,7 @@ import json
 import pytest
 import responses
 
-from pythonanywhere.api.base import get_api_endpoint
+from pythonanywhere_core.base import get_api_endpoint
 from pythonanywhere.api.students_api import StudentsAPI
 
 

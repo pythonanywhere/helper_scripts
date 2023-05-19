@@ -7,8 +7,9 @@ students.
 
 import logging
 
+from snakesay import snakesay
+
 from pythonanywhere.api.students_api import StudentsAPI
-from pythonanywhere.snakesay import snakesay
 
 logger = logging.getLogger("pythonanywhere")
 
