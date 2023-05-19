@@ -6,7 +6,7 @@ import logging
 
 from snakesay import snakesay
 
-from pythonanywhere.api.schedule import Schedule
+from pythonanywhere_core.schedule import Schedule
 
 logger = logging.getLogger(name=__name__)
 
