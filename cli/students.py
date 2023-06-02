@@ -28,7 +28,7 @@ def get(
     ),
     sort: bool = typer.Option(False, "-s", "--sort", help="Sort alphabetically"),
     sort_reverse: bool = typer.Option(
-        False, "-r", "--reverse", help="Sort in reverse order"
+        False, "-r", "--reverse", help="Sort alphabetically in reverse order"
     ),
 ):
     """
@@ -83,8 +83,6 @@ def holidays(
     students = api.get()
 
     if not students:
-        if not quiet:
-            typer.echo("No students found!")
         sys.exit(1)
 
     result = 0 if all(api.delete(s) for s in students) else 1

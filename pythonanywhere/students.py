@@ -34,7 +34,9 @@ class Students:
         try:
             result = self.api.get()
             student_usernames = [student["username"] for student in result["students"]]
-            logger.info(snakesay(f"{len(student_usernames)} students found!"))
+            count = len(student_usernames)
+            msg = f"You have {count} students!" if count else "Currently you don't have any students."
+            logger.info(snakesay(msg))
             return student_usernames
         except Exception as e:
             logger.warning(snakesay(str(e)))

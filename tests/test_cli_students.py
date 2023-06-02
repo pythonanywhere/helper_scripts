@@ -134,4 +134,3 @@ class TestHolidays:
 
         assert result.exit_code == 1
         assert not mock_students_delete.called
-        assert "No students found" in result.stdout
