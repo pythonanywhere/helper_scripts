@@ -22,7 +22,7 @@ def create(
         help="Domain name, eg www.mydomain.com",
     ),
     python_version: str = typer.Option(
-        "3.7",
+        "3.8",
         "-p",
         "--python-version",
         help="Python version, eg '3.9'",

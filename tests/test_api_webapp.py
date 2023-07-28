@@ -90,13 +90,13 @@ class TestCreateWebapp:
         api_responses.add(responses.PATCH, expected_patch_url, status=200)
 
         Webapp("mydomain.com").create(
-            "3.7", "/virtualenv/path", "/project/path", nuke=False
+            "3.8", "/virtualenv/path", "/project/path", nuke=False
         )
 
         post = api_responses.calls[0]
         assert post.request.url == expected_post_url
         assert post.request.body == urlencode(
-            {"domain_name": "mydomain.com", "python_version": PYTHON_VERSIONS["3.7"]}
+            {"domain_name": "mydomain.com", "python_version": PYTHON_VERSIONS["3.8"]}
         )
         assert post.request.headers["Authorization"] == f"Token {api_token}"
 
@@ -119,7 +119,7 @@ class TestCreateWebapp:
         api_responses.add(responses.PATCH, expected_patch_url, status=200)
 
         Webapp("mydomain.com").create(
-            "3.7", "/virtualenv/path", "/project/path", nuke=False
+            "3.8", "/virtualenv/path", "/project/path", nuke=False
         )
 
         patch = api_responses.calls[1]
@@ -139,7 +139,7 @@ class TestCreateWebapp:
 
         with pytest.raises(Exception) as e:
             Webapp("mydomain.com").create(
-                "3.7", "/virtualenv/path", "/project/path", nuke=False
+                "3.8", "/virtualenv/path", "/project/path", nuke=False
             )
 
         assert "POST to create webapp via API failed" in str(e.value)
@@ -166,7 +166,7 @@ class TestCreateWebapp:
 
         with pytest.raises(Exception) as e:
             Webapp("mydomain.com").create(
-                "3.7", "/virtualenv/path", "/project/path", nuke=False
+                "3.8", "/virtualenv/path", "/project/path", nuke=False
             )
 
         assert "POST to create webapp via API failed" in str(e.value)
@@ -195,7 +195,7 @@ class TestCreateWebapp:
 
         with pytest.raises(Exception) as e:
             Webapp("mydomain.com").create(
-                "3.7", "/virtualenv/path", "/project/path", nuke=False
+                "3.8", "/virtualenv/path", "/project/path", nuke=False
             )
 
         assert (
@@ -219,7 +219,7 @@ class TestCreateWebapp:
         api_responses.add(responses.PATCH, webapp_url, status=200)
 
         Webapp("mydomain.com").create(
-            "3.7", "/virtualenv/path", "/project/path", nuke=True
+            "3.8", "/virtualenv/path", "/project/path", nuke=True
         )
 
         delete = api_responses.calls[0]
@@ -242,7 +242,7 @@ class TestCreateWebapp:
         api_responses.add(responses.PATCH, webapp_url, status=200)
 
         Webapp("mydomain.com").create(
-            "3.7", "/virtualenv/path", "/project/path", nuke=True
+            "3.8", "/virtualenv/path", "/project/path", nuke=True
         )
 
 

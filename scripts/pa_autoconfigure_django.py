@@ -1,4 +1,4 @@
-#!/usr/bin/python3.7
+#!/usr/bin/python3.8
 """Autoconfigure a Django project from on a github URL.
 
 - downloads the repo
@@ -13,7 +13,7 @@ Usage:
 Options:
   --branch=<branch>         Branch name in case of multiple branches   [default: None]
   --domain=<domain>         Domain name, eg www.mydomain.com   [default: your-username.pythonanywhere.com]
-  --python=<python-version> Python version, eg "3.8"    [default: 3.7]
+  --python=<python-version> Python version, eg "3.9"    [default: 3.8]
   --nuke                    *Irrevocably* delete any existing web app config on this domain. Irrevocably.
 """
 

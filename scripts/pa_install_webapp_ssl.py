@@ -1,4 +1,4 @@
-#!/usr/bin/python3.7
+#!/usr/bin/python3.8
 """Set the HTTPS certificate and private key for a website to the contents of two files, and reload the site.
 
 Usage:

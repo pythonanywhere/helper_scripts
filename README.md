@@ -16,10 +16,10 @@ In a PythonAnywhere Bash console, run:
 
     pip3.10 install --user pythonanywhere
 
-If there is no `python3.9` on your PythonAnywhere account, 
+If there is no `python3.10` on your PythonAnywhere account, 
 you should upgrade your account to the newest system image.
 See [here](https://help.pythonanywhere.com/pages/ChangingSystemImage) how to do that.
-`pa` works with python 3.7, 3.8 and 3.9, but we recommend using the latest system image.
+`pa` works with python 3.8, 3.9, and 3.10 but we recommend using the latest system image.
 
 ### On your own machine
 Install the `pythonanywhere` package from [PyPI](https://pypi.org/project/pythonanywhere/). 

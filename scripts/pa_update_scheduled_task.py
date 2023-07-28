@@ -1,4 +1,4 @@
-#!/usr/bin/python3.7
+#!/usr/bin/python3.8
 """Update a scheduled task using id and proper specs.
 
 Note that logfile name will change after updating the task but it won't be

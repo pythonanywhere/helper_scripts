@@ -1,4 +1,4 @@
-#!/usr/bin/python3.7
+#!/usr/bin/python3.8
 """Get list of user's scheduled tasks as a table with columns:
 id, interval, at (hour:minute/minute past), status (enabled/disabled), command.
 

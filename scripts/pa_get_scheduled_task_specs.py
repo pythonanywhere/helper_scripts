@@ -1,4 +1,4 @@
-#!/usr/bin/python3.7
+#!/usr/bin/python3.8
 """Get current scheduled task's specs file by task id.
 
 Available specs are: command, enabled, interval, hour, minute, printable-time,
