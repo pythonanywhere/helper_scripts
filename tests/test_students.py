@@ -35,6 +35,23 @@ class TestStudentsGet:
         assert mock_students_api_get.called
         assert result == []
 
+    def test_uses_correct_grammar_in_log_messages(self, mocker, caplog):
+        mock_students_api_get = mocker.patch("pythonanywhere.api.students_api.StudentsAPI.get")
+        mock_students_api_get.return_value = {
+            "students": [{"username": "one"}, {"username": "two"}]
+        }
+
+        Students().get()
+
+        mock_students_api_get.return_value = {
+            "students": [{"username": "one"}]
+        }
+
+        Students().get()
+
+        first_log, second_log = caplog.records
+        assert "students!" in first_log.message
+        assert "student!" in second_log.message
 
 @pytest.mark.students
 class TestStudentsDelete:

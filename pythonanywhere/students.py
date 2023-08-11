@@ -35,7 +35,10 @@ class Students:
             result = self.api.get()
             student_usernames = [student["username"] for student in result["students"]]
             count = len(student_usernames)
-            msg = f"You have {count} students!" if count else "Currently you don't have any students."
+            if count:
+                msg = f"You have {count} student{'s' if count > 1 else ''}!"
+            else:
+                msg = "Currently you don't have any students."
             logger.info(snakesay(msg))
             return student_usernames
         except Exception as e:
@@ -49,7 +52,7 @@ class Students:
 
         try:
             self.api.delete(username)
-            logger.info(snakesay(f"{username!r} removed from the students list!"))
+            logger.info(snakesay(f"{username!r} removed from the list of students!"))
             return True
         except Exception as e:
             logger.warning(snakesay(str(e)))
