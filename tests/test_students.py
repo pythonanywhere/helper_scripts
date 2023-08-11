@@ -64,7 +64,7 @@ class TestStudentsDelete:
 
         result = Students().delete(student)
 
-        assert mock_snake.call_args == call(f"{student!r} removed from the students list!")
+        assert mock_snake.call_args == call(f"{student!r} removed from the list of students!")
         assert mock_info.call_args == call(mock_snake.return_value)
         assert result is True
 
