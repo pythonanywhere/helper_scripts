@@ -42,15 +42,16 @@ class TestStudentsGet:
             ({"students": [{"username": "one"}]}, "You have 1 student!"),
         ]
     )
-    def test_uses_correct_grammar_in_log_messages(
-            self, mocker, api_response, expected_wording, caplog
-    ):
+    def test_uses_correct_grammar_in_log_messages(self, mocker, api_response, expected_wording):
         mock_students_api_get = mocker.patch("pythonanywhere.api.students_api.StudentsAPI.get")
         mock_students_api_get.return_value = api_response
+        mock_snake = mocker.patch("pythonanywhere.students.snakesay")
+        mock_info =  mocker.patch("pythonanywhere.students.logger.info")
 
         Students().get()
 
-        assert expected_wording in caplog.text
+        assert mock_snake.call_args == call(expected_wording)
+        assert mock_info.call_args == call(mock_snake.return_value)
 
 
 @pytest.mark.students
