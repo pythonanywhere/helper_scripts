@@ -1,4 +1,3 @@
-import logging
 import pytest
 from unittest.mock import call
 
@@ -36,25 +35,22 @@ class TestStudentsGet:
         assert mock_students_api_get.called
         assert result == []
 
-    def test_uses_correct_grammar_in_log_messages(self, mocker, caplog):
-        caplog.set_level(logging.INFO)
-
+    @pytest.mark.parametrize(
+        "api_response,expected_wording",
+        [
+            ({"students": [{"username": "one"}, {"username": "two"}]}, "You have 2 students!"),
+            ({"students": [{"username": "one"}]}, "You have 1 student!"),
+        ]
+    )
+    def test_uses_correct_grammar_in_log_messages(
+            self, mocker, api_response, expected_wording, caplog
+    ):
         mock_students_api_get = mocker.patch("pythonanywhere.api.students_api.StudentsAPI.get")
-        mock_students_api_get.return_value = {
-            "students": [{"username": "one"}, {"username": "two"}]
-        }
+        mock_students_api_get.return_value = api_response
 
         Students().get()
 
-        mock_students_api_get.return_value = {
-            "students": [{"username": "one"}]
-        }
-
-        Students().get()
-
-        first_log, second_log = caplog.records
-        assert "students!" in first_log.message, "Should be plural"
-        assert "student!" in second_log.message, "Should be singular"
+        assert expected_wording in caplog.text
 
 
 @pytest.mark.students
