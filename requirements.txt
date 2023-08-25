@@ -12,6 +12,6 @@ requests==2.31.0
 responses==0.22.0
 schema==0.7.2
 tabulate==0.9.0
-typer==0.7.0
+typer==0.9.0
 urllib3==2.0.4
 virtualenvwrapper==4.8.4
