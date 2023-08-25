@@ -12,7 +12,7 @@ jobs:
     name: Python ${{ matrix.python-version }}
     steps:
 
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3
 
     - name: Setup timezone
       uses: zcong1993/setup-timezone@master
@@ -20,7 +20,7 @@ jobs:
         timezone: UTC
 
     - name: Set up Python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@61a6322f88396a6271a6ee3565807d608ecaddd1 # v4
       with:
         python-version: ${{ matrix.python-version }}
 
