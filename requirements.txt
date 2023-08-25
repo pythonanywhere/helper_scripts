@@ -5,7 +5,7 @@ importlib-metadata==6.8.0
 packaging
 psutil==5.9.5
 pytest==7.4.0
-pytest-cov==4.0.0
+pytest-cov==4.1.0
 pytest-mock==3.11.1
 pytest-mypy==0.10.3
 requests==2.31.0
