@@ -41,7 +41,13 @@ class TestMain:
         with patch('scripts.pa_autoconfigure_django.DjangoProject.update_wsgi_file'):
             with patch('scripts.pa_autoconfigure_django.DjangoProject.start_bash'):
                 with patch('pythonanywhere.api.webapp.call_api'):
-                    main(repo, "None", domain, running_python_version, nuke=False)
+                    main(
+                        repo_url=repo,
+                        branch="master",
+                        domain=domain,
+                        python_version=running_python_version,
+                        nuke=False
+                    )
 
         expected_django_version = '3.0.6'
         expected_virtualenv = virtualenvs_folder / domain
