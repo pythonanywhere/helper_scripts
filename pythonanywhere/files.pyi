@@ -2,7 +2,7 @@ from typing import Optional, Union
 
 from typer import FileBinaryRead
 
-from pythonanywhere.api.files_api import Files
+from pythonanywhere_core.files import Files
 
 
 class PAPath:

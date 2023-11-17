@@ -8,7 +8,7 @@ from urllib.parse import urljoin
 
 from snakesay import snakesay
 
-from pythonanywhere.api.files_api import Files
+from pythonanywhere_core.files import Files
 
 logger = logging.getLogger("pythonanywhere")
 
