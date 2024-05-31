@@ -13,7 +13,7 @@ help = """This is a new experimental PythonAnywhere cli client.
 It was build with typer & click under the hood.
 """
 
-app = typer.Typer(help=help)
+app = typer.Typer(help=help, no_args_is_help=True, context_settings={"help_option_names": ["--help", "-h"]})
 app.add_typer(django.app, name="django", help="Makes Django Girls tutorial projects deployment easy")
 app.add_typer(path.app, name="path", help="Perform some operations on files")
 app.add_typer(schedule.app, name="schedule", help="Manage scheduled tasks")

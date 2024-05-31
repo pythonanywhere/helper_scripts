@@ -42,9 +42,12 @@ setup(
     python_requires=">=3.8",
     package_data={},
     data_files=[],
-    entry_points={},
+    entry_points={
+        "console_scripts": [
+            "pa=cli.pa:app",
+        ]
+    },
     scripts=[
-        "cli/pa",
         "pythonanywhere/snakesay.py",
         "scripts/pa_autoconfigure_django.py",
         "scripts/pa_create_scheduled_task.py",
