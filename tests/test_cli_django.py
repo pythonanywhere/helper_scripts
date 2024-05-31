@@ -33,6 +33,15 @@ def running_python_version():
     return ".".join(python_version().split(".")[:2])
 
 
+def test_main_subcommand_without_args_prints_help():
+    result = runner.invoke(
+        app,
+        [],
+    )
+    assert result.exit_code == 0
+    assert "Show this message and exit." in result.stdout
+
+
 def test_autoconfigure_calls_all_stuff_in_right_order(mock_django_project):
     result = runner.invoke(
         app,

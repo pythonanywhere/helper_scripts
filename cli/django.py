@@ -6,7 +6,7 @@ from pythonanywhere.django_project import DjangoProject
 from pythonanywhere.snakesay import snakesay
 from pythonanywhere.utils import ensure_domain
 
-app = typer.Typer()
+app = typer.Typer(no_args_is_help=True)
 
 
 @app.command()

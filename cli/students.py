@@ -5,7 +5,7 @@ import typer
 from pythonanywhere.scripts_commons import get_logger
 from pythonanywhere.students import Students
 
-app = typer.Typer()
+app = typer.Typer(no_args_is_help=True)
 
 
 def setup(quiet: bool) -> Students:

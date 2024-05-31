@@ -9,7 +9,7 @@ import typer
 from pythonanywhere.files import PAPath
 from pythonanywhere.scripts_commons import get_logger
 
-app = typer.Typer()
+app = typer.Typer(no_args_is_help=True)
 
 
 def setup(path: str, quiet: bool) -> PAPath:

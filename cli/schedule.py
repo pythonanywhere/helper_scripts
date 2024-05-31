@@ -10,7 +10,7 @@ from pythonanywhere.scripts_commons import get_logger, get_task_from_id, tabulat
 from pythonanywhere.snakesay import snakesay
 from pythonanywhere.task import Task, TaskList
 
-app = typer.Typer()
+app = typer.Typer(no_args_is_help=True)
 
 
 @app.command()

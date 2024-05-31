@@ -40,6 +40,15 @@ def mock_confirm(mocker):
     return mocker.patch("cli.schedule.typer.confirm")
 
 
+def test_main_subcommand_without_args_prints_help():
+    result = runner.invoke(
+        app,
+        [],
+    )
+    assert result.exit_code == 0
+    assert "Show this message and exit." in result.stdout
+
+
 class TestSet:
     def test_calls_all_stuff_in_right_order(self, mocker):
         mock_logger = mocker.patch("cli.schedule.get_logger")

@@ -22,6 +22,15 @@ def mock_students_delete(mock_students):
     return mock_students.return_value.delete
 
 
+def test_main_subcommand_without_args_prints_help():
+    result = runner.invoke(
+        app,
+        [],
+    )
+    assert result.exit_code == 0
+    assert "Show this message and exit." in result.stdout
+
+
 @pytest.mark.students
 class TestGet:
     def test_exits_early_with_error_when_api_does_not_return_expected_list(

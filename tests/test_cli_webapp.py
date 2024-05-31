@@ -39,6 +39,15 @@ def fixture_file_with_content():
     return file_with_content
 
 
+def test_main_subcommand_without_args_prints_help():
+    result = runner.invoke(
+        app,
+        [],
+    )
+    assert result.exit_code == 0
+    assert "Show this message and exit." in result.stdout
+
+
 def test_create_calls_all_stuff_in_right_order(mocker):
     mock_project = mocker.patch("cli.webapp.Project")
 

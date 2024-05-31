@@ -41,6 +41,15 @@ def mock_file_path(mock_path):
     return mock_path
 
 
+def test_main_subcommand_without_args_prints_help():
+    result = runner.invoke(
+        app,
+        [],
+    )
+    assert result.exit_code == 0
+    assert "Show this message and exit." in result.stdout
+
+
 class TestGet:
     def test_exits_early_when_no_contents_for_given_path(self, mock_path):
         mock_path.return_value.contents = None
