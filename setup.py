@@ -28,7 +28,7 @@ setup(
         "Programming Language :: Python :: 3.8",
     ],
     keywords="pythonanywhere api cloud web hosting",
-    packages=["cli", "pythonanywhere", "pythonanywhere.api"],
+    packages=["cli", "pythonanywhere", ],
     install_requires=[
         "docopt",
         "packaging",
