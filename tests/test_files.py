@@ -49,14 +49,6 @@ class TestPAPathInit(TestFiles):
 
         assert PAPath("path").__repr__() == mock_url
 
-    def test_make_sharing_url_contains_pa_site_address(self, mocker):
-        mock_urljoin = mocker.patch("pythonanywhere.files.urljoin")
-        pa_path = PAPath("path")
-
-        pa_path._make_sharing_url("rest")
-
-        assert mock_urljoin.call_args == call(pa_path.api.base_url.split("api")[0], "rest")
-
     def test_sanitizes_path(self):
         pa_path = PAPath("~")
 
@@ -205,7 +197,6 @@ class TestPAPathShare():
     def test_returns_full_url_for_shared_file(self, mocker):
         mock_sharing_get = mocker.patch("pythonanywhere_core.files.Files.sharing_get")
         mock_sharing_get.return_value = "url"
-        mock_make_url = mocker.patch("pythonanywhere.files.PAPath._make_sharing_url")
         mock_snake = mocker.patch("pythonanywhere.files.snakesay")
         mock_info = mocker.patch("pythonanywhere.files.logger.info")
         query_path = "/pa/path/to/a/file"
@@ -213,7 +204,7 @@ class TestPAPathShare():
         result = PAPath(query_path).get_sharing_url()
 
         assert mock_sharing_get.call_args == call(query_path)
-        assert mock_snake.call_args == call(f"{query_path} is shared at {mock_make_url.return_value}")
+        assert mock_snake.call_args == call(f"{query_path} is shared at {mock_sharing_get.return_value}")
         assert mock_info.call_args == call(mock_snake.return_value)
         assert result.endswith("url")
 
@@ -233,8 +224,7 @@ class TestPAPathShare():
 
     def test_path_already_shared(self, mocker):
         mock_sharing_post = mocker.patch("pythonanywhere_core.files.Files.sharing_post")
-        mock_sharing_post.return_value = (200, "url")
-        mock_make_url = mocker.patch("pythonanywhere.files.PAPath._make_sharing_url")
+        mock_sharing_post.return_value = ("was already shared", "url")
         mock_snake = mocker.patch("pythonanywhere.files.snakesay")
         mock_info = mocker.patch("pythonanywhere.files.logger.info")
         path_to_share = "/pa/path/to/a/file"
@@ -242,15 +232,12 @@ class TestPAPathShare():
         result = PAPath(path_to_share).share()
 
         assert mock_sharing_post.call_args == call(path_to_share)
-        assert mock_snake.call_args == call(f"{path_to_share} was already shared at {mock_make_url.return_value}")
+        assert mock_snake.call_args == call(f"{path_to_share} was already shared at {mock_sharing_post.return_value[1]}")
         assert mock_info.call_args == call(mock_snake.return_value)
-        assert mock_make_url.call_args == call("url")
-        assert result == mock_make_url.return_value
 
     def test_path_successfully_shared(self, mocker):
         mock_sharing_post = mocker.patch("pythonanywhere_core.files.Files.sharing_post")
-        mock_sharing_post.return_value = (201, "url")
-        mock_make_url = mocker.patch("pythonanywhere.files.PAPath._make_sharing_url")
+        mock_sharing_post.return_value = ("successfully shared", "url")
         mock_snake = mocker.patch("pythonanywhere.files.snakesay")
         mock_info = mocker.patch("pythonanywhere.files.logger.info")
         path_to_share = "/pa/path/to/a/file"
@@ -258,10 +245,8 @@ class TestPAPathShare():
         result = PAPath(path_to_share).share()
 
         assert mock_sharing_post.call_args == call(path_to_share)
-        assert mock_snake.call_args == call(f"{path_to_share} successfully shared at {mock_make_url.return_value}")
+        assert mock_snake.call_args == call(f"{path_to_share} successfully shared at {mock_sharing_post.return_value[1]}")
         assert mock_info.call_args == call(mock_snake.return_value)
-        assert mock_make_url.call_args == call("url")
-        assert result == mock_make_url.return_value
 
     def test_warns_if_share_fails(self, mocker):
         mock_sharing_post = mocker.patch("pythonanywhere_core.files.Files.sharing_post")

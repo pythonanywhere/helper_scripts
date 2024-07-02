@@ -4,7 +4,6 @@ providing features for programmatic handling of user's files."""
 
 import getpass
 import logging
-from urllib.parse import urljoin
 
 from snakesay import snakesay
 
@@ -44,9 +43,6 @@ class PAPath:
 
     def __repr__(self):
         return self.url
-
-    def _make_sharing_url(self, path):
-        return urljoin(self.api.base_url.split("api")[0], path)
 
     @staticmethod
     def _standarize_path(path):
@@ -141,10 +137,9 @@ class PAPath:
 
         url = self.api.sharing_get(self.path)
         if url:
-            sharing_url = self._make_sharing_url(url)
             if not quiet:
-                logger.info(snakesay(f"{self.path} is shared at {sharing_url}"))
-            return sharing_url
+                logger.info(snakesay(f"{self.path} is shared at {url}"))
+            return url
 
         logger.info(snakesay(f"{self.path} has not been shared"))
 
@@ -155,15 +150,13 @@ class PAPath:
         empty string when share not successful."""
 
         try:
-            code, url = self.api.sharing_post(self.path)
+            msg, url = self.api.sharing_post(self.path)
         except Exception as e:
             logger.warning(snakesay(str(e)))
             return ""
 
-        msg = {200: "was already", 201: "successfully"}[code]
-        sharing_url = self._make_sharing_url(url)
-        logger.info(snakesay(f"{self.path} {msg} shared at {sharing_url}"))
-        return sharing_url
+        logger.info(snakesay(f"{self.path} {msg} at {url}"))
+        return url
 
     def unshare(self):
         """Returns `True` when file unshared or has not been shared,
