@@ -1,0 +1,33 @@
+#!/usr/bin/python3
+import typer
+from typing_extensions import Annotated
+
+
+app = typer.Typer(no_args_is_help=True)
+
+@app.command()
+def create(
+    domain_name: Annotated[
+        str,
+        typer.Option(
+            "-d",
+            "--domain",
+            help="Domain name, eg. yourusername.pythonanywhere.com or www.mydomain.com",
+        )
+    ],
+    command: Annotated[
+        str,
+        typer.Option(
+            "-c",
+            "--command",
+            help="The command to start up your server",
+        )
+    ],
+):
+    """Create an ASGI website"""
+    pass
+
+
+@app.command()
+def delete():
+    pass
