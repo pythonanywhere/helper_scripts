@@ -1,7 +1,9 @@
 #!/usr/bin/python3
 import typer
+from pprint import pformat
 from typing_extensions import Annotated
-
+from pythonanywhere_core.website import Website
+from snakesay import snakesay
 
 app = typer.Typer(no_args_is_help=True)
 
@@ -25,7 +27,13 @@ def create(
     ],
 ):
     """Create an ASGI website"""
-    pass
+    Website().create(domain_name=domain_name, command=command)
+    # TODO: do some basic checks
+    typer.echo(
+        snakesay(
+            f"All done! Your site is now live at {domain_name}. "
+        )
+    )
 
 
 @app.command()
@@ -38,7 +46,15 @@ def get(
     )
 ):
     """If no domain name is specified, list all domains.  Otherwise get details for specified domain"""
-    pass
+    websites = Website().get()
+    typer.echo(
+        snakesay(
+            f"You have {len(websites)} website(s). "
+        )
+    )
+    typer.echo(
+        pformat(websites)
+    )
 
 
 @app.command()
