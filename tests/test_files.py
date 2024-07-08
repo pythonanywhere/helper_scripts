@@ -10,7 +10,7 @@ from pythonanywhere.files import PAPath
 
 class TestFiles:
     username = getuser()
-    base_url = get_api_endpoint().format(username=username, flavor="files")
+    base_url = get_api_endpoint(username=username, flavor="files")
     home_dir_path = f"/home/{username}"
     default_home_dir_files = {
         ".bashrc": {"type": "file", "url": f"{base_url}path{home_dir_path}/.bashrc"},
