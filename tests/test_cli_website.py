@@ -102,7 +102,10 @@ def test_create_with_domain_and_command_creates_it(mocker):
 
 def test_get_with_no_domain_lists_websites(mocker, website_info):
     mock_website = mocker.patch("cli.website.Website")
-    mock_website.return_value.list.return_value = [website_info]
+    second_website_info = {"domain_name": "blah.com", "enabled": False}
+    mock_website.return_value.list.return_value = [website_info, second_website_info]
+    mock_tabulate = mocker.patch("cli.website.tabulate")
+    mock_echo = mocker.patch("cli.website.typer.echo")
 
     result = runner.invoke(
         app,
@@ -110,11 +113,18 @@ def test_get_with_no_domain_lists_websites(mocker, website_info):
             "get",
         ],
     )
+
     assert result.exit_code == 0
     mock_website.return_value.list.assert_called_once()
-    assert "You have 1 website(s). " in result.stdout
-    assert "foo.bar.com" in result.stdout
-
+    assert mock_tabulate.call_args == call(
+        [
+            [website_info["domain_name"], website_info["enabled"]],
+            [second_website_info["domain_name"], second_website_info["enabled"]],
+        ],
+        headers=["domain name", "enabled"],
+        tablefmt="simple",
+    )
+    mock_echo.assert_called_once_with(mock_tabulate.return_value)
 
 def test_get_with_domain_gives_details_for_domain(mocker, website_info, domain_name):
     mock_website = mocker.patch("cli.website.Website")

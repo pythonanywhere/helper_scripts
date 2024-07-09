@@ -66,17 +66,17 @@ def get(
             ],
             tablefmt="simple",
         )
-        typer.echo(table)
     else:
         websites = website.list()
-        typer.echo(
-            snakesay(
-                f"You have {len(websites)} website(s). "
-            )
+        table = tabulate(
+            [
+                [website_info["domain_name"], website_info["enabled"]]
+                for website_info in websites
+            ],
+            headers=["domain name", "enabled"],
+            tablefmt="simple"
         )
-        typer.echo(
-            pformat(websites)
-        )
+    typer.echo(table)
 
 
 @app.command()
