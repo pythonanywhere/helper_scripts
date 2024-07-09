@@ -46,7 +46,9 @@ def get(
     )
 ):
     """If no domain name is specified, list all domains.  Otherwise get details for specified domain"""
-    websites = Website().get()
+    # TODO: implement get if domain_name is provided
+
+    websites = Website().list()
     typer.echo(
         snakesay(
             f"You have {len(websites)} website(s). "

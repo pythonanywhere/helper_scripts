@@ -93,7 +93,7 @@ def test_create_with_domain_and_command_creates_it(mocker):
 
 def test_get_with_no_domain_lists_websites(mocker, website_info):
     mock_website = mocker.patch("cli.website.Website")
-    mock_website.return_value.get.return_value = [website_info]
+    mock_website.return_value.list.return_value = [website_info]
 
     result = runner.invoke(
         app,
@@ -102,7 +102,7 @@ def test_get_with_no_domain_lists_websites(mocker, website_info):
         ],
     )
     assert result.exit_code == 0
-    mock_website.return_value.get.assert_called_once()
+    mock_website.return_value.list.assert_called_once()
     assert "You have 1 website(s). " in result.stdout
     assert "foo.bar.com" in result.stdout
 
