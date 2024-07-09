@@ -91,7 +91,8 @@ def reload(
     ],
 ):
     """Reload the website at the given domain"""
-    pass
+    Website().reload(domain_name=domain_name)
+    typer.echo(snakesay(f"Website {domain_name} reloaded!"))
 
 
 @app.command()
