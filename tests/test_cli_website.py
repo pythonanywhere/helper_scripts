@@ -1,10 +1,14 @@
 import getpass
+from unittest.mock import call
+
 import pytest
 from typer.testing import CliRunner
 
 from cli.website import app
 
+
 runner = CliRunner()
+
 
 @pytest.fixture
 def domain_name():
@@ -22,6 +26,11 @@ def website_info(domain_name, command):
         "domain_name": domain_name,
         "enabled": True,
         "id": 42,
+        "logfiles": {
+            "access": f"/var/log/{domain_name}.access.log",
+            "error": f"/var/log/{domain_name}.error.log",
+            "server": f"/var/log/{domain_name}.server.log",
+        },
         "user": getpass.getuser(),
         "webapp": {
             "command": command,
@@ -107,18 +116,35 @@ def test_get_with_no_domain_lists_websites(mocker, website_info):
     assert "foo.bar.com" in result.stdout
 
 
-def test_get_with_domain_gives_details_for_domain():
+def test_get_with_domain_gives_details_for_domain(mocker, website_info, domain_name):
+    mock_website = mocker.patch("cli.website.Website")
+    mock_website.return_value.get.return_value = website_info
+    mock_tabulate = mocker.patch("cli.website.tabulate")
+    mock_echo = mocker.patch("cli.website.typer.echo")
+
     result = runner.invoke(
         app,
         [
             "get",
             "-d",
-            "www.domain.com",
+            domain_name
         ],
     )
-    print(result.stdout)
+
     assert result.exit_code == 0
-    assert False, "TODO"
+    mock_website.return_value.get.assert_called_once_with(domain_name=domain_name)
+    assert mock_tabulate.call_args == call(
+        [
+            ["domain name", website_info["domain_name"]],
+            ["enabled", website_info["enabled"]],
+            ["command", website_info["webapp"]["command"]],
+            ["access log", website_info["logfiles"]["access"]],
+            ["error log", website_info["logfiles"]["error"]],
+            ["server log", website_info["logfiles"]["server"]],
+        ],
+        tablefmt="simple",
+    )
+    mock_echo.assert_called_once_with(mock_tabulate.return_value)
 
 
 def test_reload_with_no_domain_barfs():
@@ -167,4 +193,3 @@ def test_delete_with_domain_deletes_it():
     )
     assert result.exit_code == 0
     assert False, "TODO"
-

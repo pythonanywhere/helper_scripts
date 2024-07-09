@@ -1,11 +1,17 @@
 #!/usr/bin/python3
-import typer
+
 from pprint import pformat
 from typing_extensions import Annotated
-from pythonanywhere_core.website import Website
+
+import typer
 from snakesay import snakesay
+from tabulate import tabulate
+
+from pythonanywhere_core.website import Website
+
 
 app = typer.Typer(no_args_is_help=True)
+
 
 @app.command()
 def create(
@@ -46,17 +52,31 @@ def get(
     )
 ):
     """If no domain name is specified, list all domains.  Otherwise get details for specified domain"""
-    # TODO: implement get if domain_name is provided
-
-    websites = Website().list()
-    typer.echo(
-        snakesay(
-            f"You have {len(websites)} website(s). "
+    website = Website()
+    if domain_name is not None:
+        website_info = website.get(domain_name=domain_name)
+        table = tabulate(
+            [
+                ["domain name", website_info["domain_name"]],
+                ["enabled", website_info["enabled"]],
+                ["command", website_info["webapp"]["command"]],
+                ["access log", website_info["logfiles"]["access"]],
+                ["error log", website_info["logfiles"]["error"]],
+                ["server log", website_info["logfiles"]["server"]],
+            ],
+            tablefmt="simple",
         )
-    )
-    typer.echo(
-        pformat(websites)
-    )
+        typer.echo(table)
+    else:
+        websites = website.list()
+        typer.echo(
+            snakesay(
+                f"You have {len(websites)} website(s). "
+            )
+        )
+        typer.echo(
+            pformat(websites)
+        )
 
 
 @app.command()
