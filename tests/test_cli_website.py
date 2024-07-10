@@ -185,7 +185,7 @@ def test_reload_with_domain_reloads(mocker):
 
     assert result.exit_code == 0
     mock_website.return_value.reload.assert_called_once_with(domain_name="www.domain.com")
-    mock_snakesay.assert_called_once_with(f"Website www.domain.com reloaded!")
+    mock_snakesay.assert_called_once_with(f"Website www.domain.com has been reloaded!")
     mock_echo.assert_called_once_with(mock_snakesay.return_value)
 
 
@@ -200,7 +200,11 @@ def test_delete_with_no_domain_barfs():
     assert "Missing option" in result.stdout
 
 
-def test_delete_with_domain_deletes_it():
+def test_delete_with_domain_deletes_it(mocker):
+    mock_website = mocker.patch("cli.website.Website")
+    mock_snakesay = mocker.patch("cli.website.snakesay")
+    mock_echo = mocker.patch("cli.website.typer.echo")
+
     result = runner.invoke(
         app,
         [
@@ -209,5 +213,9 @@ def test_delete_with_domain_deletes_it():
             "www.domain.com",
         ],
     )
+
     assert result.exit_code == 0
-    assert False, "TODO"
+    mock_website.return_value.delete.assert_called_once_with(domain_name="www.domain.com")
+    mock_snakesay.assert_called_once_with(f"Website www.domain.com has been deleted!")
+    mock_echo.assert_called_once_with(mock_snakesay.return_value)
+

@@ -92,7 +92,7 @@ def reload(
 ):
     """Reload the website at the given domain"""
     Website().reload(domain_name=domain_name)
-    typer.echo(snakesay(f"Website {domain_name} reloaded!"))
+    typer.echo(snakesay(f"Website {domain_name} has been reloaded!"))
 
 
 @app.command()
@@ -107,4 +107,5 @@ def delete(
     ],
 ):
     """Delete the website at the given domain"""
-    pass
+    Website().delete(domain_name=domain_name)
+    typer.echo(snakesay(f"Website {domain_name} has been deleted!"))
