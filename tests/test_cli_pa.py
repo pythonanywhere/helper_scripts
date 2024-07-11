@@ -11,7 +11,7 @@ def test_main_command_without_args_prints_help():
         [],
     )
     assert result.exit_code == 0
-    tidied_output = " ".join([line.replace("│", "").strip() for line in result.stdout.split("\n")])
+    tidied_output = " ".join([line.replace("│", "").strip() for line in result.output.split("\n")])
     assert "This is a new experimental PythonAnywhere cli client." in tidied_output
     assert "Makes Django Girls tutorial projects deployment easy" in tidied_output
     assert "Perform some operations on files" in tidied_output
