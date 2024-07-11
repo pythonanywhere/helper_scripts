@@ -33,7 +33,7 @@ jobs:
 
     - name: Test with pytest
       run: |
-        pytest
+        pytest -vvv
 
     - name: Check coverage
       run: |
