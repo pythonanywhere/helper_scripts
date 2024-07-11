@@ -21,6 +21,16 @@ def command():
 
 
 @pytest.fixture
+def mock_echo(mocker):
+    return mocker.patch("cli.website.typer.echo")
+
+
+@pytest.fixture
+def mock_tabulate(mocker):
+    return mocker.patch("cli.website.tabulate")
+
+
+@pytest.fixture
 def mock_website(mocker):
     return mocker.patch("cli.website.Website")
 
@@ -104,11 +114,9 @@ def test_create_with_domain_and_command_creates_it(mock_website):
     assert "All done!" in result.stdout
 
 
-def test_get_with_no_domain_lists_websites(mocker, mock_website, website_info):
+def test_get_with_no_domain_lists_websites(mock_echo, mock_tabulate, mock_website, website_info):
     second_website_info = {"domain_name": "blah.com", "enabled": False}
     mock_website.return_value.list.return_value = [website_info, second_website_info]
-    mock_tabulate = mocker.patch("cli.website.tabulate")
-    mock_echo = mocker.patch("cli.website.typer.echo")
 
     result = runner.invoke(
         app,
@@ -130,10 +138,10 @@ def test_get_with_no_domain_lists_websites(mocker, mock_website, website_info):
     mock_echo.assert_called_once_with(mock_tabulate.return_value)
 
 
-def test_get_with_domain_gives_details_for_domain(mocker, mock_website, website_info, domain_name):
+def test_get_with_domain_gives_details_for_domain(
+        mock_echo, mock_tabulate, mock_website, website_info, domain_name
+):
     mock_website.return_value.get.return_value = website_info
-    mock_tabulate = mocker.patch("cli.website.tabulate")
-    mock_echo = mocker.patch("cli.website.typer.echo")
 
     result = runner.invoke(
         app,
@@ -161,7 +169,7 @@ def test_get_with_domain_gives_details_for_domain(mocker, mock_website, website_
 
 
 def test_get_with_domain_gives_details_for_domain_even_without_logfiles(
-        mocker, domain_name, command, mock_website
+        domain_name, command, mock_echo, mock_tabulate, mock_website
 ):
     website_info = {
         "domain_name": domain_name,
@@ -180,8 +188,6 @@ def test_get_with_domain_gives_details_for_domain_even_without_logfiles(
         }
     }
     mock_website.return_value.get.return_value = website_info
-    mock_tabulate = mocker.patch("cli.website.tabulate")
-    mock_echo = mocker.patch("cli.website.typer.echo")
 
     result = runner.invoke(
         app,
@@ -216,9 +222,8 @@ def test_reload_with_no_domain_barfs():
     assert "Missing option" in result.stdout
 
 
-def test_reload_with_domain_reloads(mocker, mock_website):
+def test_reload_with_domain_reloads(mocker, mock_echo, mock_website):
     mock_snakesay = mocker.patch("cli.website.snakesay")
-    mock_echo = mocker.patch("cli.website.typer.echo")
 
     result = runner.invoke(
         app,
@@ -246,9 +251,8 @@ def test_delete_with_no_domain_barfs():
     assert "Missing option" in result.stdout
 
 
-def test_delete_with_domain_deletes_it(mocker, mock_website):
+def test_delete_with_domain_deletes_it(mocker, mock_echo, mock_website):
     mock_snakesay = mocker.patch("cli.website.snakesay")
-    mock_echo = mocker.patch("cli.website.typer.echo")
 
     result = runner.invoke(
         app,
