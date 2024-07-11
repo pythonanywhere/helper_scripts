@@ -55,17 +55,22 @@ def get(
     website = Website()
     if domain_name is not None:
         website_info = website.get(domain_name=domain_name)
-        table = tabulate(
-            [
-                ["domain name", website_info["domain_name"]],
-                ["enabled", website_info["enabled"]],
-                ["command", website_info["webapp"]["command"]],
-                ["access log", website_info["logfiles"]["access"]],
-                ["error log", website_info["logfiles"]["error"]],
-                ["server log", website_info["logfiles"]["server"]],
-            ],
-            tablefmt="simple",
-        )
+        tabular_data = [
+            ["domain name", website_info["domain_name"]],
+            ["enabled", website_info["enabled"]],
+            ["command", website_info["webapp"]["command"]],
+
+        ]
+        if "logfiles" in website_info:
+            tabular_data.extend(
+                [
+                    ["access log", website_info["logfiles"]["access"]],
+                    ["error log", website_info["logfiles"]["error"]],
+                    ["server log", website_info["logfiles"]["server"]],
+                ]
+            )
+
+        table = tabulate(tabular_data, tablefmt="simple")
     else:
         websites = website.list()
         table = tabulate(

@@ -158,6 +158,52 @@ def test_get_with_domain_gives_details_for_domain(mocker, website_info, domain_n
     mock_echo.assert_called_once_with(mock_tabulate.return_value)
 
 
+def test_get_with_domain_gives_details_for_domain_even_without_logfiles(
+        mocker, domain_name, command
+):
+    website_info = {
+        "domain_name": domain_name,
+        "enabled": True,
+        "id": 42,
+        "user": getpass.getuser(),
+        "webapp": {
+            "command": command,
+            "domains": [
+                {
+                    "domain_name": domain_name,
+                    "enabled": True
+                }
+            ],
+            "id": 42
+        }
+    }
+    mock_website = mocker.patch("cli.website.Website")
+    mock_website.return_value.get.return_value = website_info
+    mock_tabulate = mocker.patch("cli.website.tabulate")
+    mock_echo = mocker.patch("cli.website.typer.echo")
+
+    result = runner.invoke(
+        app,
+        [
+            "get",
+            "-d",
+            domain_name
+        ],
+    )
+
+    assert result.exit_code == 0
+    mock_website.return_value.get.assert_called_once_with(domain_name=domain_name)
+    assert mock_tabulate.call_args == call(
+        [
+            ["domain name", website_info["domain_name"]],
+            ["enabled", website_info["enabled"]],
+            ["command", website_info["webapp"]["command"]],
+        ],
+        tablefmt="simple",
+    )
+    mock_echo.assert_called_once_with(mock_tabulate.return_value)
+
+
 def test_reload_with_no_domain_barfs():
     result = runner.invoke(
         app,
