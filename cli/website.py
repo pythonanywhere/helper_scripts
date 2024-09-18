@@ -1,6 +1,5 @@
 #!/usr/bin/python3
 
-from pprint import pformat
 from typing_extensions import Annotated
 
 import typer
@@ -114,3 +113,19 @@ def delete(
     """Delete the website at the given domain"""
     Website().delete(domain_name=domain_name)
     typer.echo(snakesay(f"Website {domain_name} has been deleted!"))
+
+
+@app.command()
+def create_autorenew_cert(
+    domain_name: Annotated[
+        str,
+        typer.Option(
+            "-d",
+            "--domain",
+            help="Domain name, eg. yourusername.pythonanywhere.com or www.mydomain.com",
+        )
+    ],
+):
+    """Create and apply an auto-renewing Let's Encrypt certificate for the given domain"""
+    Website().auto_ssl(domain_name=domain_name)
+    typer.echo(snakesay(f"Applied auto-renewing SSL certificate for {domain_name}!"))

@@ -268,3 +268,21 @@ def test_delete_with_domain_deletes_it(mocker, mock_echo, mock_website):
     mock_snakesay.assert_called_once_with(f"Website www.domain.com has been deleted!")
     mock_echo.assert_called_once_with(mock_snakesay.return_value)
 
+
+def test_create_le_autorenew_cert(mocker, mock_echo, mock_website):
+    mock_snakesay = mocker.patch("cli.website.snakesay")
+
+    result = runner.invoke(
+        app,
+        [
+            "create-autorenew-cert",
+            "-d",
+            "www.domain.com",
+        ],
+    )
+
+    assert result.exit_code == 0
+    mock_website.return_value.auto_ssl.assert_called_once_with(domain_name="www.domain.com")
+    mock_snakesay.assert_called_once_with(f"Applied auto-renewing SSL certificate for www.domain.com!")
+    mock_echo.assert_called_once_with(mock_snakesay.return_value)
+
