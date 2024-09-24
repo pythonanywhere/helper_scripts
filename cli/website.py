@@ -2,6 +2,7 @@
 
 from typing_extensions import Annotated
 
+import json
 import typer
 from snakesay import snakesay
 from tabulate import tabulate
@@ -32,8 +33,11 @@ def create(
     ],
 ):
     """Create an ASGI website"""
-    Website().create(domain_name=domain_name, command=command)
-    # TODO: do some basic checks
+    response = Website().create(domain_name=domain_name, command=command)
+
+    typer.echo("Response:")
+    typer.echo(json.dumps(response))
+
     typer.echo(
         snakesay(
             f"All done! Your site is now live at {domain_name}. "
