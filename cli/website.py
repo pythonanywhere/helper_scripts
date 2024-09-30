@@ -131,9 +131,5 @@ def create_autorenew_cert(
     ],
 ):
     """Create and apply an auto-renewing Let's Encrypt certificate for the given domain"""
-    response_json = Website().auto_ssl(domain_name=domain_name)
-    from pprint import pprint
-    print("########################", flush=True)
-    pprint(response_json)
-    print("########################", flush=True)
+    Website().auto_ssl(domain_name=domain_name)
     typer.echo(snakesay(f"Applied auto-renewing SSL certificate for {domain_name}!"))
