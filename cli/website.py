@@ -33,10 +33,7 @@ def create(
     ],
 ):
     """Create an ASGI website"""
-    response = Website().create(domain_name=domain_name, command=command)
-
-    typer.echo("Response:")
-    typer.echo(json.dumps(response))
+    Website().create(domain_name=domain_name, command=command)
 
     typer.echo(
         snakesay(
