@@ -2,7 +2,6 @@
 
 from typing_extensions import Annotated
 
-import json
 import typer
 from snakesay import snakesay
 from tabulate import tabulate
@@ -57,9 +56,9 @@ def get(
         website_info = website.get(domain_name=domain_name)
         tabular_data = [
             ["domain name", website_info["domain_name"]],
+            ["cname", website_info["webapp"]["domains"][0].get("cname")],
             ["enabled", website_info["enabled"]],
             ["command", website_info["webapp"]["command"]],
-
         ]
         if "logfiles" in website_info:
             tabular_data.extend(
@@ -69,6 +68,7 @@ def get(
                     ["server log", website_info["logfiles"]["server"]],
                 ]
             )
+        tabular_data = [[k, v] for k, v in tabular_data if v is not None]
 
         table = tabulate(tabular_data, tablefmt="simple")
     else:

@@ -211,6 +211,94 @@ def test_get_with_domain_gives_details_for_domain_even_without_logfiles(
     mock_echo.assert_called_once_with(mock_tabulate.return_value)
 
 
+def test_get_includes_cname_if_cname_is_present_in_domain(
+        domain_name, command, mock_echo, mock_tabulate, mock_website
+):
+    website_info = {
+        "domain_name": domain_name,
+        "enabled": True,
+        "id": 42,
+        "user": getpass.getuser(),
+        "webapp": {
+            "command": command,
+            "domains": [
+                {
+                    "domain_name": domain_name,
+                    "enabled": True,
+                    "cname": "the-cname"
+                }
+            ],
+            "id": 42
+        }
+    }
+    mock_website.return_value.get.return_value = website_info
+
+    result = runner.invoke(
+        app,
+        [
+            "get",
+            "-d",
+            domain_name
+        ],
+    )
+
+    assert result.exit_code == 0
+    mock_website.return_value.get.assert_called_once_with(domain_name=domain_name)
+    assert mock_tabulate.call_args == call(
+        [
+            ["domain name", website_info["domain_name"]],
+            ["cname", website_info["webapp"]["domains"][0]["cname"]],
+            ["enabled", website_info["enabled"]],
+            ["command", website_info["webapp"]["command"]],
+        ],
+        tablefmt="simple",
+    )
+    mock_echo.assert_called_once_with(mock_tabulate.return_value)
+
+
+def test_get_does_not_include_cname_if_cname_is_not_present_in_domain(
+        domain_name, command, mock_echo, mock_tabulate, mock_website
+):
+    website_info = {
+        "domain_name": domain_name,
+        "enabled": True,
+        "id": 42,
+        "user": getpass.getuser(),
+        "webapp": {
+            "command": command,
+            "domains": [
+                {
+                    "domain_name": domain_name,
+                    "enabled": True,
+                }
+            ],
+            "id": 42
+        }
+    }
+    mock_website.return_value.get.return_value = website_info
+
+    result = runner.invoke(
+        app,
+        [
+            "get",
+            "-d",
+            domain_name
+        ],
+    )
+
+    assert result.exit_code == 0
+    mock_website.return_value.get.assert_called_once_with(domain_name=domain_name)
+    assert mock_tabulate.call_args == call(
+        [
+            ["domain name", website_info["domain_name"]],
+            ["enabled", website_info["enabled"]],
+            ["command", website_info["webapp"]["command"]],
+        ],
+        tablefmt="simple",
+    )
+    mock_echo.assert_called_once_with(mock_tabulate.return_value)
+
+
 def test_reload_with_no_domain_barfs():
     result = runner.invoke(
         app,
