@@ -7,6 +7,7 @@ from snakesay import snakesay
 from tabulate import tabulate
 
 from pythonanywhere_core.website import Website
+from pythonanywhere_core.exceptions import SanityException
 
 
 app = typer.Typer(no_args_is_help=True)
@@ -32,7 +33,11 @@ def create(
     ],
 ):
     """Create an ASGI website"""
-    Website().create(domain_name=domain_name, command=command)
+    try:
+        Website().create(domain_name=domain_name, command=command)
+    except SanityException as e:
+        typer.echo(f"You already have a website for {domain_name}. Use the --nuke option to replace it.")
+        return
 
     typer.echo(
         snakesay(

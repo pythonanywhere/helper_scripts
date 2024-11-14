@@ -5,6 +5,7 @@ import pytest
 from typer.testing import CliRunner
 
 from cli.website import app
+from pythonanywhere_core.exceptions import SanityException
 
 
 runner = CliRunner()
@@ -112,6 +113,27 @@ def test_create_with_domain_and_command_creates_it(mock_website):
         command="some kind of server"
     )
     assert "All done!" in result.stdout
+
+
+def test_create_with_failing_sanity_check(mock_website):
+    mock_website.return_value.create.side_effect = SanityException("You already have a website for this domain. Use the --nuke option to replace it.")
+    
+    result = runner.invoke(
+        app,
+        [
+            "create",
+            "-d",
+            "www.something.com",
+            "-c",
+            "some kind of server",
+        ],
+    )
+    assert result.exit_code == 0
+    mock_website.return_value.create.assert_called_once_with(
+        domain_name="www.something.com",
+        command="some kind of server"
+    )
+    assert "You already have a website for www.something.com. Use the --nuke option to replace it." in result.stdout
 
 
 def test_get_with_no_domain_lists_websites(mock_echo, mock_tabulate, mock_website, website_info):
