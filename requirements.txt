@@ -8,7 +8,7 @@ pytest==8.3.3
 pytest-cov==5.0.0
 pytest-mock==3.14.0
 pytest-mypy==0.10.3
-pythonanywhere_core==0.2.2
+pythonanywhere_core==0.2.3
 requests==2.32.3
 responses==0.25.3
 schema==0.7.2

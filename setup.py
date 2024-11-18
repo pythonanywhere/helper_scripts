@@ -9,7 +9,7 @@ with (here / "README.md").open(encoding="utf-8") as f:
 
 setup(
     name="pythonanywhere",
-    version="0.15.3",
+    version="0.15.4",
     description="PythonAnywhere helper tools for users",
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -36,7 +36,7 @@ setup(
         "docopt",
         "packaging",
         "python-dateutil",
-        "pythonanywhere_core==0.2.0",
+        "pythonanywhere_core==0.2.3",
         "requests",
         "schema",
         "snakesay",

@@ -7,7 +7,7 @@ from snakesay import snakesay
 from tabulate import tabulate
 
 from pythonanywhere_core.website import Website
-from pythonanywhere_core.exceptions import SanityException
+from pythonanywhere_core.exceptions import PythonAnywhereApiException, DomainAlreadyExistsException
 
 
 app = typer.Typer(no_args_is_help=True)
@@ -35,9 +35,12 @@ def create(
     """Create an ASGI website"""
     try:
         Website().create(domain_name=domain_name, command=command)
-    except SanityException as e:
-        typer.echo(f"You already have a website for {domain_name}. Use the --nuke option to replace it.")
-        return
+    except DomainAlreadyExistsException:
+        typer.echo(f"You already have a website for {domain_name}.")
+        raise typer.Exit(code=1)
+    except PythonAnywhereApiException as e:
+        typer.echo(str(e))
+        raise typer.Exit(code=1)
 
     typer.echo(
         snakesay(
