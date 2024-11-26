@@ -1,4 +1,3 @@
-from platform import python_version
 from unittest.mock import call, patch
 import os
 import pytest
@@ -7,6 +6,7 @@ import requests
 import time
 
 from scripts.pa_autoconfigure_django import main
+from tests.conftest import new_django_version
 
 
 class TestMain:
@@ -33,9 +33,9 @@ class TestMain:
 
     @pytest.mark.slowtest
     def test_actually_works_against_example_repo(
-        self, fake_home, virtualenvs_folder, api_token, process_killer
+        self, fake_home, virtualenvs_folder, api_token, process_killer, running_python_version, new_django_version
     ):
-        running_python_version = ".".join(python_version().split(".")[:2])
+        git_ref = "non-nested-old" if running_python_version in ["3.8", "3.9"] else "master"
         repo = 'https://github.com/pythonanywhere/example-django-project.git'
         domain = 'mydomain.com'
         with patch('scripts.pa_autoconfigure_django.DjangoProject.update_wsgi_file'):
@@ -43,13 +43,12 @@ class TestMain:
                 with patch('pythonanywhere_core.webapp.call_api'):
                     main(
                         repo_url=repo,
-                        branch="master",
+                        branch=git_ref,
                         domain=domain,
                         python_version=running_python_version,
                         nuke=False
                     )
 
-        expected_django_version = '3.0.6'
         expected_virtualenv = virtualenvs_folder / domain
         expected_project_path = fake_home / domain
         django_project_name = 'myproject'
@@ -60,11 +59,11 @@ class TestMain:
             '-c'
             'import django; print(django.get_version())'
         ]).decode().strip()
-        assert django_version == expected_django_version
+        assert django_version == new_django_version
 
         with expected_settings_path.open() as f:
             lines = f.read().split('\n')
-        assert "MEDIA_ROOT = os.path.join(BASE_DIR, 'media')" in lines
+        assert "MEDIA_ROOT = Path(BASE_DIR / 'media')" in lines
         assert "ALLOWED_HOSTS = ['mydomain.com']  # type: List[str]" in lines
 
         assert 'base.css' in os.listdir(str(fake_home / domain / 'static/admin/css'))

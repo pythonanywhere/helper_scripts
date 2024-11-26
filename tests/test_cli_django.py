@@ -59,6 +59,7 @@ def test_autoconfigure_calls_all_stuff_in_right_order(mock_django_project):
     assert mock_django_project.return_value.method_calls == [
         call.sanity_checks(nuke=True),
         call.download_repo("repo.url", nuke=True),
+        call.ensure_branch("None"),
         call.create_virtualenv(nuke=True),
         call.create_webapp(nuke=True),
         call.add_static_file_mappings(),
@@ -86,6 +87,8 @@ def test_autoconfigure_actually_works_against_example_repo(
     process_killer,
     running_python_version,
 ):
+    git_ref = "non-nested-old" if running_python_version in ["3.8", "3.9"] else "master"
+    expected_django_version = "4.2.16" if running_python_version in ["3.8", "3.9"] else "5.1.3"
     mocker.patch("cli.django.DjangoProject.start_bash")
     repo = "https://github.com/pythonanywhere/example-django-project.git"
     domain = "mydomain.com"
@@ -99,10 +102,11 @@ def test_autoconfigure_actually_works_against_example_repo(
             domain,
             "-p",
             running_python_version,
+            "--branch",
+            git_ref,
         ],
     )
 
-    expected_django_version = "3.0.6"
     expected_virtualenv = virtualenvs_folder / domain
     expected_project_path = fake_home / domain
     django_project_name = "myproject"
@@ -122,7 +126,7 @@ def test_autoconfigure_actually_works_against_example_repo(
 
     with expected_settings_path.open() as f:
         lines = f.read().split("\n")
-    assert "MEDIA_ROOT = os.path.join(BASE_DIR, 'media')" in lines
+    assert "MEDIA_ROOT = Path(BASE_DIR / 'media')" in lines
     assert "ALLOWED_HOSTS = ['mydomain.com']  # type: List[str]" in lines
 
     assert "base.css" in os.listdir(str(fake_home / domain / "static/admin/css"))
@@ -180,6 +184,7 @@ def test_start_actually_creates_django_project_in_virtualenv_with_hacked_setting
     virtualenvs_folder,
     api_token,
     running_python_version,
+    new_django_version,
 ):
     runner.invoke(
         app,
@@ -188,7 +193,7 @@ def test_start_actually_creates_django_project_in_virtualenv_with_hacked_setting
             "-d",
             "mydomain.com",
             "-j",
-            "2.2.12",
+            new_django_version,
             "-p",
             running_python_version,
         ],
@@ -204,11 +209,11 @@ def test_start_actually_creates_django_project_in_virtualenv_with_hacked_setting
         .decode()
         .strip()
     )
-    assert django_version == "2.2.12"
+    assert django_version == new_django_version
 
     with (fake_home / "mydomain.com/mysite/settings.py").open() as f:
         lines = f.read().split("\n")
-    assert "MEDIA_ROOT = os.path.join(BASE_DIR, 'media')" in lines
+    assert "MEDIA_ROOT = Path(BASE_DIR / 'media')" in lines
     assert "ALLOWED_HOSTS = ['mydomain.com']" in lines
 
     assert "base.css" in os.listdir(str(fake_home / "mydomain.com/static/admin/css"))
@@ -222,10 +227,9 @@ def test_nuke_option_lets_you_run_twice(
     virtualenvs_folder,
     api_token,
     running_python_version,
+    old_django_version,
+    new_django_version,
 ):
-    old_django_version = "2.2.12"
-    new_django_version = "3.0.6"
-
     runner.invoke(
         app,
         [

@@ -9,7 +9,7 @@ with (here / "README.md").open(encoding="utf-8") as f:
 
 setup(
     name="pythonanywhere",
-    version="0.15.4",
+    version="0.15.5",
     description="PythonAnywhere helper tools for users",
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -22,6 +22,8 @@ setup(
         "Intended Audience :: Developers",
         "Topic :: Software Development :: Libraries",
         "License :: OSI Approved :: MIT License",
+        "Programming Language :: Python :: 3.13",
+        "Programming Language :: Python :: 3.12",
         "Programming Language :: Python :: 3.11",
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.9",
@@ -36,7 +38,7 @@ setup(
         "docopt",
         "packaging",
         "python-dateutil",
-        "pythonanywhere_core==0.2.3",
+        "pythonanywhere_core==0.2.4",
         "requests",
         "schema",
         "snakesay",

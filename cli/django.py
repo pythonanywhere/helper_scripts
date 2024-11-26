@@ -12,6 +12,12 @@ app = typer.Typer(no_args_is_help=True)
 @app.command()
 def autoconfigure(
     repo_url: str = typer.Argument(..., help="url of remote git repository of your django project"),
+    branch: str = typer.Option(
+        "None",
+        "-b",
+        "--branch",
+        help="Branch name in case of multiple branches",
+    ),
     domain_name: str = typer.Option(
         "your-username.pythonanywhere.com",
         "-d",
@@ -43,6 +49,7 @@ def autoconfigure(
     project = DjangoProject(domain, python_version)
     project.sanity_checks(nuke=nuke)
     project.download_repo(repo_url, nuke=nuke),
+    project.ensure_branch(branch),
     project.create_virtualenv(nuke=nuke)
     project.create_webapp(nuke=nuke)
     project.add_static_file_mappings()

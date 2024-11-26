@@ -45,8 +45,7 @@ class TestVirtualenv:
         assert command_list == [pip_path, "install", "package1", "package2==1.1.2"]
 
     @pytest.mark.slowtest
-    def test_actually_installing_a_real_package(self, fake_home, virtualenvs_folder):
-        running_python_version = ".".join(python_version().split(".")[:2])
+    def test_actually_installing_a_real_package(self, fake_home, virtualenvs_folder, running_python_version):
         v = Virtualenv("www.adomain.com", running_python_version)
         v.create(nuke=False)
         v.pip_install("aafigure")
@@ -54,8 +53,7 @@ class TestVirtualenv:
         subprocess.check_call([str(v.path / "bin/python"), "-c" "import aafigure"])
 
     @pytest.mark.slowtest
-    def test_gets_version(self, fake_home, virtualenvs_folder):
-        running_python_version = ".".join(python_version().split(".")[:2])
+    def test_gets_version(self, fake_home, virtualenvs_folder, running_python_version):
         v = Virtualenv("www.adomain.com", running_python_version)
         v.create(nuke=False)
         v.pip_install("aafigure==0.6")

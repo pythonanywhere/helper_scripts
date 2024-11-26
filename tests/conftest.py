@@ -3,6 +3,7 @@ import shutil
 import tempfile
 from getpass import getuser
 from pathlib import Path
+from platform import python_version
 from unittest.mock import Mock, patch
 
 import psutil
@@ -120,3 +121,21 @@ def process_killer():
         for child in psutil.Process(p.pid).children():
             child.kill()
         p.kill()
+
+@pytest.fixture
+def running_python_version():
+    return ".".join(python_version().split(".")[:2])
+
+@pytest.fixture
+def new_django_version(running_python_version):
+    if running_python_version in ["3.10", "3.11", "3.12", "3.13"]:
+        return "5.1.3"
+    else:
+        return "4.2.16"
+
+@pytest.fixture
+def old_django_version(running_python_version):
+    if running_python_version in ["3.10", "3.11", "3.12", "3.13"]:
+        return "5.1.2"
+    else:
+        return "4.2.15"

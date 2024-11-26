@@ -247,19 +247,21 @@ class TestRunStartproject:
 
 
 @pytest.fixture
-def non_nested_submodule():
+def non_nested_submodule(running_python_version):
+    git_ref = "non-nested-old" if running_python_version in ["3.8", "3.9"] else "master"
     subprocess.check_call(["git", "submodule", "update", "--init", "--recursive"])
     submodule_path = Path(__file__).parents[1] / "submodules" / "example-django-project"
-    subprocess.check_call(["git", "checkout", "master"], cwd=str(submodule_path))
+    subprocess.check_call(["git", "checkout", git_ref], cwd=str(submodule_path))
     yield submodule_path
     subprocess.check_call(["git", "submodule", "update", "--init", "--recursive"])
 
 
 @pytest.fixture
-def more_nested_submodule():
+def more_nested_submodule(running_python_version):
+    git_ref = "more-nested-old" if running_python_version in ["3.8", "3.9"] else "morenested"
     subprocess.check_call(["git", "submodule", "update", "--init", "--recursive"])
     submodule_path = Path(__file__).parents[1] / "submodules" / "example-django-project"
-    subprocess.check_call(["git", "checkout", "morenested"], cwd=str(submodule_path))
+    subprocess.check_call(["git", "checkout", git_ref], cwd=str(submodule_path))
     yield submodule_path
     subprocess.check_call(["git", "submodule", "update", "--init", "--recursive"])
 
@@ -509,9 +511,8 @@ class TestUpdateWsgiFile:
 
     @pytest.mark.slowtest
     def test_actually_produces_wsgi_file_that_can_import_project_non_nested(
-        self, fake_home, non_nested_submodule, virtualenvs_folder
+        self, fake_home, non_nested_submodule, virtualenvs_folder, running_python_version
     ):
-        running_python_version = ".".join(python_version().split(".")[:2])
         project = DjangoProject("mydomain.com", running_python_version)
         shutil.copytree(str(non_nested_submodule), str(project.project_path))
         if running_python_version in ["3.8", "3.9", "3.10", "3.11"]:
@@ -529,15 +530,14 @@ class TestUpdateWsgiFile:
 
     @pytest.mark.slowtest
     def test_actually_produces_wsgi_file_that_can_import_nested_project(
-        self, fake_home, more_nested_submodule, virtualenvs_folder
+        self, fake_home, more_nested_submodule, virtualenvs_folder, running_python_version
     ):
-        running_python_version = ".".join(python_version().split(".")[:2])
         project = DjangoProject("mydomain.com", running_python_version)
         shutil.copytree(str(more_nested_submodule), str(project.project_path))
-        if running_python_version in ["3.8", "3.9", "3.10", "3.11"]:
-            project.create_virtualenv(django_version="latest")
-        else:
+        if running_python_version in ["3.8", "3.9"]:
             project.create_virtualenv()
+        else:
+            project.create_virtualenv(django_version="latest")
 
         project.find_django_files()
         project.wsgi_file_path = Path(tempfile.NamedTemporaryFile().name)
