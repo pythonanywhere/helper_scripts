@@ -32,6 +32,25 @@ There are two ways to use the package. You can just run the scripts or use the u
 
 ### Command line interface
 
+```
+pa [OPTIONS] COMMAND [ARGS]...
+
+Options:
+  --install-completion  Install completion for the current shell.
+  --show-completion     Show completion for the current shell, to copy it or
+                        customize the installation.
+  -h, --help            Show this message and exit.
+
+Commands:
+  django    Makes Django Girls tutorial projects deployment easy
+  path      Perform some operations on files
+  schedule  Manage scheduled tasks
+  students  Perform some operations on students
+  webapp    Everything for web apps: use this if you're not using our experimental features 
+  website   EXPERIMENTAL: create and manage ASGI websites
+
+```
+
 ### Running `pa` on your local machine
 
 `pa` expects the presence of some environment variables that are provided when you run your code in a PythonAnywere console.
