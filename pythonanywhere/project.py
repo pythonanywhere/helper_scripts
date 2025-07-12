@@ -42,10 +42,12 @@ class Project:
 
 
     def create_webapp(self, nuke):
+        print(snakesay("Creating web app via API"))
         self.webapp.create(self.python_version, self.virtualenv.path, self.project_path, nuke=nuke)
 
 
     def add_static_file_mappings(self):
+        print(snakesay("Adding static files mappings for /static/ and /media/"))
         self.webapp.add_default_static_files_mappings(self.project_path)
 
 

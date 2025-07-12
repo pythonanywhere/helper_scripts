@@ -38,6 +38,7 @@ def create(
     project.virtualenv.create(nuke=nuke)
     project.create_webapp(nuke=nuke)
     project.add_static_file_mappings()
+    typer.echo(snakesay(f"Reloading {domain_name} via API"))
     project.webapp.reload()
 
     typer.echo(
@@ -167,5 +168,6 @@ def reload(
 ):
     domain_name = ensure_domain(domain_name)
     webapp = Webapp(domain_name)
+    typer.echo(snakesay(f"Reloading {domain_name} via API"))
     webapp.reload()
     typer.echo(snakesay(f"{domain_name} has been reloaded"))
