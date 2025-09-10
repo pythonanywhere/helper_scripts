@@ -38,7 +38,7 @@ setup(
         "docopt",
         "packaging",
         "python-dateutil",
-        "pythonanywhere_core==0.2.4",
+        "pythonanywhere_core==0.2.7",
         "requests",
         "schema",
         "snakesay",
