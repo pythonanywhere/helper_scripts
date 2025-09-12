@@ -3,7 +3,7 @@ click==8.1.7
 docopt==0.6.2
 importlib-metadata==8.5.0
 packaging
-psutil==6.1.1
+psutil==7.0.0
 pytest==8.4.2
 pytest-cov==5.0.0
 pytest-mock==3.14.1
