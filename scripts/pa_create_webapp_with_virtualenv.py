@@ -32,7 +32,7 @@ def main(domain, python_version, nuke):
     project.virtualenv.create(nuke=nuke)
     project.create_webapp(nuke=nuke)
     project.add_static_file_mappings()
-    project.webapp.reload()
+    project.reload_webapp()
 
     print(snakesay(dedent(
         '''
@@ -49,6 +49,6 @@ def main(domain, python_version, nuke):
 
 
 
-if __name__ == '__main__':
+if __name__ == '__main__': # pragma: no cover
     arguments = docopt(__doc__)
     main(arguments['--domain'], arguments['--python'], nuke=arguments.get('--nuke'))
