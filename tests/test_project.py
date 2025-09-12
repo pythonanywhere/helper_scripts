@@ -89,6 +89,13 @@ def test_add_static_file_mappings_calls_webapp_add_default_static_files_mappings
     )
 
 
+def test_reload_webapp_calls_webapp_reload(virtualenvs_folder, mocker):
+    mock_webapp_class = mocker.patch('pythonanywhere.project.Webapp', autospec=True)
+    project = Project('mydomain.com', 'python.version')
+    project.reload_webapp()
+    mock_webapp_class.return_value.reload.assert_called_once()
+
+
 def test_start_bash_calls_launch_bash_in_virtualenv_with_virtualenv_and_project_path(fake_home, virtualenvs_folder):
     project = Project('mydomain.com', 'python.version')
     with patch('pythonanywhere.project.launch_bash_in_virtualenv') as mock_launch_bash_in_virtualenv:

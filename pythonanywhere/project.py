@@ -20,7 +20,6 @@ class Project:
         )
         self.webapp = Webapp(domain)
 
-
     def sanity_checks(self, nuke):
         self.webapp.sanity_checks(nuke=nuke)
         if nuke:
@@ -40,16 +39,17 @@ class Project:
                 )
             )
 
-
     def create_webapp(self, nuke):
         print(snakesay("Creating web app via API"))
         self.webapp.create(self.python_version, self.virtualenv.path, self.project_path, nuke=nuke)
 
+    def reload_webapp(self):
+        print(snakesay(f"Reloading web app on {self.domain}"))
+        self.webapp.reload()
 
     def add_static_file_mappings(self):
         print(snakesay("Adding static files mappings for /static/ and /media/"))
         self.webapp.add_default_static_files_mappings(self.project_path)
-
 
     def start_bash(self):
         print(snakesay('Starting Bash shell with activated virtualenv in project directory.  Press Ctrl+D to exit.'))
