@@ -27,7 +27,7 @@ class TestMain:
             call.update_settings_file(),
             call.run_collectstatic(),
             call.run_migrate(),
-            call.webapp.reload(),
+            call.reload_webapp(),
             call.start_bash(),
         ]
 

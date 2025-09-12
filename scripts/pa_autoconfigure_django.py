@@ -38,13 +38,13 @@ def main(repo_url, branch, domain, python_version, nuke):
     project.update_settings_file()
     project.run_collectstatic()
     project.run_migrate()
-    project.webapp.reload()
+    project.reload_webapp()
     print(snakesay(f'All done!  Your site is now live at https://{domain}'))
     print()
     project.start_bash()
 
 
-if __name__ == '__main__':
+if __name__ == '__main__':  # pragma: no cover
     arguments = docopt(__doc__)
     main(
         arguments['<git-repo-url>'],
