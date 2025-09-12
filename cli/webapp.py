@@ -39,7 +39,7 @@ def create(
     project.create_webapp(nuke=nuke)
     project.add_static_file_mappings()
     typer.echo(snakesay(f"Reloading {domain_name} via API"))
-    project.webapp.reload()
+    project.reload_webapp()
 
     typer.echo(
         snakesay(

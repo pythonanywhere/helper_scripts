@@ -69,7 +69,7 @@ def test_create_calls_all_stuff_in_right_order(mocker):
         call.virtualenv.create(nuke=True),
         call.create_webapp(nuke=True),
         call.add_static_file_mappings(),
-        call.webapp.reload(),
+        call.reload_webapp(),
     ]
     assert "All done! Your site is now live at https://www.domain.com" in result.stdout
     assert (
