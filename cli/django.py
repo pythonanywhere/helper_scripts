@@ -58,7 +58,7 @@ def autoconfigure(
     project.update_settings_file()
     project.run_collectstatic()
     project.run_migrate()
-    project.webapp.reload()
+    project.reload_webapp()
     typer.echo(snakesay(f"All done!  Your site is now live at https://{domain_name}\n"))
     project.start_bash()
 
@@ -105,6 +105,6 @@ def start(
 
     project.update_wsgi_file()
 
-    project.webapp.reload()
+    project.reload_webapp()
 
     typer.echo(snakesay(f"All done!  Your site is now live at https://{domain}"))

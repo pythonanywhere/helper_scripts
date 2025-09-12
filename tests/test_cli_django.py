@@ -68,7 +68,7 @@ def test_autoconfigure_calls_all_stuff_in_right_order(mock_django_project):
         call.update_settings_file(),
         call.run_collectstatic(),
         call.run_migrate(),
-        call.webapp.reload(),
+        call.reload_webapp(),
         call.start_bash(),
     ]
     assert (
@@ -169,7 +169,7 @@ def test_start_calls_all_stuff_in_right_order(mock_django_project):
         call.create_webapp(nuke=True),
         call.add_static_file_mappings(),
         call.update_wsgi_file(),
-        call.webapp.reload(),
+        call.reload_webapp(),
     ]
     assert (
         f"All done!  Your site is now live at https://www.domain.com" in result.stdout
