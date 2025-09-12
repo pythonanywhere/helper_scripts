@@ -25,7 +25,7 @@ def test_calls_all_stuff_in_right_order(mocker):
         call.create_webapp(nuke=sentinel.nuke),
         call.add_static_file_mappings(),
         call.update_wsgi_file(),
-        call.webapp.reload(),
+        call.reload_webapp(),
     ]
 
 @pytest.mark.slowtest

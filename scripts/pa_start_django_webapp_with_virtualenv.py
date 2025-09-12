@@ -33,7 +33,7 @@ def main(domain, django_version, python_version, nuke):
 
     project.update_wsgi_file()
 
-    project.webapp.reload()
+    project.reload_webapp()
 
     print(snakesay(f'All done!  Your site is now live at https://{domain}'))
 
