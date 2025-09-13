@@ -9,7 +9,7 @@ pytest-cov==5.0.0
 pytest-mock==3.14.1
 pytest-mypy==0.10.3
 pythonanywhere_core==0.2.7
-requests==2.32.3
+requests==2.32.4
 responses==0.25.8
 schema==0.7.2
 snakesay==0.10.4
