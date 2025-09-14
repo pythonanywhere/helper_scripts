@@ -7,7 +7,7 @@ psutil==7.0.0
 pytest==8.4.2
 pytest-cov==5.0.0
 pytest-mock==3.14.1
-pytest-mypy==0.10.3
+pytest-mypy==1.0.1
 pythonanywhere_core==0.2.7
 requests==2.32.4
 responses==0.25.8
