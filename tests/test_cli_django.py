@@ -38,8 +38,8 @@ def test_main_subcommand_without_args_prints_help():
         app,
         [],
     )
-    assert result.exit_code == 0
-    assert "Show this message and exit." in result.stdout
+    assert result.exit_code == 2
+    assert "Show this message and exit." in result.stderr
 
 
 def test_autoconfigure_calls_all_stuff_in_right_order(mock_django_project):

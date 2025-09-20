@@ -66,8 +66,8 @@ def test_main_subcommand_without_args_prints_help():
         app,
         [],
     )
-    assert result.exit_code == 0
-    assert "Show this message and exit." in result.stdout
+    assert result.exit_code == 2
+    assert "Show this message and exit." in result.stderr
 
 
 def test_create_without_domain_barfs():
@@ -80,7 +80,7 @@ def test_create_without_domain_barfs():
         ],
     )
     assert result.exit_code != 0
-    assert "Missing option" in result.stdout
+    assert "Missing option" in result.stderr
 
 
 def test_create_without_command_barfs():
@@ -93,7 +93,7 @@ def test_create_without_command_barfs():
         ],
     )
     assert result.exit_code != 0
-    assert "Missing option" in result.stdout
+    assert "Missing option" in result.stderr
 
 
 def test_create_with_domain_and_command_creates_it(mock_website):
@@ -350,7 +350,7 @@ def test_reload_with_no_domain_barfs():
         ],
     )
     assert result.exit_code != 0
-    assert "Missing option" in result.stdout
+    assert "Missing option" in result.stderr
 
 
 def test_reload_with_domain_reloads(mocker, mock_echo, mock_website):
@@ -379,7 +379,7 @@ def test_delete_with_no_domain_barfs():
         ],
     )
     assert result.exit_code != 0
-    assert "Missing option" in result.stdout
+    assert "Missing option" in result.stderr
 
 
 def test_delete_with_domain_deletes_it(mocker, mock_echo, mock_website):

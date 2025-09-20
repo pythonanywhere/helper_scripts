@@ -45,8 +45,8 @@ def test_main_subcommand_without_args_prints_help():
         app,
         [],
     )
-    assert result.exit_code == 0
-    assert "Show this message and exit." in result.stdout
+    assert result.exit_code == 2
+    assert "Show this message and exit." in result.stderr
 
 
 class TestSet:
@@ -78,13 +78,13 @@ class TestSet:
     def test_validates_minutes(self):
         result = runner.invoke(app, ["set", "-c", "echo foo", "-h", "8", "-m", "66"])
 
-        assert "Invalid value" in result.stdout
-        assert "66 is not in the range 0<=x<=59" in result.stdout
+        assert "Invalid value" in result.stderr
+        assert "66 is not in the range 0<=x<=59" in result.stderr
 
     def test_validates_hours(self):
         result = runner.invoke(app, ["set", "-c", "echo foo", "-h", "66", "-m", "1"])
-        assert "Invalid value" in result.stdout
-        assert "66 is not in the range 0<=x<=23" in result.stdout
+        assert "Invalid value" in result.stderr
+        assert "66 is not in the range 0<=x<=23" in result.stderr
 
     def test_logs_warning_when_create_schedule_raises(self, mocker):
         mock_logger = mocker.patch("cli.schedule.get_logger").return_value
@@ -259,7 +259,7 @@ class TestGet:
 
     def test_complains_when_no_id_provided(self):
         result = runner.invoke(app, ["get", "--command"])
-        assert "Missing argument 'id'" in result.stdout
+        assert "Missing argument 'id'" in result.stderr
 
 
 class TestList:
@@ -302,7 +302,7 @@ class TestList:
 
         assert mock_tabulate.call_count == 0
         assert wrong_format not in tabulate_formats
-        assert "Table format has to be one of" in result.stdout
+        assert "Table format has to be one of" in result.stderr
 
 
 class TestUpdate:
@@ -356,15 +356,15 @@ class TestUpdate:
 
     def test_validates_minute(self):
         result = runner.invoke(app, ["update", "42", "--minute", "88"])
-        assert "88 is not in the range 0<=x<=59" in result.stdout
+        assert "88 is not in the range 0<=x<=59" in result.stderr
 
     def test_validates_hour(self):
         result = runner.invoke(app, ["update", "42", "--daily", "--hour", "33"])
-        assert "33 is not in the range 0<=x<=23" in result.stdout
+        assert "33 is not in the range 0<=x<=23" in result.stderr
 
     def test_complains_when_no_id_provided(self):
         result = runner.invoke(app, ["update"])
-        assert "Missing argument 'id'" in result.stdout
+        assert "Missing argument 'id'" in result.stderr
 
     def test_exits_early_when_nothing_to_update(self, mocker):
         mock_logger = mocker.patch("cli.schedule.get_logger").return_value

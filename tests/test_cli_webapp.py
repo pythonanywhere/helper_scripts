@@ -44,8 +44,8 @@ def test_main_subcommand_without_args_prints_help():
         app,
         [],
     )
-    assert result.exit_code == 0
-    assert "Show this message and exit." in result.stdout
+    assert result.exit_code == 2
+    assert "Show this message and exit." in result.stderr
 
 
 def test_list_webapps(mocker):
@@ -240,8 +240,8 @@ def test_validates_log_number(mock_webapp):
     result = runner.invoke(
         app, ["delete-logs", "-d", "foo.bar.baz", "-t", "server", "-i", "10"]
     )
-    assert "Invalid value" in result.stdout
-    assert "log_index has to be 0 for current" in result.stdout
+    assert "Invalid value" in result.stderr
+    assert "log_index has to be 0 for current" in result.stderr
 
 
 def test_delete_webapp(mock_webapp, domain_name):

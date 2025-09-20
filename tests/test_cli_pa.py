@@ -14,11 +14,11 @@ def test_main_command_without_args_prints_help():
         app,
         [],
     )
-    assert result.exit_code == 0
-    assert "This is a new experimental PythonAnywhere cli client." in result.stdout
-    assert "Makes Django Girls tutorial projects deployment easy" in result.stdout
-    assert "Perform some operations on files" in result.stdout
-    assert "Manage scheduled tasks" in result.stdout
-    assert "Perform some operations on students" in result.stdout
-    assert "Everything for web apps: use this if you're not using" in result.stdout
-    assert "EXPERIMENTAL: create and manage ASGI websites" in result.stdout
+    assert result.exit_code == 2
+    assert "This is a new experimental PythonAnywhere cli client." in result.stderr
+    assert "Makes Django Girls tutorial projects deployment easy" in result.stderr
+    assert "Perform some operations on files" in result.stderr
+    assert "Manage scheduled tasks" in result.stderr
+    assert "Perform some operations on students" in result.stderr
+    assert "Everything for web apps: use this if you're not using" in result.stderr
+    assert "EXPERIMENTAL: create and manage ASGI websites" in result.stderr
