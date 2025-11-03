@@ -47,7 +47,7 @@ def test_main_subcommand_without_args_prints_help():
         [],
     )
     assert result.exit_code == 2
-    assert "Show this message and exit." in result.stderr
+    assert "Show this message and exit." in result.stdout
 
 
 class TestGet:
