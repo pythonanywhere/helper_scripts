@@ -13,8 +13,12 @@ Options:
   --log_index=<log_index>   Log index, 0 for current log, 1-9 for one of archive logs or all [default: all]
 """
 
+import os
 from docopt import docopt
+from pythonanywhere import __version__
 from pythonanywhere_core.webapp import Webapp
+
+os.environ["PYTHONANYWHERE_CLIENT"] = f"helper-scripts/{__version__}"
 from snakesay import snakesay
 
 from pythonanywhere.utils import ensure_domain, format_log_deletion_message

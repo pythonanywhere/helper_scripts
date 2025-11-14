@@ -17,7 +17,10 @@ from os.path import expanduser
 import os
 import sys
 
+from pythonanywhere import __version__
 from pythonanywhere_core.exceptions import MissingCNAMEException
+
+os.environ["PYTHONANYWHERE_CLIENT"] = f"helper-scripts/{__version__}"
 from pythonanywhere_core.webapp import Webapp
 from snakesay import snakesay
 

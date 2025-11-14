@@ -47,10 +47,14 @@ Example:
 import logging
 from datetime import datetime
 
+import os
 from docopt import docopt
 from snakesay import snakesay
 
+from pythonanywhere import __version__
 from pythonanywhere.scripts_commons import ScriptSchema, get_logger, get_task_from_id
+
+os.environ["PYTHONANYWHERE_CLIENT"] = f"helper-scripts/{__version__}"
 
 
 def main(*, task_id, **kwargs):

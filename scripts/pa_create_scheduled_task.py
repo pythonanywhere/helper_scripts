@@ -32,9 +32,13 @@ Note:
   `pa_update_scheduled_task.py` or deleted with `pa_delete_scheduled_task.py`
   scripts."""
 
+import os
 from docopt import docopt
 
+from pythonanywhere import __version__
 from pythonanywhere.scripts_commons import ScriptSchema, get_logger
+
+os.environ["PYTHONANYWHERE_CLIENT"] = f"helper-scripts/{__version__}"
 from pythonanywhere.task import Task
 
 

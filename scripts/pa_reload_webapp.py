@@ -8,9 +8,13 @@ Options:
   <domain>              Domain name, eg www.mydomain.com
 """
 
+import os
 from docopt import docopt
 
+from pythonanywhere import __version__
 from pythonanywhere_core.exceptions import MissingCNAMEException
+
+os.environ["PYTHONANYWHERE_CLIENT"] = f"helper-scripts/{__version__}"
 from pythonanywhere_core.webapp import Webapp
 from snakesay import snakesay
 

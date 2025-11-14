@@ -42,11 +42,15 @@ Example:
 
     pa_get_scheduled_task_specs 42 --logfile --no-spec"""
 
+import os
 from docopt import docopt
 from snakesay import snakesay
 from tabulate import tabulate
 
+from pythonanywhere import __version__
 from pythonanywhere.scripts_commons import ScriptSchema, get_logger, get_task_from_id
+
+os.environ["PYTHONANYWHERE_CLIENT"] = f"helper-scripts/{__version__}"
 
 
 def main(*, task_id, **kwargs):

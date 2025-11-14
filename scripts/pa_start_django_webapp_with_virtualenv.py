@@ -12,10 +12,14 @@ Options:
   --nuke                    *Irrevocably* delete any existing web app config on this domain. Irrevocably.
 """
 
+import os
 from docopt import docopt
 from snakesay import snakesay
 
+from pythonanywhere import __version__
 from pythonanywhere.django_project import DjangoProject
+
+os.environ["PYTHONANYWHERE_CLIENT"] = f"helper-scripts/{__version__}"
 from pythonanywhere.utils import ensure_domain
 
 

@@ -1,6 +1,11 @@
 #!/usr/bin/python3
 
+import os
 import typer
+
+from pythonanywhere import __version__
+
+os.environ["PYTHONANYWHERE_CLIENT"] = f"pa/{__version__}"
 
 from cli import django
 from cli import path

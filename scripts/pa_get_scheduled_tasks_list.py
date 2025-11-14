@@ -16,11 +16,15 @@ Note:
   it using `pa_get_scheduled_task_specs.py` script instead of parsing
   the table."""
 
+import os
 from docopt import docopt
 from snakesay import snakesay
 from tabulate import tabulate
 
+from pythonanywhere import __version__
 from pythonanywhere.scripts_commons import ScriptSchema, get_logger
+
+os.environ["PYTHONANYWHERE_CLIENT"] = f"helper-scripts/{__version__}"
 from pythonanywhere.task import TaskList
 
 

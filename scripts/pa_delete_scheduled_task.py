@@ -12,9 +12,13 @@ Options:
 Note:
   Task id <num> may be acquired with `pa_get_scheduled_tasks_list.py` script."""
 
+import os
 from docopt import docopt
 
+from pythonanywhere import __version__
 from pythonanywhere.scripts_commons import ScriptSchema, get_logger, get_task_from_id
+
+os.environ["PYTHONANYWHERE_CLIENT"] = f"helper-scripts/{__version__}"
 from pythonanywhere.task import TaskList
 
 

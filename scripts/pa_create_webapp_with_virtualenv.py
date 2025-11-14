@@ -15,8 +15,13 @@ Options:
   --nuke                    *Irrevocably* delete any existing web app config on this domain. Irrevocably.
 """
 
+import os
 from docopt import docopt
 import getpass
+
+from pythonanywhere import __version__
+
+os.environ["PYTHONANYWHERE_CLIENT"] = f"helper-scripts/{__version__}"
 from textwrap import dedent
 
 from snakesay import snakesay
