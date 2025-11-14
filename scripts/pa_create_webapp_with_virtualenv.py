@@ -28,6 +28,7 @@ from pythonanywhere.utils import ensure_domain
 def main(domain, python_version, nuke):
     domain = ensure_domain(domain)
     project = Project(domain, python_version)
+    print(snakesay("Running sanity checks"))
     project.sanity_checks(nuke=nuke)
     project.virtualenv.create(nuke=nuke)
     project.create_webapp(nuke=nuke)

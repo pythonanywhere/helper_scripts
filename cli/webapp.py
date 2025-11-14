@@ -4,12 +4,13 @@ from enum import Enum
 from pathlib import Path
 
 import typer
+from pythonanywhere_core.exceptions import MissingCNAMEException
 from pythonanywhere_core.webapp import Webapp
 from snakesay import snakesay
 from tabulate import tabulate
 
 from pythonanywhere.project import Project
-from pythonanywhere.utils import ensure_domain
+from pythonanywhere.utils import ensure_domain, format_log_deletion_message
 
 app = typer.Typer(no_args_is_help=True)
 
@@ -73,6 +74,7 @@ def create(
     """Create a new webapp with virtualenv and project setup"""
     domain = ensure_domain(domain_name)
     project = Project(domain, python_version)
+    typer.echo(snakesay("Running sanity checks"))
     project.sanity_checks(nuke=nuke)
     project.virtualenv.create(nuke=nuke)
     project.create_webapp(nuke=nuke)
@@ -102,7 +104,10 @@ def reload(
     domain_name = ensure_domain(domain_name)
     webapp = Webapp(domain_name)
     typer.echo(snakesay(f"Reloading {domain_name} via API"))
-    webapp.reload()
+    try:
+        webapp.reload()
+    except MissingCNAMEException as e:
+        typer.echo(snakesay(str(e)))
     typer.echo(snakesay(f"{domain_name} has been reloaded"))
 
 
@@ -146,7 +151,10 @@ def install_ssl(
     webapp = Webapp(domain_name)
     webapp.set_ssl(certificate, private_key)
     if not suppress_reload:
-        webapp.reload()
+        try:
+            webapp.reload()
+        except MissingCNAMEException as e:
+            typer.echo(snakesay(str(e)))
 
     ssl_details = webapp.get_ssl_info()
     typer.echo(
@@ -197,20 +205,25 @@ def delete_logs(
     ),
 ):
     """Delete webapp log files (access, error, server logs)"""
-    webapp = Webapp(ensure_domain(domain_name))
+    domain = ensure_domain(domain_name)
+    webapp = Webapp(domain)
     log_types = ["access", "error", "server"]
     logs = webapp.get_log_info()
     if log_type == "all" and log_index == "all":
         for key in log_types:
             for log in logs[key]:
+                typer.echo(snakesay(format_log_deletion_message(domain, key, log)))
                 webapp.delete_log(key, log)
     elif log_type == "all":
         for key in log_types:
+            typer.echo(snakesay(format_log_deletion_message(domain, key, int(log_index))))
             webapp.delete_log(key, int(log_index))
     elif log_index == "all":
         for i in logs[log_type]:
+            typer.echo(snakesay(format_log_deletion_message(domain, log_type.value, i)))
             webapp.delete_log(log_type, int(i))
     else:
+        typer.echo(snakesay(format_log_deletion_message(domain, log_type.value, int(log_index))))
         webapp.delete_log(log_type, int(log_index))
     typer.echo(snakesay("All done!"))
 

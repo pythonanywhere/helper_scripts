@@ -47,6 +47,7 @@ def autoconfigure(
     """
     domain = ensure_domain(domain_name)
     project = DjangoProject(domain, python_version)
+    typer.echo(snakesay("Running sanity checks"))
     project.sanity_checks(nuke=nuke)
     project.download_repo(repo_url, nuke=nuke),
     project.ensure_branch(branch),
@@ -94,6 +95,7 @@ def start(
     """
     domain = ensure_domain(domain_name)
     project = DjangoProject(domain, python_version)
+    typer.echo(snakesay("Running sanity checks"))
     project.sanity_checks(nuke=nuke)
     project.create_virtualenv(django_version, nuke=nuke)
     project.run_startproject(nuke=nuke)

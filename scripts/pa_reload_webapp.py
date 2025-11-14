@@ -10,13 +10,17 @@ Options:
 
 from docopt import docopt
 
+from pythonanywhere_core.exceptions import MissingCNAMEException
 from pythonanywhere_core.webapp import Webapp
 from snakesay import snakesay
 
 
 def main(domain_name):
     webapp = Webapp(domain_name)
-    webapp.reload()
+    try:
+        webapp.reload()
+    except MissingCNAMEException as e:
+        print(snakesay(str(e)))
     print(snakesay(
         f"{domain_name} has been reloaded"
     ))

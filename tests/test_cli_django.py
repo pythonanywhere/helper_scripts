@@ -71,6 +71,7 @@ def test_autoconfigure_calls_all_stuff_in_right_order(mock_django_project):
         call.reload_webapp(),
         call.start_bash(),
     ]
+    assert "Running sanity checks" in result.stdout
     assert (
         f"All done!  Your site is now live at https://www.domain.com" in result.stdout
     )
@@ -171,6 +172,7 @@ def test_start_calls_all_stuff_in_right_order(mock_django_project):
         call.update_wsgi_file(),
         call.reload_webapp(),
     ]
+    assert "Running sanity checks" in result.stdout
     assert (
         f"All done!  Your site is now live at https://www.domain.com" in result.stdout
     )

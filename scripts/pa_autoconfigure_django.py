@@ -27,6 +27,7 @@ from pythonanywhere.utils import ensure_domain
 def main(repo_url, branch, domain, python_version, nuke):
     domain = ensure_domain(domain)
     project = DjangoProject(domain, python_version)
+    print(snakesay("Running sanity checks"))
     project.sanity_checks(nuke=nuke)
     project.download_repo(repo_url, nuke=nuke),
     project.ensure_branch(branch),

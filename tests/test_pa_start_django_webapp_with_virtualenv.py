@@ -76,3 +76,13 @@ def test_nuke_option_lets_you_run_twice(
         .strip()
     )
     assert django_version == new_django_version
+
+
+def test_shows_sanity_checks_message(mocker):
+    mock_print = mocker.patch('builtins.print')
+    mocker.patch("scripts.pa_start_django_webapp_with_virtualenv.DjangoProject")
+
+    main(sentinel.domain, sentinel.django_version, sentinel.python_version, nuke=sentinel.nuke)
+
+    print_calls = [str(call) for call in mock_print.call_args_list]
+    assert any("Running sanity checks" in str(call) for call in print_calls)

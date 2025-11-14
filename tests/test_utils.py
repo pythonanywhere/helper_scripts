@@ -1,7 +1,9 @@
 import getpass
 from unittest.mock import patch
 
-from pythonanywhere.utils import ensure_domain
+import pytest
+
+from pythonanywhere.utils import ensure_domain, format_log_deletion_message
 
 
 class TestEnsureDomain:
@@ -29,3 +31,17 @@ class TestEnsureDomain:
         result = ensure_domain(custom_domain)
 
         assert result == custom_domain
+
+
+@pytest.mark.parametrize(
+    "domain,log_type,log_index,expected",
+    [
+        ("foo.com", "access", 0, "Deleting current access log file for foo.com via API"),
+        ("bar.com", "error", 2, "Deleting old (archive number 2) error log file for bar.com via API"),
+        ("baz.com", "server", 9, "Deleting old (archive number 9) server log file for baz.com via API"),
+    ],
+)
+def test_format_log_deletion_message_with_various_inputs(domain, log_type, log_index, expected):
+    result = format_log_deletion_message(domain, log_type, log_index)
+
+    assert result == expected

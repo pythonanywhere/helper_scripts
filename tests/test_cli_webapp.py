@@ -108,6 +108,7 @@ def test_create_calls_all_stuff_in_right_order(mocker):
         call.add_static_file_mappings(),
         call.reload_webapp(),
     ]
+    assert "Running sanity checks" in result.stdout
     assert "All done! Your site is now live at https://www.domain.com" in result.stdout
     assert (
         f"https://www.pythonanywhere.com/user/{getpass.getuser().lower()}/webapps/www_domain_com"
@@ -121,6 +122,16 @@ def test_reload(mock_webapp, domain_name):
     assert f"{domain_name} has been reloaded" in result.stdout
     mock_webapp.assert_called_once_with(domain_name)
     assert mock_webapp.return_value.method_calls == [call.reload()]
+
+
+def test_reload_handles_missing_cname_exception(mocker, mock_webapp, domain_name):
+    from pythonanywhere_core.exceptions import MissingCNAMEException
+    mock_webapp.return_value.reload.side_effect = MissingCNAMEException()
+
+    result = runner.invoke(app, ["reload", "-d", domain_name])
+
+    assert "Could not find a CNAME for your website" in result.stdout
+    assert f"{domain_name} has been reloaded" in result.stdout
 
 
 def test_install_ssl_with_default_reload(mock_webapp, domain_name, file_with_content):
@@ -234,6 +245,34 @@ def test_delete_all_current_logs(mock_webapp, domain_name):
         call("server", 0),
     ]
     assert "All done!" in result.stdout
+
+
+def test_delete_all_logs_shows_per_file_messages(mock_webapp, domain_name):
+    result = runner.invoke(
+        app,
+        [
+            "delete-logs",
+            "-d",
+            domain_name,
+        ],
+    )
+
+    assert "Deleting current access log file" in result.stdout
+    assert "Deleting old (archive number 1) access log file" in result.stdout
+    assert "Deleting old (archive number 2) error log file" in result.stdout
+    assert "foo.bar.baz" in result.stdout
+    assert "All done!" in result.stdout
+
+
+def test_delete_one_log_shows_message(mock_webapp, domain_name):
+    result = runner.invoke(
+        app, ["delete-logs", "-d", domain_name, "-t", "server", "-i", "2"]
+    )
+
+    assert "Deleting old (archive number 2) server log file" in result.stdout
+    assert "foo.bar.baz" in result.stdout
+    assert "All done!" in result.stdout
+
 
 
 def test_validates_log_number(mock_webapp):

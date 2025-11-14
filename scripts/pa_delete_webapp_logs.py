@@ -17,24 +17,29 @@ from docopt import docopt
 from pythonanywhere_core.webapp import Webapp
 from snakesay import snakesay
 
-from pythonanywhere.utils import ensure_domain
+from pythonanywhere.utils import ensure_domain, format_log_deletion_message
 
 
 def main(domain, log_type, log_index):
-    webapp = Webapp(ensure_domain(domain))
+    domain = ensure_domain(domain)
+    webapp = Webapp(domain)
     log_types = ["access", "error", "server"]
     logs = webapp.get_log_info()
     if log_type == "all" and log_index == "all":
         for key in log_types:
             for log in logs[key]:
+                print(snakesay(format_log_deletion_message(domain, key, log)))
                 webapp.delete_log(key, log)
     elif log_type == "all":
         for key in log_types:
+            print(snakesay(format_log_deletion_message(domain, key, int(log_index))))
             webapp.delete_log(key, int(log_index))
     elif log_index == "all":
         for i in logs[log_type]:
+            print(snakesay(format_log_deletion_message(domain, log_type, i)))
             webapp.delete_log(log_type, int(i))
     else:
+        print(snakesay(format_log_deletion_message(domain, log_type, int(log_index))))
         webapp.delete_log(log_type, int(log_index))
     print(snakesay('All Done!'))
 

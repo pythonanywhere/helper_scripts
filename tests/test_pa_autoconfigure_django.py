@@ -77,6 +77,15 @@ class TestMain:
         response = requests.get('http://localhost:8000/', headers={'HOST': 'mydomain.com'})
         assert 'Hello from an example django project' in response.text
 
+    def test_shows_sanity_checks_message(self, mocker):
+        mock_print = mocker.patch('builtins.print')
+        mocker.patch('scripts.pa_autoconfigure_django.DjangoProject')
+
+        main('repo.url', 'foo', 'www.domain.com', 'python.version', nuke=False)
+
+        print_calls = [str(call) for call in mock_print.call_args_list]
+        assert any("Running sanity checks" in str(call) for call in print_calls)
+
 
 
 

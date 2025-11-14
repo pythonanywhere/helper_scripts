@@ -17,6 +17,7 @@ from os.path import expanduser
 import os
 import sys
 
+from pythonanywhere_core.exceptions import MissingCNAMEException
 from pythonanywhere_core.webapp import Webapp
 from snakesay import snakesay
 
@@ -40,7 +41,10 @@ def main(domain_name, suppress_reload):
             webapp = Webapp(domain_name)
             webapp.set_ssl(certificate, private_key)
             if not suppress_reload:
-                webapp.reload()
+                try:
+                    webapp.reload()
+                except MissingCNAMEException as e:
+                    print(snakesay(str(e)))
 
             ssl_details = webapp.get_ssl_info()
             print(

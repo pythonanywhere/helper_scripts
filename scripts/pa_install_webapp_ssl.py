@@ -19,6 +19,7 @@ import os
 import sys
 
 from docopt import docopt
+from pythonanywhere_core.exceptions import MissingCNAMEException
 from pythonanywhere_core.webapp import Webapp
 from snakesay import snakesay
 
@@ -39,7 +40,10 @@ def main(domain_name, certificate_file, private_key_file, suppress_reload):
     webapp = Webapp(domain_name)
     webapp.set_ssl(certificate, private_key)
     if not suppress_reload:
-        webapp.reload()
+        try:
+            webapp.reload()
+        except MissingCNAMEException as e:
+            print(snakesay(str(e)))
 
     ssl_details = webapp.get_ssl_info()
     print(snakesay(

@@ -1,6 +1,7 @@
 from pathlib import Path
 import uuid
 
+from pythonanywhere_core.exceptions import MissingCNAMEException
 from pythonanywhere_core.webapp import Webapp
 from snakesay import snakesay
 
@@ -45,7 +46,10 @@ class Project:
 
     def reload_webapp(self):
         print(snakesay(f"Reloading web app on {self.domain}"))
-        self.webapp.reload()
+        try:
+            self.webapp.reload()
+        except MissingCNAMEException as e:
+            print(snakesay(str(e)))
 
     def add_static_file_mappings(self):
         print(snakesay("Adding static files mappings for /static/ and /media/"))
