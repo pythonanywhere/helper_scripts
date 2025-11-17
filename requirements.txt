@@ -1,5 +1,5 @@
 python-dateutil==2.9.0.post0
-click==8.3.0
+click==8.3.1
 docopt==0.6.2
 importlib-metadata==8.7.0
 packaging
