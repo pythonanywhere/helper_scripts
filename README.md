@@ -79,15 +79,19 @@ Some legacy [scripts](https://github.com/pythonanywhere/helper_scripts/blob/mast
 
 Pull requests are welcome!  You'll find tests in the [tests](https://github.com/pythonanywhere/helper_scripts/blob/master/tests) folder...
 
-    # prep your dev environment (requires [uv](https://docs.astral.sh/uv/))
-    uv sync --extra test
+Requires [uv](https://docs.astral.sh/uv/).
 
-    # running the tests:
-    uv run pytest
+```bash
+# prep your dev environment
+uv sync --extra test
 
-    # make sure that the code that you have written is well tested:
-    uv run pytest --cov=pythonanywhere --cov=scripts
+# running the tests:
+uv run pytest
 
-    # to just run the fast tests:
-    uv run pytest -m 'not slowtest' -v
+# make sure that the code that you have written is well tested:
+uv run pytest --cov=pythonanywhere --cov=scripts
+
+# to just run the fast tests:
+uv run pytest -m 'not slowtest' -v
+```
 
