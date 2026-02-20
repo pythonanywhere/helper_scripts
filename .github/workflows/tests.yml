@@ -19,17 +19,14 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
 
+    - name: Install uv
+      uses: astral-sh/setup-uv@eac588ad8def6316056a12d4907a9d4d84ff7a3b # v7.3.0
 
-    - name: Install Python dependencies
-      run: |
-        python3 -m pip install --upgrade pip
-        pip3 install -r requirements.txt
-        pip3 install -e .
+    - name: Install dependencies
+      run: uv sync --extra test
 
     - name: Test with pytest
-      run: |
-        pytest -vvv
+      run: uv run pytest -vvv
 
     - name: Check coverage
-      run: |
-        pytest --cov=cli --cov=pythonanywhere --cov=scripts --cov-fail-under=65
+      run: uv run pytest --cov=cli --cov=pythonanywhere --cov=scripts --cov-fail-under=83

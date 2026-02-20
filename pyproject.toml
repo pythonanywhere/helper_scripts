@@ -1,0 +1,84 @@
+[build-system]
+requires = ["setuptools>=77.0.3", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pythonanywhere"
+version = "0.18.0"
+description = "PythonAnywhere helper tools for users"
+authors = [
+    {name = "PythonAnywhere LLP", email = "developers@pythonanywhere.com"}
+]
+readme = "README.md"
+requires-python = ">=3.10"
+license = "MIT"
+keywords = ["pythonanywhere", "api", "cloud", "web", "hosting"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Topic :: Software Development :: Libraries",
+    "Programming Language :: Python :: 3.14",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.10",
+]
+dependencies = [
+    "docopt",
+    "packaging",
+    "python-dateutil",
+    "pythonanywhere-core>=0.3.0",
+    "requests",
+    "schema==0.7.2",
+    "snakesay==0.10.4",
+    "tabulate",
+    "typer",
+]
+
+[project.optional-dependencies]
+test = [
+    "pytest",
+    "pytest-cov",
+    "pytest-mock",
+    "pytest-mypy",
+    "psutil",
+    "responses",
+    "virtualenvwrapper",
+]
+
+[project.scripts]
+pa = "cli.pa:app"
+
+[project.urls]
+Homepage = "https://github.com/pythonanywhere/helper_scripts"
+Repository = "https://github.com/pythonanywhere/helper_scripts"
+Issues = "https://github.com/pythonanywhere/helper_scripts/issues"
+
+[tool.setuptools]
+packages = ["cli", "pythonanywhere"]
+script-files = [
+    "scripts/pa_autoconfigure_django.py",
+    "scripts/pa_create_scheduled_task.py",
+    "scripts/pa_create_webapp_with_virtualenv.py",
+    "scripts/pa_delete_scheduled_task.py",
+    "scripts/pa_delete_webapp_logs.py",
+    "scripts/pa_get_scheduled_task_specs.py",
+    "scripts/pa_get_scheduled_tasks_list.py",
+    "scripts/pa_install_webapp_letsencrypt_ssl.py",
+    "scripts/pa_install_webapp_ssl.py",
+    "scripts/pa_reload_webapp.py",
+    "scripts/pa_start_django_webapp_with_virtualenv.py",
+    "scripts/pa_update_scheduled_task.py",
+]
+
+[tool.pytest.ini_options]
+addopts = "--tb=native"
+markers = [
+    "slowtest: marks tests as one of slowest (deselect with '-m \"not slowtest\"')",
+    "tasks: marks test as one of related to tasks",
+    "files: marks test as one of related to files",
+    "students: marks test as one of related to students",
+]
+
+[tool.mypy]
+ignore_missing_imports = true
