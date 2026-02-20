@@ -63,8 +63,8 @@ Click on the "API token" tab, and click the "Create a new API token" button to g
 `PYTHONANYWHERE_SITE` is used to connect to PythonAnywhere API and defaults to `www.pythonanywhere.com`, 
 but you may need to set it to `eu.pythonanywhere.com` if you use our EU site.   
 
-If your username on PythonAnywhere is different from the username on your local machine, 
-you may need to set `USER` for the environment you run `pa` in.   
+If your username on PythonAnywhere is different from the username on your local machine,
+you may need to set `PYTHONANYWHERE_USERNAME` for the environment you run `pa` in.
 
 ### Programmatic usage in your code
 
