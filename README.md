@@ -79,17 +79,15 @@ Some legacy [scripts](https://github.com/pythonanywhere/helper_scripts/blob/mast
 
 Pull requests are welcome!  You'll find tests in the [tests](https://github.com/pythonanywhere/helper_scripts/blob/master/tests) folder...
 
-    # prep your dev environment
-    mkvirtualenv --python=python3.10 helper_scripts
-    pip install -r requirements.txt
-    pip install -e .
+    # prep your dev environment (requires [uv](https://docs.astral.sh/uv/))
+    uv sync --extra test
 
     # running the tests:
-    pytest
+    uv run pytest
 
     # make sure that the code that you have written is well tested:
-    pytest --cov=pythonanywhere --cov=scripts
+    uv run pytest --cov=pythonanywhere --cov=scripts
 
     # to just run the fast tests:
-    pytest -m 'not slowtest' -v
+    uv run pytest -m 'not slowtest' -v
 
