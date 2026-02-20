@@ -128,14 +128,14 @@ def running_python_version():
 
 @pytest.fixture
 def new_django_version(running_python_version):
-    if running_python_version in ["3.10", "3.11", "3.12", "3.13"]:
+    if running_python_version in ["3.10", "3.11", "3.12", "3.13", "3.14"]:
         return "5.1.3"
     else:
         return "4.2.16"
 
 @pytest.fixture
 def old_django_version(running_python_version):
-    if running_python_version in ["3.10", "3.11", "3.12", "3.13"]:
+    if running_python_version in ["3.10", "3.11", "3.12", "3.13", "3.14"]:
         return "5.1.2"
     else:
         return "4.2.15"
