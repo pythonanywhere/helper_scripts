@@ -1,6 +1,7 @@
 import json
 import re
 import sys
+from pathlib import Path
 
 from collections import namedtuple
 
@@ -104,22 +105,39 @@ def tree(
 
 @app.command()
 def upload(
-    path: str = typer.Argument(..., help=("Full path of FILE where CONTENTS should be uploaded to.")),
-    file: typer.FileBinaryRead = typer.Option(
+    path: str = typer.Argument(..., help="Full path on PythonAnywhere where CONTENTS should be uploaded to."),
+    contents: str = typer.Option(
         ...,
         "-c",
         "--contents",
-        help="Path to exisitng file or stdin stream that should be uploaded to PATH."
+        help="Path to existing file, directory (with -r) or '-' for stdin.",
     ),
+    recursive: bool = typer.Option(False, "-r", "--recursive", help="Upload a directory recursively."),
     quiet: bool = typer.Option(False, "-q", "--quiet", help="Disable additional logging.")
 ):
-    """
-    Upload CONTENTS to file at PATH.
+    """Upload CONTENTS to PATH.
 
     If PATH points to an existing file, it will be overwritten.
+    Use -r/--recursive to upload a directory.
     """
     pa_path = setup(path, quiet)
-    success = pa_path.upload(file)
+
+    if recursive:
+        if contents == "-":
+            typer.echo("stdin is not supported with --recursive", err=True)
+            sys.exit(1)
+        success = pa_path.upload_directory(contents)
+    else:
+        if contents == "-":
+            content = sys.stdin.buffer.read()
+        else:
+            contents_path = Path(contents)
+            if contents_path.is_dir():
+                typer.echo(f"{contents} is a directory, use --recursive flag to upload directories", err=True)
+                sys.exit(1)
+            content = contents_path.read_bytes()
+        success = pa_path.upload(content)
+
     sys.exit(0 if success else 1)
 
 

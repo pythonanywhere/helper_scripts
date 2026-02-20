@@ -193,6 +193,38 @@ class TestPAPathUpload():
 
 
 @pytest.mark.files
+class TestPAPathUploadDirectory():
+    def test_informs_about_successful_directory_upload(self, mocker):
+        mock_tree_post = mocker.patch("pythonanywhere_core.files.Files.tree_post")
+        mock_snake = mocker.patch("pythonanywhere.files.snakesay")
+        mock_info = mocker.patch("pythonanywhere.files.logger.info")
+        local_dir = "/local/dir"
+        destination_path = "/home/user/remote"
+
+        result = PAPath(destination_path).upload_directory(local_dir)
+
+        assert mock_tree_post.call_args == call(local_dir, destination_path)
+        assert mock_snake.call_args == call(f"Contents of {local_dir} successfully uploaded to {destination_path}!")
+        assert mock_info.call_args == call(mock_snake.return_value)
+        assert result is True
+
+    def test_warns_when_directory_upload_fails(self, mocker):
+        mock_tree_post = mocker.patch("pythonanywhere_core.files.Files.tree_post")
+        mock_tree_post.side_effect = Exception("sth went wrong")
+        mock_snake = mocker.patch("pythonanywhere.files.snakesay")
+        mock_warning = mocker.patch("pythonanywhere.files.logger.warning")
+        local_dir = "/local/dir"
+        destination_path = "/home/user/remote"
+
+        result = PAPath(destination_path).upload_directory(local_dir)
+
+        assert mock_tree_post.call_args == call(local_dir, destination_path)
+        assert mock_snake.call_args == call("sth went wrong")
+        assert mock_warning.call_args == call(mock_snake.return_value)
+        assert result is False
+
+
+@pytest.mark.files
 class TestPAPathShare():
     def test_returns_full_url_for_shared_file(self, mocker):
         mock_sharing_get = mocker.patch("pythonanywhere_core.files.Files.sharing_get")

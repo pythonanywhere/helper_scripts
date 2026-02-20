@@ -222,6 +222,43 @@ class TestUpload:
         assert result.exit_code == 1
 
 
+class TestUploadRecursive:
+    def test_calls_upload_directory_with_recursive_flag(self, mock_path, tmp_path):
+        local_dir = tmp_path / "mydir"
+        local_dir.mkdir()
+        mock_path.return_value.upload_directory.return_value = True
+
+        result = runner.invoke(app, ["upload", "~/remote_dir", "-c", str(local_dir), "-r"])
+
+        mock_path.return_value.upload_directory.assert_called_once_with(str(local_dir))
+        assert result.exit_code == 0
+
+    def test_errors_when_stdin_used_with_recursive_flag(self, mock_path):
+        result = runner.invoke(app, ["upload", "~/remote_dir", "-c", "-", "-r"])
+
+        assert result.exit_code == 1
+        assert "stdin" in result.output
+        assert "--recursive" in result.output
+
+    def test_reads_from_stdin_when_contents_is_dash(self, mock_path):
+        mock_path.return_value.upload.return_value = True
+
+        result = runner.invoke(app, ["upload", "~/remote_file", "-c", "-"], input=b"stdin content")
+
+        mock_path.return_value.upload.assert_called_once()
+        assert result.exit_code == 0
+
+    def test_errors_when_directory_passed_without_recursive_flag(self, mock_path, tmp_path):
+        local_dir = tmp_path / "mydir"
+        local_dir.mkdir()
+
+        result = runner.invoke(app, ["upload", "~/remote_dir", "-c", str(local_dir)])
+
+        assert result.exit_code == 1
+        assert "is a directory" in result.output
+        assert "--recursive" in result.output
+
+
 class TestDelete:
     def test_creates_pa_path_with_provided_path(self, mock_path, home_dir):
         runner.invoke(app, ["delete", "~/hello.txt"])

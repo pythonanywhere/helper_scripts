@@ -131,6 +131,19 @@ class PAPath:
         logger.info(snakesay(msg))
         return True
 
+    def upload_directory(self, local_dir_path):
+        """Returns `True` when contents of `local_dir_path` successfully
+        uploaded to `self.path`, `False` otherwise."""
+
+        try:
+            self.api.tree_post(local_dir_path, self.path)
+        except Exception as e:
+            logger.warning(snakesay(str(e)))
+            return False
+
+        logger.info(snakesay(f"Contents of {local_dir_path} successfully uploaded to {self.path}!"))
+        return True
+
     def get_sharing_url(self, quiet=False):
         """Returns PythonAnywhere sharing url for `self.path` if file
         is shared, empty string otherwise."""
