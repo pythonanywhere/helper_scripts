@@ -68,6 +68,7 @@ def set(
         task.create_schedule()
     except Exception as e:
         logger.warning(snakesay(str(e)))
+        raise typer.Exit(code=1)
 
 
 delete_app = typer.Typer()

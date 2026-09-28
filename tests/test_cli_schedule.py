@@ -4,6 +4,7 @@ from unittest.mock import call, Mock
 import pytest
 from typer.testing import CliRunner
 
+from cli.pa import app as pa_app
 from cli.schedule import app, delete_app
 from pythonanywhere.scripts_commons import tabulate_formats
 
@@ -50,6 +51,20 @@ def test_main_subcommand_without_args_prints_help():
 
 
 class TestSet:
+    @pytest.mark.parametrize("fails,expected_exit_code", [(False, 0), (True, 1)])
+    def test_creation_exit_status(self, mocker, fails, expected_exit_code):
+        mocker.patch("cli.schedule.get_logger")
+        create_schedule = mocker.patch("cli.schedule.Task.create_schedule")
+        if fails:
+            create_schedule.side_effect = Exception("API request failed")
+
+        result = runner.invoke(
+            pa_app, ["schedule", "set", "--command", "echo foo", "--minute", "13"]
+        )
+
+        create_schedule.assert_called_once_with()
+        assert result.exit_code == expected_exit_code
+
     def test_calls_all_stuff_in_right_order(self, mocker):
         mock_logger = mocker.patch("cli.schedule.get_logger")
         mock_task_to_be_created = mocker.patch("cli.schedule.Task.to_be_created")
