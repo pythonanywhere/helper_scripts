@@ -27,7 +27,7 @@ dependencies = [
     "docopt",
     "packaging",
     "python-dateutil",
-    "pythonanywhere-core>=0.3.1",
+    "pythonanywhere-core>=0.3.2",
     "requests",
     "schema==0.7.2",
     "snakesay==0.10.4",
