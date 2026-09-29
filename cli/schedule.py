@@ -340,3 +340,4 @@ def update(
         task.update_schedule(params, porcelain=porcelain)
     except Exception as e:
         logger.warning(snakesay(str(e)))
+        raise typer.Exit(code=1)

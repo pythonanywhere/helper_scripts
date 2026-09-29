@@ -324,8 +324,9 @@ class TestUpdate:
     def test_enables_task_and_sets_porcelain(self, mocker):
         mock_task_from_id = mocker.patch("cli.schedule.get_task_from_id")
 
-        runner.invoke(app, ["update", "42", "--enable", "--porcelain"])
+        result = runner.invoke(app, ["update", "42", "--enable", "--porcelain"])
 
+        assert result.exit_code == 0
         assert mock_task_from_id.call_args == call(42)
         assert mock_task_from_id.return_value.method_calls == [
             call.update_schedule({"enabled": True}, porcelain=True)
@@ -344,8 +345,9 @@ class TestUpdate:
         mock_task_from_id.return_value.update_schedule.side_effect = Exception("error")
         mock_snake = mocker.patch("cli.schedule.snakesay")
 
-        runner.invoke(app, ["update", "42", "--disable"])
+        result = runner.invoke(app, ["update", "42", "--disable"])
 
+        assert result.exit_code == 1
         assert mock_snake.call_args == call("error")
         assert mock_logger.return_value.warning.call_args == call(mock_snake.return_value)
 
