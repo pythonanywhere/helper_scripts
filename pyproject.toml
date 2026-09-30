@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pythonanywhere"
-version = "0.19.2"
+version = "0.19.3"
 description = "PythonAnywhere helper tools for users"
 authors = [
     {name = "PythonAnywhere LLP", email = "developers@pythonanywhere.com"}
@@ -27,7 +27,7 @@ dependencies = [
     "docopt",
     "packaging",
     "python-dateutil",
-    "pythonanywhere-core>=0.3.2",
+    "pythonanywhere-core>=0.3.3",
     "requests",
     "schema==0.7.2",
     "snakesay==0.10.4",

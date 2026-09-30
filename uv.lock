@@ -617,7 +617,7 @@ wheels = [
 
 [[package]]
 name = "pythonanywhere"
-version = "0.19.2"
+version = "0.19.3"
 source = { editable = "." }
 dependencies = [
     { name = "docopt" },
@@ -652,7 +652,7 @@ requires-dist = [
     { name = "pytest-mock", marker = "extra == 'test'" },
     { name = "pytest-mypy", marker = "extra == 'test'" },
     { name = "python-dateutil" },
-    { name = "pythonanywhere-core", specifier = ">=0.3.2" },
+    { name = "pythonanywhere-core", specifier = ">=0.3.3" },
     { name = "requests" },
     { name = "responses", marker = "extra == 'test'" },
     { name = "schema", specifier = "==0.7.2" },
@@ -665,16 +665,16 @@ provides-extras = ["test"]
 
 [[package]]
 name = "pythonanywhere-core"
-version = "0.3.2"
+version = "0.3.3"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "python-dateutil" },
     { name = "requests" },
     { name = "typing-extensions" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/0e/6f/32d43e56334484dbd8f81788b48d71c4d7ded23a4ed9904e7becef197ed1/pythonanywhere_core-0.3.2.tar.gz", hash = "sha256:1a735c1a60f78650c0f583526338c263d5b4b8d03776881580cb3f6338262424", size = 10185, upload-time = "2026-09-28T17:40:29.926Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/b2/ba/b70d0ffb14e875a14162947bd136ac304ba0573ada87f94589ea9b3c6872/pythonanywhere_core-0.3.3.tar.gz", hash = "sha256:9a744d9ac15275276d4ec7079be5ef87b81b0256b5236215b078039dce6f13e8", size = 10375, upload-time = "2026-09-30T12:56:55.044Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/3d/55/7ed06431bbb03c56e5eba0665901803c16aaf462521e8f163b574ddc8b90/pythonanywhere_core-0.3.2-py3-none-any.whl", hash = "sha256:5916e3ffb23b063c917f9870b5b1ab67610d29d2ff573f1ccb6e13a79ac2e3b1", size = 14074, upload-time = "2026-09-28T17:40:28.693Z" },
+    { url = "https://files.pythonhosted.org/packages/46/7a/b18fbb838cefaf58a838cd3f811c96b4bd8163c928c405cb3d46c2cfbeb3/pythonanywhere_core-0.3.3-py3-none-any.whl", hash = "sha256:57313266fbea6c74c4dd9a8afee37885ff95909c69b56dab6ebd24090749039e", size = 14330, upload-time = "2026-09-30T12:56:54.076Z" },
 ]
 
 [[package]]
