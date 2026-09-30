@@ -30,11 +30,10 @@ def test_calls_all_stuff_in_right_order(mocker):
 
 @pytest.mark.slowtest
 def test_actually_creates_django_project_in_virtualenv_with_hacked_settings_and_static_files(
-    fake_home, virtualenvs_folder, api_token, running_python_version, new_django_version
+    fake_home, virtualenvs_folder, api_token, running_python_version, new_django_version, webapp_api
 ):
     with patch("scripts.pa_start_django_webapp_with_virtualenv.DjangoProject.update_wsgi_file"):
-        with patch("pythonanywhere_core.webapp.call_api"):
-            main("mydomain.com", new_django_version, running_python_version, nuke=False)
+        main("mydomain.com", new_django_version, running_python_version, nuke=False)
 
     output_django_version = (
         subprocess.check_output(
@@ -57,13 +56,12 @@ def test_actually_creates_django_project_in_virtualenv_with_hacked_settings_and_
 
 @pytest.mark.slowtest
 def test_nuke_option_lets_you_run_twice(
-        fake_home, virtualenvs_folder, api_token, running_python_version, new_django_version, old_django_version
+        fake_home, virtualenvs_folder, api_token, running_python_version, new_django_version, old_django_version, webapp_api
 ):
 
     with patch("scripts.pa_start_django_webapp_with_virtualenv.DjangoProject.update_wsgi_file"):
-        with patch("pythonanywhere_core.webapp.call_api"):
-            main("mydomain.com", old_django_version, running_python_version, nuke=False)
-            main("mydomain.com", new_django_version, running_python_version, nuke=True)
+        main("mydomain.com", old_django_version, running_python_version, nuke=False)
+        main("mydomain.com", new_django_version, running_python_version, nuke=True)
 
     django_version = (
         subprocess.check_output(

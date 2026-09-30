@@ -33,21 +33,20 @@ class TestMain:
 
     @pytest.mark.slowtest
     def test_actually_works_against_example_repo(
-        self, fake_home, virtualenvs_folder, api_token, process_killer, running_python_version, new_django_version
+        self, fake_home, virtualenvs_folder, api_token, process_killer, running_python_version, new_django_version, webapp_api
     ):
         git_ref = "non-nested-old" if running_python_version in ["3.8", "3.9"] else "master"
         repo = 'https://github.com/pythonanywhere/example-django-project.git'
         domain = 'mydomain.com'
         with patch('scripts.pa_autoconfigure_django.DjangoProject.update_wsgi_file'):
             with patch('scripts.pa_autoconfigure_django.DjangoProject.start_bash'):
-                with patch('pythonanywhere_core.webapp.call_api'):
-                    main(
-                        repo_url=repo,
-                        branch=git_ref,
-                        domain=domain,
-                        python_version=running_python_version,
-                        nuke=False
-                    )
+                main(
+                    repo_url=repo,
+                    branch=git_ref,
+                    domain=domain,
+                    python_version=running_python_version,
+                    nuke=False
+                )
 
         expected_virtualenv = virtualenvs_folder / domain
         expected_project_path = fake_home / domain

@@ -87,6 +87,25 @@ def api_responses(monkeypatch):
         yield r
 
 
+@pytest.fixture
+def webapp_api(api_responses):
+    """HTTP contract for the webapp used by Django setup integration tests."""
+    from pythonanywhere_core.webapp import Webapp
+
+    webapp = Webapp("mydomain.com")
+    api_responses.add(responses.GET, webapp.domain_url, status=404)
+    api_responses.add(responses.POST, webapp.webapps_url, status=201, json={"status": "OK"})
+    api_responses.add(responses.PATCH, webapp.domain_url, status=200, json={})
+    api_responses.add(responses.DELETE, webapp.domain_url, status=204)
+    api_responses.add(responses.POST, f"{webapp.domain_url}static_files/", status=201, json={})
+    api_responses.add(responses.POST, f"{webapp.domain_url}reload/", status=200, json={"status": "OK"})
+    # DELETE is only used by the replacement test; the other routes may repeat.
+    api_responses.assert_all_requests_are_fired = False
+    # These tests also GET the local Django development server.
+    api_responses.add_passthru("http://localhost:8000/")
+    return api_responses
+
+
 @pytest.fixture(scope="function")
 def api_token():
     old_token = os.environ.get("API_TOKEN")

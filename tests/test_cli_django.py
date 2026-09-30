@@ -24,11 +24,6 @@ def mock_update_wsgi_file(mocker):
 
 
 @pytest.fixture
-def mock_call_api(mocker):
-    return mocker.patch("pythonanywhere_core.webapp.call_api")
-
-
-@pytest.fixture
 def running_python_version():
     return ".".join(python_version().split(".")[:2])
 
@@ -80,7 +75,7 @@ def test_autoconfigure_calls_all_stuff_in_right_order(mock_django_project):
 @pytest.mark.slowtest
 def test_autoconfigure_actually_works_against_example_repo(
     mocker,
-    mock_call_api,
+    webapp_api,
     mock_update_wsgi_file,
     fake_home,
     virtualenvs_folder,
@@ -94,7 +89,7 @@ def test_autoconfigure_actually_works_against_example_repo(
     repo = "https://github.com/pythonanywhere/example-django-project.git"
     domain = "mydomain.com"
 
-    runner.invoke(
+    result = runner.invoke(
         app,
         [
             "autoconfigure",
@@ -107,6 +102,8 @@ def test_autoconfigure_actually_works_against_example_repo(
             git_ref,
         ],
     )
+
+    assert result.exit_code == 0, result.exception
 
     expected_virtualenv = virtualenvs_folder / domain
     expected_project_path = fake_home / domain
@@ -180,7 +177,7 @@ def test_start_calls_all_stuff_in_right_order(mock_django_project):
 
 @pytest.mark.slowtest
 def test_start_actually_creates_django_project_in_virtualenv_with_hacked_settings_and_static_files(
-    mock_call_api,
+    webapp_api,
     mock_update_wsgi_file,
     fake_home,
     virtualenvs_folder,
@@ -188,7 +185,7 @@ def test_start_actually_creates_django_project_in_virtualenv_with_hacked_setting
     running_python_version,
     new_django_version,
 ):
-    runner.invoke(
+    result = runner.invoke(
         app,
         [
             "start",
@@ -200,6 +197,7 @@ def test_start_actually_creates_django_project_in_virtualenv_with_hacked_setting
             running_python_version,
         ],
     )
+    assert result.exit_code == 0, result.exception
 
     django_version = (
         subprocess.check_output(
@@ -223,7 +221,7 @@ def test_start_actually_creates_django_project_in_virtualenv_with_hacked_setting
 
 @pytest.mark.slowtest
 def test_nuke_option_lets_you_run_twice(
-    mock_call_api,
+    webapp_api,
     mock_update_wsgi_file,
     fake_home,
     virtualenvs_folder,
@@ -232,7 +230,7 @@ def test_nuke_option_lets_you_run_twice(
     old_django_version,
     new_django_version,
 ):
-    runner.invoke(
+    result = runner.invoke(
         app,
         [
             "start",
@@ -244,7 +242,8 @@ def test_nuke_option_lets_you_run_twice(
             running_python_version,
         ],
     )
-    runner.invoke(
+    assert result.exit_code == 0, result.exception
+    result = runner.invoke(
         app,
         [
             "start",
@@ -257,6 +256,7 @@ def test_nuke_option_lets_you_run_twice(
             "--nuke",
         ],
     )
+    assert result.exit_code == 0, result.exception
 
     django_version = (
         subprocess.check_output(
