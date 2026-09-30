@@ -238,6 +238,12 @@ def list_(
     logger.info(msg)
 
 
+def _has_update_value(name, value):
+    if name in ("hour", "minute"):
+        return value is not None
+    return bool(value)
+
+
 @app.command()
 def update(
     task_id: int = typer.Argument(..., metavar="id"),
@@ -317,7 +323,7 @@ def update(
     if not kwargs.pop("quiet"):
         logger.setLevel(logging.INFO)
 
-    if not any(kwargs.values()):
+    if not any(_has_update_value(k, v) for k, v in kwargs.items()):
         msg = "Nothing to update!"
         logger.warning(msg if porcelain else snakesay(msg))
         sys.exit(1)
@@ -325,13 +331,13 @@ def update(
     if kwargs.pop("hourly"):
         kwargs["interval"] = "hourly"
     if kwargs.pop("daily"):
-        kwargs["hour"] = kwargs["hour"] if kwargs["hour"] else datetime.now().hour
+        kwargs["hour"] = kwargs["hour"] if kwargs["hour"] is not None else datetime.now().hour
         kwargs["interval"] = "daily"
 
     task = get_task_from_id(task_id)
 
     enable_opt = [k for k in ["toggle_enabled", "disable", "enable"] if kwargs.pop(k)]
-    params = {k: v for k, v in kwargs.items() if v}
+    params = {k: v for k, v in kwargs.items() if _has_update_value(k, v)}
     if enable_opt:
         lookup = {"toggle_enabled": not task.enabled, "disable": False, "enable": True}
         params.update({"enabled": lookup[enable_opt[0]]})

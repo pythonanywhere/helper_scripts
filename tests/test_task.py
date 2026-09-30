@@ -135,6 +135,23 @@ class TestTaskDeleteSchedule:
 
 @pytest.mark.tasks
 class TestTaskUpdateSchedule:
+    @pytest.mark.parametrize("params", [
+        {"minute": 0},
+        {"hour": 0},
+        {"hour": 0, "interval": "daily"},
+    ])
+    def test_preserves_zero_times_in_api_params(self, mocker, example_task, task_specs, params):
+        example_task.minute = 15
+        updated = {**task_specs, "minute": 15, **params}
+        update = mocker.patch("pythonanywhere.task.Schedule.update", return_value=updated)
+
+        example_task.update_schedule(params)
+
+        update.assert_called_once_with(42, {
+            "command": "echo foo", "enabled": True, "interval": "daily",
+            "hour": 16, "minute": 15, **params,
+        })
+
     def test_updates_specs_and_prints_porcelain(self, mocker, example_task, task_specs):
         mock_schedule_update = mocker.patch("pythonanywhere.task.Schedule.update")
         mock_info = mocker.patch("pythonanywhere.task.logger.info")

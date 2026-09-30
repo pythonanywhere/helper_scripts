@@ -190,7 +190,7 @@ class Task:
 
         if (
             (specs["interval"] != "daily")
-            or (params.get("interval") == "daily" and self.hour)
+            or (params.get("interval") == "daily" and self.hour and "hour" not in params)
             or (params.get("hour") == self.hour)
         ):
             specs.pop("hour")

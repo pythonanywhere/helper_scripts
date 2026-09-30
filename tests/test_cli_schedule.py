@@ -321,6 +321,25 @@ class TestList:
 
 
 class TestUpdate:
+    @pytest.mark.parametrize("options,expected", [
+        (["--minute", "0"], {"minute": 0}),
+        (["--hour", "0"], {"hour": 0}),
+        (["--daily", "--hour", "0"], {"hour": 0, "interval": "daily"}),
+        (["--daily"], {"hour": 12, "interval": "daily"}),
+        (["--minute", "0", "--disable"], {"minute": 0, "enabled": False}),
+        (["--minute", "0", "--enable"], {"minute": 0, "enabled": True}),
+        (["--minute", "0", "--toggle-enabled"], {"minute": 0, "enabled": False}),
+    ])
+    def test_preserves_zero_times(self, mocker, options, expected):
+        task = mocker.patch("cli.schedule.get_task_from_id").return_value
+        task.enabled = True
+        mocker.patch("cli.schedule.datetime").now.return_value.hour = 12
+
+        result = runner.invoke(app, ["update", "42", *options])
+
+        assert result.exit_code == 0
+        task.update_schedule.assert_called_once_with(expected, porcelain=False)
+
     def test_enables_task_and_sets_porcelain(self, mocker):
         mock_task_from_id = mocker.patch("cli.schedule.get_task_from_id")
 
