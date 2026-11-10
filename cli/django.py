@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 
 import typer
+from pythonanywhere_core.exceptions import SlowStartupException
 from snakesay import snakesay
 
 from pythonanywhere.django_project import DjangoProject
@@ -59,8 +60,11 @@ def autoconfigure(
     project.update_settings_file()
     project.run_collectstatic()
     project.run_migrate()
-    project.reload_webapp()
-    typer.echo(snakesay(f"All done!  Your site is now live at https://{domain_name}\n"))
+    try:
+        project.reload_webapp()
+    except SlowStartupException as exc:
+        typer.echo(f"Warning: {exc}", err=True)
+    typer.echo(snakesay(f"All done! Django configuration completed for https://{domain}"))
     project.start_bash()
 
 

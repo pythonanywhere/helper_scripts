@@ -6,9 +6,16 @@ from unittest.mock import call
 
 import pytest
 import requests
+import responses
 from typer.testing import CliRunner
+from pythonanywhere_core.exceptions import (
+    AuthenticationError,
+    PythonAnywhereApiException,
+    SlowStartupException,
+)
 
 from cli.django import app
+from pythonanywhere.project import Project
 
 runner = CliRunner()
 
@@ -66,10 +73,144 @@ def test_autoconfigure_calls_all_stuff_in_right_order(mock_django_project):
         call.reload_webapp(),
         call.start_bash(),
     ]
+    assert result.exit_code == 0, result.exception
     assert "Running sanity checks" in result.stdout
+    assert "All done! Django configuration completed for https://www.domain.com" in result.stdout
+    assert "Your site is now live" not in result.stdout
+    assert result.stderr == ""
+
+
+@pytest.mark.parametrize("nuke", [False, True])
+def test_autoconfigure_warns_and_opens_project_shell_when_startup_is_unconfirmed(
+    mock_django_project, nuke
+):
+    project = mock_django_project.return_value
+    project.reload_webapp.side_effect = SlowStartupException()
+    args = ["autoconfigure", "repo.url", "--domain", "www.domain.com"]
+    if nuke:
+        args.append("--nuke")
+
+    result = runner.invoke(app, args)
+
+    assert result.exit_code == 0, result.exception
     assert (
-        f"All done!  Your site is now live at https://www.domain.com" in result.stdout
+        "Warning: Website startup could not be confirmed after the reload attempt."
+        in result.stderr
     )
+    assert "server and error logs" in result.stderr
+    assert "All done! Django configuration completed for https://www.domain.com" in result.stdout
+    assert "Your site is now live" not in result.output
+    project.reload_webapp.assert_called_once_with()
+    project.start_bash.assert_called_once_with()
+    assert project.method_calls[-2:] == [call.reload_webapp(), call.start_bash()]
+
+
+@pytest.mark.parametrize("slow_startup", [False, True])
+def test_autoconfigure_completion_uses_the_resolved_default_domain(
+    mock_django_project, monkeypatch, slow_startup
+):
+    monkeypatch.setattr("pythonanywhere.utils.getpass.getuser", lambda: "Florence")
+    monkeypatch.setenv("PYTHONANYWHERE_DOMAIN", "test.pythonanywhere.com")
+    if slow_startup:
+        mock_django_project.return_value.reload_webapp.side_effect = SlowStartupException()
+
+    result = runner.invoke(app, ["autoconfigure", "repo.url"])
+
+    assert result.exit_code == 0, result.exception
+    assert "https://florence.test.pythonanywhere.com" in result.stdout
+    assert "your-username" not in result.stdout
+
+
+@pytest.mark.parametrize(
+    "failure",
+    [
+        PythonAnywhereApiException("virtualenv_error"),
+        PythonAnywhereApiException("unexpected API response"),
+        AuthenticationError("invalid token"),
+        requests.exceptions.Timeout("reload response timed out"),
+    ],
+)
+def test_autoconfigure_does_not_report_completion_or_open_shell_after_reload_failure(
+    mock_django_project, failure
+):
+    project = mock_django_project.return_value
+    project.reload_webapp.side_effect = failure
+
+    result = runner.invoke(app, ["autoconfigure", "repo.url", "--domain", "www.domain.com"])
+
+    assert result.exit_code != 0
+    assert result.exception is failure
+    assert "All done!" not in result.stdout
+    assert "configuration completed" not in result.stdout
+    assert "Warning:" not in result.output
+    project.start_bash.assert_not_called()
+    project.reload_webapp.assert_called_once_with()
+
+
+@pytest.mark.parametrize(
+    "status_code, error_code, opens_shell, warns",
+    [
+        (200, None, True, False),
+        (409, "slow_startup_error", True, True),
+        (409, "cname_error", True, False),
+        (409, "virtualenv_error", False, False),
+        (401, "slow_startup_error", False, False),
+        (403, "slow_startup_error", False, False),
+        (500, "slow_startup_error", False, False),
+    ],
+)
+def test_autoconfigure_handles_the_core_reload_response(
+    mock_django_project,
+    virtualenvs_folder,
+    api_token,
+    api_responses,
+    status_code,
+    error_code,
+    opens_shell,
+    warns,
+):
+    real_project = Project("www.domain.com", "3.13")
+    project = mock_django_project.return_value
+    project.reload_webapp.side_effect = real_project.reload_webapp
+    api_responses.add(
+        responses.POST,
+        f"{real_project.webapp.domain_url}reload/",
+        status=status_code,
+        json={"status": "error", "error": error_code} if error_code else {"status": "OK"},
+    )
+
+    result = runner.invoke(app, ["autoconfigure", "repo.url", "--domain", "www.domain.com"])
+
+    assert (result.exit_code == 0) is opens_shell
+    assert project.start_bash.called is opens_shell
+    assert ("Django configuration completed" in result.stdout) is opens_shell
+    assert ("Warning:" in result.stderr) is warns
+    assert "Your site is now live" not in result.output
+    assert len(api_responses.calls) == 1
+
+
+def test_autoconfigure_does_not_handle_slow_startup_before_reload(mock_django_project):
+    failure = SlowStartupException()
+    project = mock_django_project.return_value
+    project.create_webapp.side_effect = failure
+
+    result = runner.invoke(app, ["autoconfigure", "repo.url"])
+
+    assert result.exception is failure
+    assert result.exit_code != 0
+    assert "configuration completed" not in result.stdout
+    project.reload_webapp.assert_not_called()
+    project.start_bash.assert_not_called()
+
+
+def test_django_start_still_fails_on_unconfirmed_startup(mock_django_project):
+    mock_django_project.return_value.reload_webapp.side_effect = SlowStartupException()
+
+    result = runner.invoke(app, ["start", "--domain", "www.domain.com"])
+
+    assert isinstance(result.exception, SlowStartupException)
+    assert result.exit_code != 0
+    assert "All done!" not in result.stdout
 
 
 @pytest.mark.slowtest

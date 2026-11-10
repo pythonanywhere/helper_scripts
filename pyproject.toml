@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pythonanywhere"
-version = "0.19.3"
+version = "0.19.4"
 description = "PythonAnywhere helper tools for users"
 authors = [
     {name = "PythonAnywhere LLP", email = "developers@pythonanywhere.com"}
@@ -24,25 +24,30 @@ classifiers = [
     "Programming Language :: Python :: 3.10",
 ]
 dependencies = [
+    "certifi>=2026.10.19",
     "docopt",
+    "idna>=3.15",
     "packaging",
+    "pygments>=2.20.0",
     "python-dateutil",
-    "pythonanywhere-core>=0.3.3",
-    "requests",
+    "pythonanywhere-core>=0.3.4",
+    "requests>=2.34.2",
     "schema==0.7.2",
     "snakesay==0.10.4",
     "tabulate",
     "typer",
+    "urllib3>=2.8.0",
 ]
 
 [project.optional-dependencies]
 test = [
-    "pytest",
+    "pytest>=9.0.3",
     "pytest-cov",
     "pytest-mock",
     "pytest-mypy",
     "psutil",
     "responses",
+    "virtualenv>=21.14.9",
     "virtualenvwrapper",
 ]
 

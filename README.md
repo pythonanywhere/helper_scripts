@@ -51,6 +51,18 @@ Commands:
 
 ```
 
+### Django autoconfigure and slow startup
+
+`pa django autoconfigure` completes the Django configuration and opens a Bash
+shell with the project's virtualenv activated. If the reload API reports
+`slow_startup_error`, the command prints a warning to stderr and still opens
+that shell. Website startup remains unconfirmed; check the website's server
+and error logs. The command does not retry the reload.
+
+Other API and network errors still abort autoconfigure. This warning handling
+currently applies only to `pa django autoconfigure`, not `pa django start` or
+the legacy scripts.
+
 ### Running `pa` on your local machine
 
 `pa` expects the presence of some environment variables that are provided when you run your code in a PythonAnywere console.
